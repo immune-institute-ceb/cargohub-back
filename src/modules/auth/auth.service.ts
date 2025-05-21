@@ -1,0 +1,318 @@
+// Objective: Implement the service of the authentication module
+
+// * NestJS modules
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+
+// * External modules
+import { google } from 'googleapis';
+import * as bcrypt from 'bcrypt';
+import * as nodemailer from 'nodemailer';
+import * as speakeasy from 'speakeasy';
+import * as QRCode from 'qrcode';
+
+//* DTOs
+import {
+  ChangePasswordDto,
+  ContactDto,
+  LoginUserDto,
+  RecoverPasswordDto,
+  RegisterUserDto,
+  TwoFactorDto,
+  VerifyTwoFactorDto,
+} from './dto';
+
+//* Interfaces
+import { JwtPayload, JwtPayloadRecoverPassword } from './interfaces';
+
+//* Services
+import { UsersService } from '@modules/users/users.service';
+import { ExceptionsService } from '@common/exceptions/exceptions.service';
+
+//* Entities
+import { User } from '@modules/users/entities/user.entity';
+import { envs } from '@config/envs';
+
+@Injectable()
+class AuthService {
+  private transporter: nodemailer.Transporter;
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly usersService: UsersService,
+    private readonly exceptionsService: ExceptionsService,
+  ) {
+    // * Initialize the transporter
+    const oauth2Client = new google.auth.OAuth2(
+      envs.emailClientId,
+      envs.emailClientSecret,
+      'http://localhost',
+    );
+
+    oauth2Client.setCredentials({
+      refresh_token: envs.emailRefreshToken,
+    });
+
+    const accessToken = oauth2Client.getAccessToken();
+
+    this.transporter = nodemailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false,
+      auth: {
+        type: 'OAuth2',
+        user: envs.emailUser,
+        clientId: envs.emailClientId,
+        clientSecret: envs.emailClientSecret,
+        refreshToken: envs.emailRefreshToken,
+        accessToken,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+  }
+
+  async registerUser(registerUserDto: RegisterUserDto) {
+    try {
+      registerUserDto.password = bcrypt.hashSync(registerUserDto.password, 10);
+      const user = await this.usersService.create(registerUserDto);
+      return this.refreshToken(user);
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async login(loginUserDto: LoginUserDto) {
+    const { email, password } = loginUserDto;
+
+    const user = (await this.usersService.findUserWithPassword(email)) as User;
+
+    if (!user) throw new UnauthorizedException(`Not valid credentials (email)`);
+    if (user?.isDeleted) throw new UnauthorizedException('User is archived');
+    if (!user?.isActive)
+      throw new UnauthorizedException('User is inactive, talk with an admin');
+
+    if (!bcrypt.compareSync(password, user.password))
+      throw new UnauthorizedException(`Not valid credentials (password)`);
+
+    if (user.twoFactorAuthEnabled) {
+      return {
+        user: user.email,
+        message: '2FA code is required',
+      };
+    }
+
+    return this.refreshToken(user);
+  }
+
+  refreshToken(user: User) {
+    return {
+      user,
+      token: this.getJwtToken({
+        _id: user._id.toString(),
+        name: user.name,
+        username: user.username,
+        phone: user.phone,
+        email: user.email,
+        role: user.roles,
+        permissions: user.permissions,
+        membership: user.membership,
+      }),
+    };
+  }
+
+  async resetPassword(token: string, changePasswordDto: ChangePasswordDto) {
+    try {
+      const { _id } = this.jwtService.verify<{ _id: string }>(token);
+
+      if (changePasswordDto.password !== changePasswordDto.passwordConfirmed)
+        throw new BadRequestException('Passwords do not match');
+
+      const passwordHash = bcrypt.hashSync(
+        String(changePasswordDto.password),
+        10,
+      );
+
+      const userUpdated = await this.usersService.findAndUpdatePassword(
+        _id,
+        passwordHash,
+      );
+
+      if (!userUpdated) throw new NotFoundException('User not found');
+
+      return { message: 'Password updated' };
+    } catch (error) {
+      if (error?.name === 'TokenExpiredError') {
+        throw new BadRequestException('Email confirmation token expired');
+      }
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async recoverPassword(recoverPasswordDto: RecoverPasswordDto) {
+    try {
+      const { email } = recoverPasswordDto;
+
+      const user = (await this.usersService.findUserByEmail(email)) as User;
+
+      if (!user) throw new BadRequestException('Not valid credentials (email)');
+
+      await this.sendEmail(
+        email,
+        this.getJwtToken({ _id: user._id.toString() }),
+      );
+
+      return { message: 'Email sent, check your inbox' };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async contact(body: ContactDto) {
+    try {
+      // * Send email to the admin
+      await this.transporter.sendMail({
+        from: envs.emailUser,
+        to: envs.emailUser,
+        subject: 'Contact',
+        html: `<h1>Contact</h1><p>${body.name}</p><p>${body.email}</p><p>${body.consulta}</p>`,
+      });
+      // * Send email to the user
+      await this.transporter.sendMail({
+        from: envs.emailUser,
+        to: body.email,
+        subject: 'Contact',
+        html: `<h1>Contact</h1><p>Thanks for contacting us, your message has been recieved, we will contact you soon</p>`,
+      });
+      return { message: 'Thanks for contacting us, check your email' };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async generate2faCode(user: User) {
+    try {
+      const userTo2fa = await this.usersService.findUserById(
+        user._id.toString(),
+      );
+
+      if (!userTo2fa) throw new NotFoundException('User not found');
+
+      const secret = speakeasy.generateSecret({
+        name: `TradeHub - ${userTo2fa.email}`,
+      });
+
+      const otpauth_url = secret.otpauth_url;
+      user.twoFactorAuth = secret.base32;
+      await user.save();
+
+      if (!otpauth_url) {
+        throw new BadRequestException('Failed to generate OTP Auth URL');
+      }
+
+      const qrCode = await QRCode.toDataURL(otpauth_url);
+      if (!qrCode) {
+        throw new BadRequestException('Failed to generate QR code');
+      }
+      user.twoFactorQrCode = qrCode;
+      await user.save();
+      return {
+        message: '2FA code generated',
+        secret: secret.base32,
+        qrCode,
+      };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async activateTwoFactorCode(user: User, token: TwoFactorDto) {
+    try {
+      const userId = user._id.toString();
+      const userTo2fa = await this.usersService.findUserById(userId);
+      if (!userTo2fa || !userTo2fa.twoFactorAuth)
+        throw new BadRequestException('2FA not enabled');
+
+      if (userTo2fa.twoFactorAuthEnabled)
+        throw new BadRequestException('2FA already enabled');
+
+      const isValid = speakeasy.totp.verify({
+        secret: userTo2fa.twoFactorAuth,
+        encoding: 'base32',
+        token: token.token,
+      });
+
+      if (!isValid) throw new BadRequestException('Invalid 2FA code');
+      userTo2fa.twoFactorAuthEnabled = true;
+      await userTo2fa.save();
+      return { message: '2FA code activated' };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async verify2faCode(verifiyTwoFactorDto: VerifyTwoFactorDto) {
+    try {
+      const user = (await this.usersService.findUserByEmail(
+        verifiyTwoFactorDto.email,
+      )) as User;
+      if (!user) throw new NotFoundException('User not found');
+      if (!user.twoFactorAuth) throw new BadRequestException('2FA not enabled');
+
+      const isValid = speakeasy.totp.verify({
+        secret: user.twoFactorAuth,
+        encoding: 'base32',
+        token: verifiyTwoFactorDto.token,
+      });
+
+      if (!isValid) throw new BadRequestException('Invalid 2FA code');
+      return { message: '2FA code verified', user: this.refreshToken(user) };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async disableTwoFactor(user: User) {
+    try {
+      const userTo2fa = await this.usersService.findUserById(
+        user._id.toString(),
+      );
+      if (!userTo2fa) throw new NotFoundException('User not found');
+      if (!userTo2fa.twoFactorAuthEnabled)
+        throw new BadRequestException('2FA not enabled');
+      userTo2fa.twoFactorAuthEnabled = false;
+      userTo2fa.twoFactorAuth = '';
+      userTo2fa.twoFactorQrCode = '';
+      await userTo2fa.save();
+      return { message: '2FA code disabled' };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  private getJwtToken(payload: JwtPayload | JwtPayloadRecoverPassword) {
+    const token = this.jwtService.sign(payload);
+    return token;
+  }
+
+  private async sendEmail(email: string, token: string) {
+    try {
+      const url = `${envs.frontendUrl}api/auth/reset-password?_t=${token}`;
+      await this.transporter.sendMail({
+        from: envs.emailUser,
+        to: email,
+        subject: 'Recover your password',
+        html: `<a href="${url}">Click here to recover your password</a>`,
+      });
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+}
+
+export default AuthService;
