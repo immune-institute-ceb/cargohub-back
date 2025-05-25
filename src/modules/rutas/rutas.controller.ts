@@ -59,14 +59,14 @@ export class RutasController {
     return this.rutasService.update(ruta, updateRutaDto);
   }
 
-  @Delete(':id')
+  @Delete('delete-route/:id')
   @ApiCreatedResponse({ description: 'Ruta deleted' })
   async delete(@Param('id', ParseMongoIdPipe) id: string) {
     const ruta = await this.rutasService.findRutaById(id);
     return this.rutasService.deleteRuta(ruta);
   }
 
-  @Patch('archive/:id')
+  @Delete('archive-route/:id')
   @ApiCreatedResponse({ description: 'Ruta archived' })
   async archive(@Param('id', ParseMongoIdPipe) id: string) {
     const ruta = await this.rutasService.findRutaById(id);

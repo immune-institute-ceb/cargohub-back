@@ -74,7 +74,8 @@ export class RutasService {
     try {
       const rutaToArchive = await this.rutaModel.findById(ruta._id);
 
-      if (!rutaToArchive) throw new NotFoundException('Ruta not found');
+      if (rutaToArchive?.isDeleted === true)
+        throw new BadRequestException('Ruta already archived');
 
       const rutaArchived = await this.rutaModel.findOneAndUpdate(
         { _id: ruta._id },
