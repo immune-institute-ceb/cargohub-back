@@ -23,8 +23,8 @@ export class RegisterRutaDto {
     description: 'Route type',
     example: 'National',
   })
-  @Transform(({ value }) => value.toLowerCase().trim())
   @IsString()
+  @Transform(({ value }) => value.toLowerCase().trim())
   @MinLength(1)
   type: string;
 
@@ -32,8 +32,8 @@ export class RegisterRutaDto {
     description: 'Route origen',
     example: 'Madrid',
   })
-  @Transform(({ value }) => value.toLowerCase().trim())
   @IsString()
+  @Transform(({ value }) => value.toLowerCase().trim())
   @MinLength(1)
   origen: string;
 
@@ -41,8 +41,8 @@ export class RegisterRutaDto {
     description: 'Route destino',
     example: 'Málaga',
   })
-  @Transform(({ value }) => value.toLowerCase().trim())
   @IsString()
+  @Transform(({ value }) => value.toLowerCase().trim())
   @MinLength(1)
   destino: string;
 
@@ -50,15 +50,15 @@ export class RegisterRutaDto {
     description: 'Route distance',
     example: 523,
   })
-  @Type(() => Number)
   @IsNumber()
+  @Type(() => Number)
   distancia: number;
 
   @ApiProperty({
     description: 'Route type',
     example: 'National',
   })
-  @Type(() => Number)
   @IsNumber()
+  @Type(() => Number)
   tiempoEstimado: number;
 }
