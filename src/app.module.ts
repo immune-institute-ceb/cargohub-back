@@ -8,6 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './modules/auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { UsersModule } from './modules/users/users.module';
+import { FacturacionModule } from './modules/facturacion/facturacion.module';
 import { envs } from './config/envs';
 import { ConfigModule } from '@nestjs/config';
 
@@ -26,6 +27,7 @@ import { ConfigModule } from '@nestjs/config';
     CommonModule,
     AuthModule,
     UsersModule,
+    FacturacionModule,
   ],
 })
 export class AppModule {}
