@@ -1,58 +1,62 @@
-// Objective: RegisterUserDto class to define the structure of the data to be received in the register endpoint
-import { ApiProperty } from '@nestjs/swagger';
+// Purpose: DTO for user registration with validation and transformation
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsBoolean,
-  IsDate,
+  IsArray,
   IsEmail,
+  IsEnum,
   IsOptional,
   IsPhoneNumber,
   IsString,
   Matches,
   MaxLength,
   MinLength,
+  ValidateNested,
 } from 'class-validator';
-
 import { Transform, Type } from 'class-transformer';
 
+//* Nested DTOs
+import { CreateCarrierDto } from '@modules/carriers/dto/create-carrier.dto';
+import { CreateClientDto } from '@modules/clients/dto/create-client.dto';
+
+//* Interfaces
+import { ValidRoles } from '../interfaces';
+
+//* Common modules
+import { IsRequiredIfRole, RoleDataConsistency } from '@common/validators';
+
 /**
- * Data transfer object for register user
+ * Data transfer object for user registration
  * @export
  * @class RegisterUserDto
  * @example
  * {
- *  "email": "test@gmail.com",
- *  "phone": "123456789",
- *  "password": "Password123",
- *  "name": "Test",
- *  "lastName1": "Example",
- *  "lastName2": "Api",
- *  "username": "TestExampleApi",
- *  "dateOfBirth": "2000-01-01",
- *  "location": "Madrid",
- *  "...": "..."
+ * "email": "test@gmail.com"
+ * "phone": "123456789",
+ * "password": "Password123",
+ * "name": "Test",
+ * "lastName1": "Example",
+ * "lastName2": "Api",
+ * "roles": ["client"],
+ * ! If the user has the 'client' role, the clientData field is required
+ * ! If the user has the 'carrier' role, the carrierData field is required
+ * "clientData": {
+ *   ... // Client specific data
  * }
  */
 export class RegisterUserDto {
-  @ApiProperty({
-    description: 'User email',
-    example: 'test@gmail.com',
-  })
+  @ApiProperty({ description: 'User email', example: 'test@gmail.com' })
   @Transform(({ value }) => value.toLowerCase().trim())
   @IsString()
   @IsEmail()
   email: string;
 
-  @ApiProperty({
-    description: 'User phone',
-    example: '123456789',
-  })
+  @ApiProperty({ description: 'User phone', example: '123456789' })
   @IsString()
   @IsPhoneNumber('ES')
   phone: string;
 
   @ApiProperty({
-    description:
-      'User password, must have a Uppercase, lowercase letter and a number',
+    description: 'Password must contain uppercase, lowercase, and a number',
     example: 'Password123',
   })
   @IsString()
@@ -60,67 +64,52 @@ export class RegisterUserDto {
   @MaxLength(50)
   @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
     message:
-      'The password must have a Uppercase, lowercase letter and a number',
+      'The password must contain an uppercase letter, a lowercase letter, and a number',
   })
   password: string;
 
-  @ApiProperty({
-    description: 'User name',
-    example: 'Test',
-  })
+  @ApiProperty({ description: 'User name', example: 'Test' })
   @Transform(({ value }) => value.toLowerCase().trim())
   @IsString()
   @MinLength(1)
   name: string;
 
-  @ApiProperty({
-    description: 'User lastName1',
-    example: 'Example',
-  })
+  @ApiProperty({ description: 'User lastName1', example: 'Example' })
   @Transform(({ value }) => value.toLowerCase().trim())
   @IsString()
   @MinLength(1)
   lastName1: string;
 
-  @ApiProperty({
-    description: 'User lastName2',
-    example: 'Api',
-  })
-  @Transform(({ value }) => value.toLowerCase().trim())
+  @ApiPropertyOptional({ description: 'User lastName2', example: 'Api' })
+  @Transform(({ value }) => value?.toLowerCase()?.trim())
   @IsString()
   @IsOptional()
-  lastName2: string;
+  lastName2?: string;
 
   @ApiProperty({
-    description: 'User username',
-    example: 'TestExampleApi',
+    description: 'User role',
+    example: 'client | carrier | admin',
   })
-  @Transform(({ value }) => value.toLowerCase().trim())
-  @IsString()
-  @MinLength(1)
-  username: string;
+  @IsArray()
+  @IsEnum(ValidRoles, {
+    each: true,
+    message: `roles must be one of the following: ${Object.values(ValidRoles).join(', ')}`,
+  })
+  roles: ValidRoles[];
 
-  @ApiProperty({
-    description: 'User dateOfBirth',
-    example: '2000-01-01',
-  })
-  @Type(() => Date)
-  @IsDate()
-  dateOfBirth: Date;
+  @IsRequiredIfRole(ValidRoles.client)
+  @ValidateNested()
+  @Type(() => CreateClientDto)
+  @ApiPropertyOptional({ type: () => CreateClientDto })
+  clientData?: CreateClientDto;
 
-  @ApiProperty({
-    description: 'User location',
-    example: 'Madrid',
-  })
-  @Transform(({ value }) => value.toLowerCase().trim())
-  @IsString()
-  @MinLength(1)
-  location: string;
+  @IsRequiredIfRole(ValidRoles.carrier)
+  @ValidateNested()
+  @Type(() => CreateCarrierDto)
+  @ApiPropertyOptional({ type: () => CreateCarrierDto })
+  carrierData?: CreateCarrierDto;
 
-  @ApiProperty({
-    description: 'User suscribed',
-    example: 'true',
-  })
-  @IsBoolean()
-  suscribed: boolean;
+  // Custom validator to ensure data consistency based on roles
+  @RoleDataConsistency()
+  private readonly __rolesValidator__: unknown;
 }

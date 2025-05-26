@@ -1,3 +1,4 @@
+// Description: Environment configuration module that validates and exports environment variables using Joi.
 import 'dotenv/config';
 import * as joi from 'joi';
 

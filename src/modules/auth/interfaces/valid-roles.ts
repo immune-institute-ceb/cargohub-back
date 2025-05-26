@@ -2,5 +2,5 @@
 export enum ValidRoles {
   admin = 'admin',
   client = 'client',
-  transporter = 'transporter',
+  carrier = 'carrier',
 }
