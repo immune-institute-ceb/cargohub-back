@@ -116,12 +116,10 @@ class AuthService {
       token: this.getJwtToken({
         _id: user._id.toString(),
         name: user.name,
-        username: user.username,
         phone: user.phone,
         email: user.email,
         role: user.roles,
         permissions: user.permissions,
-        membership: user.membership,
       }),
     };
   }

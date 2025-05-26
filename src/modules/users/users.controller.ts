@@ -1,37 +1,16 @@
 // Objective: Implement the controller for the users module
 
 //* NestJS modules
-import {
-  Controller,
-  Body,
-  Patch,
-  Delete,
-  Post,
-  UploadedFile,
-  UseInterceptors,
-  ParseFilePipe,
-  FileTypeValidator,
-  Get,
-  Param,
-  Query,
-} from '@nestjs/common';
+import { Controller, Body, Patch, Delete } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiBody,
-  ApiConsumes,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
-  ApiOperation,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
-
-//* External modules
-import { Express } from 'express';
 
 //* DTOs
 import {
@@ -105,28 +84,6 @@ export class UsersController {
     return this.usersService.updatePassword(changePasswordDto, user);
   }
 
-  @Patch('suscribe-newsletter')
-  @ApiCreatedResponse({
-    description: 'User subscribed to newsletter',
-    type: User,
-  })
-  @ApiBearerAuth()
-  @Auth()
-  suscribeNewsLetter(@GetUser() user: User) {
-    return this.usersService.suscribeNewsLetter(user);
-  }
-
-  @Patch('unsuscribe-newsletter')
-  @ApiCreatedResponse({
-    description: 'User unsubscribed to newsletter',
-    type: User,
-  })
-  @ApiBearerAuth()
-  @Auth()
-  unsuscribeNewsLetter(@GetUser() user: User) {
-    return this.usersService.unsuscribeNewsLetter(user);
-  }
-
   @Delete('delete-user')
   @ApiCreatedResponse({
     description: 'User deleted',
@@ -162,79 +119,4 @@ export class UsersController {
   restoreUser(@Body() restoreUserDto: RestoreUserDto) {
     return this.usersService.restoreUser(restoreUserDto);
   }
-
-  // @Post('upload-csv')
-  // @ApiCreatedResponse({
-  //   description: 'CSV uploaded',
-  //   type: User,
-  // })
-  // @ApiBadRequestResponse({
-  //   description: 'Bad Request, file related',
-  //   schema: {
-  //     oneOf: [
-  //       { example: { message: 'Unexpected field' } },
-  //       {
-  //         example: {
-  //           message:
-  //             'Validation failed (current file type is image/jpeg, expected type is csv)',
-  //         },
-  //       },
-  //       { example: { message: 'File is required' } },
-  //     ],
-  //   },
-  // })
-  // @ApiBearerAuth()
-  // @Auth()
-  // @ApiOperation({ summary: 'Upload CSV file' })
-  // @ApiConsumes('multipart/form-data')
-  // @ApiBody({
-  //   schema: {
-  //     type: 'object',
-  //     properties: {
-  //       file: {
-  //         type: 'string',
-  //         format: 'binary',
-  //       },
-  //     },
-  //   },
-  // })
-  // @UseInterceptors(FileInterceptor('file'))
-  // uploadCSV(
-  //   @GetUser() user: User,
-  //   @UploadedFile(
-  //     new ParseFilePipe({
-  //       validators: [new FileTypeValidator({ fileType: 'csv' })],
-  //     }),
-  //   )
-  //   file: Express.Multer.File,
-  // ) {
-  //   return this.usersService.uploadCSV(user, file);
-  // }
-
-  // @Get('files/:Userid')
-  // @ApiResponse({
-  //   status: 200,
-  //   description: 'Files retrieved',
-  //   schema: {
-  //     example: {
-  //       message: 'Files retrieved',
-  //       files: ['file1', 'file2'],
-  //     },
-  //   },
-  // })
-  // getFiles(@Param('Userid', ParseMongoIdPipe) id: string) {
-  //   return this.usersService.getFiles(id);
-  // }
-
-  // @Delete('files/:Userid')
-  // @ApiCreatedResponse({
-  //   description: 'File deleted',
-  //   type: User,
-  // })
-  // deleteFile(
-  //   @Param('Userid', ParseMongoIdPipe) id: string,
-  //   @Query('ListIndexFile') file: number,
-  // ) {
-  //   return this.usersService.deleteFile(id, file);
-  // }
 }

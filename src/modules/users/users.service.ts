@@ -26,18 +26,64 @@ import { ExceptionsService } from '@common/exceptions/exceptions.service';
 //* Entities
 import { User } from './entities/user.entity';
 
+//* Modules
+import { CarriersService } from '@modules/carriers/carriers.service';
+import { ClientsService } from '@modules/clients/clients.service';
+import { ValidRoles } from '@modules/auth/interfaces';
+
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name)
     private readonly userModel: Model<User>,
     private readonly exceptionsService: ExceptionsService,
+    private readonly clientsService: ClientsService,
+    private readonly carriersService: CarriersService,
   ) {}
 
   async create(registerUserDto: RegisterUserDto) {
     try {
-      const userCreated = await this.userModel.create(registerUserDto);
-      return userCreated;
+      const { roles, clientData, carrierData, ...rest } = registerUserDto;
+
+      const userData: Partial<User> = {
+        ...rest,
+        roles: Array.isArray(roles) ? roles : [roles],
+        isActive: true,
+        isDeleted: false,
+      };
+
+      const userExists = await this.userModel.findOne({
+        email: userData.email,
+      });
+      if (userExists)
+        throw new BadRequestException('User already exists in the database');
+      // 1. Crear usuario base
+      const createdUser = await this.userModel.create(userData);
+      console.log(roles.includes(ValidRoles.client));
+      console.log(roles.includes(ValidRoles.carrier));
+      // 2. Según rol, crear entidad relacionada
+      if (roles.includes(ValidRoles.client) && clientData) {
+        const client = await this.clientsService.create(
+          {
+            ...clientData,
+          },
+          createdUser._id.toString(),
+        );
+        createdUser.clientId = client._id;
+      }
+
+      if (roles.includes(ValidRoles.carrier) && carrierData) {
+        const carrier = await this.carriersService.create(
+          {
+            ...carrierData,
+          },
+          createdUser._id.toString(),
+        );
+        createdUser.carrierId = carrier._id;
+      }
+
+      // 3. Guardar referencias en el usuario
+      return createdUser.save();
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -92,7 +138,12 @@ export class UsersService {
 
   async findUserWithPassword(email: string) {
     try {
-      return await this.userModel.findOne({ email }).select('+password');
+      return await this.userModel
+        .findOne({ email })
+        .select('+password')
+        .populate('clientId')
+        .populate('carrierId')
+        .exec();
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -100,7 +151,11 @@ export class UsersService {
 
   async findUserById(_id: string) {
     try {
-      return await this.userModel.findById(_id);
+      return await this.userModel
+        .findById(_id)
+        .populate('clientId')
+        .populate('carrierId')
+        .exec();
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -113,44 +168,6 @@ export class UsersService {
         { password },
         { new: true },
       );
-    } catch (error) {
-      this.exceptionsService.handleDBExceptions(error);
-    }
-  }
-
-  async suscribeNewsLetter(user: User) {
-    try {
-      const userUpdated = await this.userModel.findOneAndUpdate(
-        { _id: user._id },
-        { suscribed: true },
-        { new: true },
-      );
-
-      if (!userUpdated) throw new NotFoundException('User not found');
-
-      return {
-        message: 'User subscribed to newsletter',
-        userUpdated,
-      };
-    } catch (error) {
-      this.exceptionsService.handleDBExceptions(error);
-    }
-  }
-
-  async unsuscribeNewsLetter(user: User) {
-    try {
-      const userUpdated = await this.userModel.findOneAndUpdate(
-        { _id: user._id },
-        { suscribed: false },
-        { new: true },
-      );
-
-      if (!userUpdated) throw new NotFoundException('User not found');
-
-      return {
-        message: 'User unsubscribed to newsletter',
-        userUpdated,
-      };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -208,95 +225,11 @@ export class UsersService {
     }
   }
 
-  // async uploadCSV(user: User, file: Express.Multer.File) {
-  //   try {
-  //     const userToUpdate = await this.userModel.findOne({ _id: user._id });
-  //     if (!userToUpdate) throw new NotFoundException('User not found');
-
-  //     const data = new FormData();
-  //     const blob = new Blob([file.buffer], { type: file.mimetype });
-  //     data.append('file', blob, file.originalname);
-
-  //     const uploadRequest = await fetch(
-  //       'https://api.pinata.cloud/pinning/pinFileToIPFS',
-  //       {
-  //         method: 'POST',
-  //         headers: {
-  //           pinata_api_key: this.configService.get('pinataApiKey') || '',
-  //           pinata_secret_api_key: this.configService.get('pinataSecret') || '',
-  //         },
-  //         body: data,
-  //       },
-  //     );
-
-  //     const response = await uploadRequest.json();
-  //     const ipfsHash = response.IpfsHash;
-
-  //     if (!ipfsHash)
-  //       throw new BadRequestException('Error uploading file to IPFS');
-
-  //     const url = `https://gateway.pinata.cloud/ipfs/${ipfsHash}`;
-
-  //     let files = userToUpdate?.csvfile;
-
-  //     if (files) {
-  //       files.push(url);
-  //     } else {
-  //       files = [url];
-  //     }
-
-  //     const userUpdated = await this.userModel.findOneAndUpdate(
-  //       { _id: user._id },
-  //       { csvfile: files },
-  //       { new: true },
-  //     );
-
-  //     return { message: 'CSV uploaded', userUpdated };
-  //   } catch (error) {
-  //     this.exceptionsService.handleDBExceptions(error);
-  //   }
-  // }
-
-  // async getFiles(id: string) {
-  //   try {
-  //     const userFiles = await this.userModel.findOne({ _id: id });
-  //     if (!userFiles) throw new NotFoundException('User not found');
-
-  //     return {
-  //       message: 'Files retrieved',
-  //       files: userFiles.csvfile,
-  //     };
-  //   } catch (error) {
-  //     this.exceptionsService.handleDBExceptions(error);
-  //   }
-  // }
-
-  // async deleteFile(id: string, file: number) {
-  //   try {
-  //     const userFiles = await this.userModel.findOne({ _id: id });
-  //     if (!userFiles) throw new NotFoundException('User not found');
-  //     if (userFiles.csvfile.length === 0)
-  //       throw new BadRequestException('No files found');
-  //     const files = userFiles.csvfile;
-  //     if (file >= files.length || file < 0)
-  //       throw new BadRequestException('No files found');
-
-  //     if (!files) throw new BadRequestException('No files found');
-  //     files.splice(file, 1);
-
-  //     const userUpdated = await this.userModel.findOneAndUpdate(
-  //       { _id: id },
-  //       { csvfile: files },
-  //       { new: true },
-  //     );
-
-  //     return { message: 'File deleted', userUpdated };
-  //   } catch (error) {
-  //     this.exceptionsService.handleDBExceptions(error);
-  //   }
-  // }
-
   async findUserByEmail(email: string) {
-    return await this.userModel.findOne({ email });
+    return await this.userModel
+      .findOne({ email })
+      .populate('clientId')
+      .populate('carrierId')
+      .exec();
   }
 }

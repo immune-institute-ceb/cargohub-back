@@ -36,6 +36,7 @@ export default tseslint.config(
       '@typescript-eslint/no-var-requires': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/prefer-promise-reject-errors': 'off',
     },
   },
 );

@@ -1,7 +1,7 @@
 // Objective: Define the user entity schema and model for the database
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 
 /**
  * User entity schema
@@ -10,23 +10,22 @@ import { Document, Types } from 'mongoose';
  * @param phone User phone
  * @param password User password
  * @param name User name
- * @param lastName1 User lastName1
- * @param lastName2 User lastName2
- * @param username User username
- * @param dateOfBirth User dateOfBirth
+ * @param lastName1 User first last name
+ * @param lastName2 User second last name
  * @param image User image
- * @param location User location
  * @param isActive Tells if the user is active
- * @param suscribed Tells if the user is suscribed to the newsletter
  * @param roles User roles
- * @param csvfile User csv file
- * @param membership User membership
  * @param permissions User permissions
- * @param deletedAt User deletedAt
+ * @param createdAt User creation date
+ * @param deletedAt User deletion date
  * @param isDeleted Tells if the user is deleted
- * @param twoFactorAuth User twoFactorAuth
- * @param twoFactorAuthEnabled User twoFactorAuthEnabled
- * @returns User entity schema
+ * @param twoFactorAuth User two-factor authentication code
+ * @param twoFactorQrCode User two-factor authentication QR code
+ * @param twoFactorAuthEnabled Tells if the user has two-factor authentication enabled
+ * @param clientId Client id associated with the user
+ * @param carrierId Carrier id associated with the user
+ * @export
+ * @class User
  */
 @Schema({ timestamps: true })
 export class User extends Document {
@@ -94,24 +93,6 @@ export class User extends Document {
   lastName2: string;
 
   @ApiProperty({
-    description: 'User username',
-    example: 'TestExampleApi',
-  })
-  @Prop({
-    index: true,
-  })
-  username: string;
-
-  @ApiProperty({
-    description: 'User dateOfBirth',
-    example: '2000-01-01',
-  })
-  @Prop({
-    index: true,
-  })
-  dateOfBirth: Date;
-
-  @ApiProperty({
     description: 'User image',
     example: 'https://www.example.com/image.jpg',
   })
@@ -119,15 +100,6 @@ export class User extends Document {
     index: true,
   })
   image: string;
-
-  @ApiProperty({
-    description: 'User location',
-    example: 'Madrid',
-  })
-  @Prop({
-    index: true,
-  })
-  location: string;
 
   @ApiProperty({
     description: 'Tells if the user is active',
@@ -140,43 +112,13 @@ export class User extends Document {
   isActive: boolean;
 
   @ApiProperty({
-    description: 'Tells if the user is suscribed to the newsletter',
-    example: 'true',
-  })
-  @Prop({
-    index: true,
-  })
-  suscribed: boolean;
-
-  @ApiProperty({
     description: 'User roles',
-    example: ['user'],
+    example: ['admin', 'client', 'carrier'],
   })
   @Prop({
     index: true,
-    default: ['user'],
   })
   roles: string[];
-
-  @ApiProperty({
-    description: 'User csv file',
-    example: ['https://www.example.com/file.csv'],
-  })
-  @Prop({
-    index: true,
-    default: [],
-  })
-  csvfile: string[];
-
-  @ApiProperty({
-    description: 'User membership',
-    example: ['basic'],
-  })
-  @Prop({
-    index: true,
-    default: ['basic'],
-  })
-  membership: string[];
 
   @ApiProperty({
     description: 'User permissions',
@@ -187,6 +129,16 @@ export class User extends Document {
     default: [],
   })
   permissions: string[];
+
+  @ApiProperty({
+    description: 'User createdAt',
+    example: '2021-01-01',
+  })
+  @Prop({
+    index: true,
+    default: Date.now,
+  })
+  createdAt: Date;
 
   @ApiProperty({
     description: 'User deletedAt',
@@ -236,6 +188,28 @@ export class User extends Document {
     default: false,
   })
   twoFactorAuthEnabled: boolean;
+
+  @ApiProperty({
+    description: 'Client id associated with the user',
+    example: '5f4e6d6f4f6d4f6d4f6d4f6d',
+  })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Client',
+    default: null,
+  })
+  clientId?: Types.ObjectId;
+
+  @ApiProperty({
+    description: 'Carrier id associated with the user',
+    example: '5f4e6d6f4f6d4f6d4f6d4f6d',
+  })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Carrier',
+    default: null,
+  })
+  carrierId?: Types.ObjectId;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
