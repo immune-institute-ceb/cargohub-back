@@ -11,6 +11,7 @@ import { UsersModule } from './modules/users/users.module';
 import { FacturacionModule } from './modules/facturacion/facturacion.module';
 import { envs } from './config/envs';
 import { ConfigModule } from '@nestjs/config';
+import { RutasModule } from './modules/rutas/rutas.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ConfigModule } from '@nestjs/config';
     AuthModule,
     UsersModule,
     FacturacionModule,
+    RutasModule,
   ],
 })
 export class AppModule {}
