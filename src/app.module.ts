@@ -10,6 +10,7 @@ import { CommonModule } from './common/common.module';
 import { UsersModule } from './modules/users/users.module';
 import { envs } from './config/envs';
 import { ConfigModule } from '@nestjs/config';
+import { RequestsModule } from './modules/request/request.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ConfigModule } from '@nestjs/config';
     CommonModule,
     AuthModule,
     UsersModule,
+    RequestsModule,
   ],
 })
 export class AppModule {}
