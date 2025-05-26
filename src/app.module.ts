@@ -8,6 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './modules/auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { UsersModule } from './modules/users/users.module';
+import { FacturacionModule } from './modules/facturacion/facturacion.module';
 import { envs } from './config/envs';
 import { ConfigModule } from '@nestjs/config';
 import { RutasModule } from './modules/rutas/rutas.module';
@@ -27,6 +28,7 @@ import { RutasModule } from './modules/rutas/rutas.module';
     CommonModule,
     AuthModule,
     UsersModule,
+    FacturacionModule,
     RutasModule,
   ],
 })
