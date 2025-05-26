@@ -30,8 +30,11 @@ import { Transform, Type } from 'class-transformer';
 export class RegisterFacturacionDto {
   @ApiProperty({ description: 'Nombre del cliente', example: 'Juan Perez' })
   @IsString()
-  @Transform(({ value }) => value.toLowerCase().trim())
+  @Matches(/^[a-zA-Z\sáéíóúüñÁÉÍÓÚÜÑ]+$/, {
+    message: 'nombreCliente debe ser texto válido (solo letras y espacios)',
+  })
   @MaxLength(100)
+  @Transform(({ value }) => value.toLowerCase().trim())
   nombreCliente: string;
 
   @ApiProperty({ description: 'Importe de la facturacion', example: 100 })
