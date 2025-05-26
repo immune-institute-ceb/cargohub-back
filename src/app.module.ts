@@ -14,6 +14,7 @@ import { ConfigModule } from '@nestjs/config';
 import { RutasModule } from './modules/rutas/rutas.module';
 import { ClientsModule } from './modules/clients/clients.module';
 import { CarriersModule } from './modules/carriers/carriers.module';
+import { RequestsModule } from '@modules/requests/requests.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { CarriersModule } from './modules/carriers/carriers.module';
     RutasModule,
     ClientsModule,
     CarriersModule,
+    RequestsModule,
   ],
 })
 export class AppModule {}
