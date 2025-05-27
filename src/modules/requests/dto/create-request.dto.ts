@@ -4,62 +4,62 @@ import { Type } from 'class-transformer';
 
 export class CreateRequestDto {
   @ApiProperty({
-    description: 'Client name',
-    example: 'ABC Company',
+    description: 'Nombre del cliente',
+    example: 'Empresa ABC',
   })
   @IsString()
   @IsNotEmpty()
-  client_name: string;
+  nombre_cliente: string;
 
   @ApiProperty({
-    description: 'Shipment origin',
+    description: 'Origen del envío',
     example: 'Madrid',
   })
   @IsString()
   @IsNotEmpty()
-  origin: string;
+  origen: string;
 
   @ApiProperty({
-    description: 'Shipment destination',
+    description: 'Destino del envío',
     example: 'Barcelona',
   })
   @IsString()
   @IsNotEmpty()
-  destination: string;
+  destino: string;
 
   @ApiProperty({
-    description: 'Request date',
+    description: 'Fecha de solicitud',
     example: '2023-08-15T10:30:00Z',
   })
   @Type(() => Date)
   @IsDate()
   @IsOptional()
-  request_date?: Date;
+  fecha_solicitud?: Date;
 
   @ApiProperty({
-    description: 'Estimated delivery date',
+    description: 'Fecha de entrega estimada',
     example: '2023-08-20T14:00:00Z',
   })
   @Type(() => Date)
   @IsDate()
   @IsNotEmpty()
-  delivery_date: Date;
+  fecha_entrega: Date;
 
   @ApiProperty({
-    description: 'Request status',
-    example: 'pending',
-    enum: ['pending', 'in_transit', 'delivered', 'cancelled'],
+    description: 'Estado de la solicitud',
+    example: 'pendiente',
+    enum: ['pendiente', 'en_transito', 'entregado', 'cancelado'],
   })
   @IsString()
   @IsOptional()
-  status?: string;
+  estado?: string;
 
   @ApiProperty({
-    description: 'Request priority',
-    example: 'high',
-    enum: ['low', 'normal', 'high', 'urgent'],
+    description: 'Prioridad de la solicitud',
+    example: 'alta',
+    enum: ['baja', 'normal', 'alta', 'urgente'],
   })
   @IsString()
   @IsOptional()
-  priority?: string;
+  prioridad?: string;
 }

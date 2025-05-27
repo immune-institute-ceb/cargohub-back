@@ -12,8 +12,8 @@ export class Request extends Document {
   _id: Types.ObjectId;
 
   @ApiProperty({
-    description: 'Client name',
-    example: 'ABC Company',
+    description: 'Nombre del cliente',
+    example: 'Empresa ABC',
   })
   @Prop({
     index: true,
@@ -22,7 +22,7 @@ export class Request extends Document {
   nombre_cliente: string;
 
   @ApiProperty({
-    description: 'Shipping origin',
+    description: 'Origen del envío',
     example: 'Madrid',
   })
   @Prop({
@@ -31,7 +31,7 @@ export class Request extends Document {
   origen: string;
 
   @ApiProperty({
-    description: 'Shipping destination',
+    description: 'Destino del envío',
     example: 'Barcelona',
   })
   @Prop({
@@ -40,7 +40,7 @@ export class Request extends Document {
   destino: string;
 
   @ApiProperty({
-    description: 'Request date',
+    description: 'Fecha de solicitud',
     example: '2023-08-15T10:30:00Z',
   })
   @Prop({
@@ -50,7 +50,7 @@ export class Request extends Document {
   fecha_solicitud: Date;
 
   @ApiProperty({
-    description: 'Estimated delivery date',
+    description: 'Fecha de entrega estimada',
     example: '2023-08-20T14:00:00Z',
   })
   @Prop({
@@ -59,18 +59,18 @@ export class Request extends Document {
   fecha_entrega: Date;
 
   @ApiProperty({
-    description: 'Request status',
-    example: 'pending',
+    description: 'Estado de la solicitud',
+    example: 'pendiente',
   })
   @Prop({
     index: true,
-    default: 'pending',
+    default: 'pendiente',
   })
   estado: string;
 
   @ApiProperty({
-    description: 'Request priority',
-    example: 'high',
+    description: 'Prioridad de la solicitud',
+    example: 'alta',
   })
   @Prop({
     index: true,
