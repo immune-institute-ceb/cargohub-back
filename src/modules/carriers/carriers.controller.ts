@@ -2,73 +2,65 @@
 // Endpoints:
 
 //* NestJS Modules
+import { Controller, Get, Body, Patch, Param } from '@nestjs/common';
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+  ApiBadRequestResponse,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 //* Pipes
 import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
 //* DTOs
-import { CreateCarrierDto } from './dto/create-carrier.dto';
 import { UpdateCarrierDto } from './dto/update-carrier.dto';
+
+// * Entities
+import { Carrier } from './entities/carrier.entity';
 
 //* Services
 import { CarriersService } from './carriers.service';
-import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Carriers')
+@ApiNotFoundResponse({ description: 'Carrier not found' })
+@ApiBadRequestResponse({ description: 'Bad Request' })
+@ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
 @Controller('carriers')
 export class CarriersController {
   constructor(private readonly carriersService: CarriersService) {}
 
-  @Post()
-  create(@Body() createCarrierDto: CreateCarrierDto) {
-    return this.carriersService.create(createCarrierDto);
-  }
-
   @Get()
-  @ApiCreatedResponse({
+  @ApiResponse({
+    status: 200,
     description: 'List of all carriers',
-    type: [CreateCarrierDto],
+    type: [Carrier],
   })
   findAll() {
     return this.carriersService.findAll();
   }
 
   @Get(':id')
-  @ApiCreatedResponse({
+  @ApiResponse({
+    status: 200,
     description: 'Carrier found',
-    type: CreateCarrierDto,
+    type: Carrier,
   })
   findOne(@Param('id', ParseMongoIdPipe) id: string) {
     return this.carriersService.findOne(id);
   }
 
   @Patch(':id')
-  @ApiCreatedResponse({
+  @ApiResponse({
+    status: 200,
     description: 'Carrier updated',
-    type: CreateCarrierDto,
+    type: Carrier,
   })
   update(
     @Param('id', ParseMongoIdPipe) id: string,
     @Body() updateCarrierDto: UpdateCarrierDto,
   ) {
     return this.carriersService.update(id, updateCarrierDto);
-  }
-
-  @Delete(':id')
-  @ApiCreatedResponse({
-    description: 'Carrier removed',
-    type: CreateCarrierDto,
-  })
-  remove(@Param('id', ParseMongoIdPipe) id: string) {
-    return this.carriersService.remove(id);
   }
 }

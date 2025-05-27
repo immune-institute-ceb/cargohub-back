@@ -1,9 +1,20 @@
-import { Injectable } from '@nestjs/common';
+// Objective: Implement the service of the clients module to manage client entities.
+
+//* NestJS modules
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+
+// * External modules
+import { Model, ObjectId } from 'mongoose';
+
+// * DTOs
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
-import { InjectModel } from '@nestjs/mongoose';
+
+// * Entities
 import { Client } from './entities/client.entity';
-import { Model } from 'mongoose';
+
+// * Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 
 @Injectable()
@@ -13,13 +24,14 @@ export class ClientsService {
     private readonly clientModel: Model<Client>,
     private readonly exceptionsService: ExceptionsService,
   ) {}
-  async create(createClientDto: CreateClientDto, userId?: string) {
+  async create(createClientDto: CreateClientDto, userId: ObjectId) {
     try {
       // If userId is provided, set it in the DTO
-      if (userId) {
-        createClientDto.userId = userId;
-      }
-      const clientCreated = await this.clientModel.create(createClientDto);
+
+      const clientCreated = await this.clientModel.create({
+        ...createClientDto,
+        userId,
+      });
       return clientCreated;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -30,7 +42,7 @@ export class ClientsService {
     try {
       const clients = await this.clientModel
         .find()
-        .populate('user', 'name lastName1 lastName2 phone email');
+        .populate('userId', 'name lastName1 lastName2 phone email');
       return clients;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -41,8 +53,8 @@ export class ClientsService {
     try {
       const client = await this.clientModel
         .findById(id)
-        .populate('user', 'name lastName1 lastName2 phone email');
-      if (!client) throw new Error('Client not found');
+        .populate('userId', 'name lastName1 lastName2 phone email');
+      if (!client) throw new NotFoundException('Client not found');
       return client;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -60,7 +72,7 @@ export class ClientsService {
           new: true,
         },
       );
-      if (!clientUpdated) throw new Error('Client not found');
+      if (!clientUpdated) throw new NotFoundException('Client not found');
       return {
         message: 'Client updated',
         clientUpdated,
@@ -73,7 +85,7 @@ export class ClientsService {
   async remove(id: string) {
     try {
       const clientDeleted = await this.clientModel.findByIdAndDelete(id);
-      if (!clientDeleted) throw new Error('Client not found');
+      if (!clientDeleted) throw new NotFoundException('Client not found');
       return {
         message: 'Client deleted',
         clientDeleted,

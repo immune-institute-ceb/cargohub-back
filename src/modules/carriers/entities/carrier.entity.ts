@@ -52,14 +52,21 @@ export class Carrier extends Document {
 
   @ApiProperty({
     description: 'User id',
-    example: '5f4e6d6f4f6d4f6d4f6d4f6d',
+    example: {
+      _id: '5f4e6d6f4f6d4f6d4f6d4f6d',
+      email: 'test@gmail.com',
+      firstName: 'Test',
+      lastName: 'User',
+      phone: '123456789',
+    },
     type: 'string',
   })
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    default: null,
   })
-  user: Types.ObjectId;
+  userId?: Types.ObjectId;
 }
 
 export const CarrierSchema = SchemaFactory.createForClass(Carrier);

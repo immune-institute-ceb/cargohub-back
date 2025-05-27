@@ -1,8 +1,15 @@
+// Main entry point for the NestJS application
+
+//* NestJS modules
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { envs } from './config/envs';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+//* Config
+import { envs } from './config/envs';
+
+// * Application module
+import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,9 +28,10 @@ async function bootstrap() {
     }),
   );
 
+  // Set up Swagger documentation
   const config = new DocumentBuilder()
-    .setTitle('TradeHub RESTful API')
-    .setDescription('TradeHub endpoints')
+    .setTitle('Cargohub RESTful API')
+    .setDescription('Cargohub endpoints')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

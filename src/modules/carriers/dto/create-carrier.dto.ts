@@ -16,7 +16,13 @@ import {
  * {
  * "dni": "12345678A",
  * "licenseNumber": "B-123456",
- * "userId": "5f4e6d6f4f6d4f6d4f6d4f6d"
+ * "userId": {
+ *  "_id": "5f4e6d6f4f6d4f6d4f6d4f6d",
+ * "email": "test@gmail.com",
+ * "firstName": "Test",
+ * "lastName": "User",
+ * "phone": "123456789",
+ *  }
  * }
  */
 export class CreateCarrierDto {
@@ -41,7 +47,13 @@ export class CreateCarrierDto {
 
   @ApiProperty({
     description: 'User id',
-    example: '5f4e6d6f4f6d4f6d4f6d4f6d',
+    example: {
+      _id: '5f4e6d6f4f6d4f6d4f6d4f6d',
+      email: 'test@gmail.com',
+      firstName: 'Test',
+      lastName: 'User',
+      phone: '123456789',
+    },
   })
   @IsString()
   @IsOptional()

@@ -6,9 +6,6 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
-//* Modules
-import { CommonModule } from '@common/common.module';
-
 //* Services
 import { RutasService } from './rutas.service';
 
@@ -17,6 +14,9 @@ import { RutasController } from './rutas.controller';
 
 //* Entities
 import { Ruta, RutaSchema } from './entities/rutas.entity';
+
+//* Modules
+import { CommonModule } from '@common/common.module';
 
 @Module({
   imports: [

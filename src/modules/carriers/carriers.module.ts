@@ -15,6 +15,7 @@ import { Carrier, CarrierSchema } from './entities/carrier.entity';
 
 //* Modules
 import { CommonModule } from '@common/common.module';
+import { User, UserSchema } from '@modules/users/entities/user.entity';
 
 @Module({
   controllers: [CarriersController],
@@ -26,6 +27,10 @@ import { CommonModule } from '@common/common.module';
       {
         name: Carrier.name,
         schema: CarrierSchema,
+      },
+      {
+        name: User.name,
+        schema: UserSchema,
       },
     ]),
   ],

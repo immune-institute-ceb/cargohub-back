@@ -12,6 +12,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+//* Pipes
+import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
+
 //* DTOs
 import {
   ChangePasswordDto,
@@ -25,14 +28,12 @@ import { Auth, GetUser } from '@modules/auth/decorators';
 //* Interfaces
 import { ValidRoles } from '@modules/auth/interfaces';
 
-//* Pipes
-import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
+//* Entities
+import { User } from '@modules/users/entities/user.entity';
+import { UserWithRelations } from './interfaces/user-with-relations';
 
 //* Services
 import { UsersService } from './users.service';
-
-//* Entities
-import { User } from '@modules/users/entities/user.entity';
 
 @ApiTags('Users')
 @ApiNotFoundResponse({
@@ -67,7 +68,10 @@ export class UsersController {
   })
   @ApiBearerAuth()
   @Auth()
-  update(@Body() updateUserDto: UpdateUserDto, @GetUser() user: User) {
+  update(
+    @Body() updateUserDto: UpdateUserDto,
+    @GetUser() user: UserWithRelations,
+  ) {
     return this.usersService.update(user, updateUserDto);
   }
 
@@ -79,7 +83,7 @@ export class UsersController {
   @Auth()
   updatePassword(
     @Body() changePasswordDto: ChangePasswordDto,
-    @GetUser() user: User,
+    @GetUser() user: UserWithRelations,
   ) {
     return this.usersService.updatePassword(changePasswordDto, user);
   }
@@ -90,7 +94,7 @@ export class UsersController {
   })
   @ApiBearerAuth()
   @Auth()
-  deleteUser(@GetUser() user: User) {
+  deleteUser(@GetUser() user: UserWithRelations) {
     return this.usersService.deleteUser(user);
   }
 
@@ -100,7 +104,7 @@ export class UsersController {
   })
   @ApiBearerAuth()
   @Auth()
-  archiveUser(@GetUser() user: User) {
+  archiveUser(@GetUser() user: UserWithRelations) {
     return this.usersService.archiveUser(user);
   }
 
