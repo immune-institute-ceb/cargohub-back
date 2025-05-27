@@ -9,6 +9,7 @@ import {
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
+  ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 
@@ -66,6 +67,7 @@ export class UsersController {
     description: 'User updated',
     type: User,
   })
+  @ApiOperation({ summary: 'Update user information' })
   @ApiBearerAuth()
   @Auth()
   update(
@@ -79,6 +81,7 @@ export class UsersController {
   @ApiCreatedResponse({
     description: 'Password updated',
   })
+  @ApiOperation({ summary: 'Update user password' })
   @ApiBearerAuth()
   @Auth()
   updatePassword(
@@ -92,6 +95,7 @@ export class UsersController {
   @ApiCreatedResponse({
     description: 'User deleted',
   })
+  @ApiOperation({ summary: 'Delete user by Token' })
   @ApiBearerAuth()
   @Auth()
   deleteUser(@GetUser() user: UserWithRelations) {
@@ -102,6 +106,7 @@ export class UsersController {
   @ApiCreatedResponse({
     description: 'User archived',
   })
+  @ApiOperation({ summary: 'Archive user by Token' })
   @ApiBearerAuth()
   @Auth()
   archiveUser(@GetUser() user: UserWithRelations) {
@@ -112,6 +117,7 @@ export class UsersController {
   @ApiCreatedResponse({
     description: 'User restored',
   })
+  @ApiOperation({ summary: 'Restore user by email' })
   @ApiForbiddenResponse({
     description: 'Forbidden, user related',
     schema: {

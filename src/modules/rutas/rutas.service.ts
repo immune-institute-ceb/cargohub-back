@@ -137,7 +137,8 @@ export class RutasService {
   async findRutasByType(type: string) {
     try {
       const rutas = await this.rutaModel.find({ type });
-      if (!rutas) throw new NotFoundException('Rutas not found');
+      if (!rutas)
+        throw new NotFoundException(`No rutas found for type: ${type}`);
       return rutas;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

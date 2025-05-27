@@ -1,4 +1,4 @@
-// Objective: Define the data transfer object to update a user data.
+// Objective: Define the data transfer object to update a facturacion data.
 import { PartialType } from '@nestjs/swagger';
 
 import { RegisterFacturacionDto } from './register-facturacion.dto';

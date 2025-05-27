@@ -1,7 +1,20 @@
+// Objective: Define the Request entity schema and model for the database
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
+/**
+ * Request entity schema
+ * @param _id Request id
+ * @param nombre_cliente Nombre del cliente
+ * @param origen Origen del envío
+ * @param destino Destino del envío
+ * @param fecha_solicitud Fecha de solicitud
+ * @param fecha_entrega Fecha de entrega estimada
+ * @param estado Estado de la solicitud (pendiente, en proceso, entregado)
+ * @param prioridad Prioridad de la solicitud (normal, alta, urgente)
+ * @returns Request entity schema
+ */
 @Schema({ timestamps: true })
 export class Request extends Document {
   @ApiProperty({

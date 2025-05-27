@@ -17,6 +17,7 @@ import {
   ApiNotFoundResponse,
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 
 //* Pipes
@@ -43,12 +44,14 @@ export class RutasController {
 
   @Post()
   @ApiCreatedResponse({ description: 'Ruta created', type: Ruta })
+  @ApiOperation({ summary: 'Create a new ruta' })
   create(@Body() registerRutaDto: RegisterRutaDto) {
     return this.rutasService.create(registerRutaDto);
   }
 
   @Patch(':id')
   @ApiCreatedResponse({ description: 'Ruta updated', type: Ruta })
+  @ApiOperation({ summary: 'Update an existing ruta' })
   async update(
     @Param('id', ParseMongoIdPipe) id: string,
     @Body() updateRutaDto: UpdateRutaDto,
@@ -59,6 +62,7 @@ export class RutasController {
 
   @Delete('delete-route/:id')
   @ApiCreatedResponse({ description: 'Ruta deleted' })
+  @ApiOperation({ summary: 'Delete a ruta by Id' })
   async delete(@Param('id', ParseMongoIdPipe) id: string) {
     const ruta = await this.rutasService.findRutaById(id);
     return this.rutasService.deleteRuta(ruta);
@@ -66,6 +70,7 @@ export class RutasController {
 
   @Delete('archive-route/:id')
   @ApiCreatedResponse({ description: 'Ruta archived' })
+  @ApiOperation({ summary: 'Archive a ruta by Id' })
   async archive(@Param('id', ParseMongoIdPipe) id: string) {
     const ruta = await this.rutasService.findRutaById(id);
     return this.rutasService.archiveRuta(ruta);
@@ -73,6 +78,7 @@ export class RutasController {
 
   @Patch('restore/:id')
   @ApiCreatedResponse({ description: 'Ruta restored' })
+  @ApiOperation({ summary: 'Restore a ruta arhived by Id' })
   async restore(@Param('id', ParseMongoIdPipe) id: string) {
     const ruta = await this.rutasService.findRutaById(id);
     return this.rutasService.restoreRuta(ruta);
@@ -80,18 +86,22 @@ export class RutasController {
 
   @Get()
   @ApiCreatedResponse({ description: 'All rutas', type: [Ruta] })
+  @ApiOperation({ summary: 'Get all rutas' })
   findAll() {
     return this.rutasService.findAllRutas();
   }
 
   @Get(':id')
   @ApiCreatedResponse({ description: 'Ruta found', type: Ruta })
+  @ApiOperation({ summary: 'Get ruta by ID' })
   findOne(@Param('id', ParseMongoIdPipe) id: string) {
     return this.rutasService.findRutaById(id);
   }
 
   @Get('type/:type')
   @ApiCreatedResponse({ description: 'Rutas by type', type: [Ruta] })
+  @ApiOperation({ summary: 'Get rutas by type' })
+  @ApiNotFoundResponse({ description: 'No rutas found for type :type' })
   findByType(@Param('type') type: string) {
     return this.rutasService.findRutasByType(type.toLowerCase().trim());
   }

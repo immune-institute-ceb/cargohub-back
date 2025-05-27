@@ -1,3 +1,6 @@
+// Objetive: Implement a controller for handling requests in a NestJS application.
+
+//* NestJS modules
 import {
   Controller,
   Get,
@@ -8,26 +11,33 @@ import {
   Delete,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 
-import { RequestsService } from './requests.service';
-import { CreateRequestDto, UpdateRequestDto } from './dto';
+//* Pipes
 import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
+
+//* DTOs
+import { CreateRequestDto } from './dto/create-request.dto';
+import { UpdateRequestDto } from './dto/update-request.dto';
+
+// * Decorators
 import { Auth } from '@modules/auth/decorators';
 
+//* Services
+import { RequestsService } from './requests.service';
+
 @ApiTags('Requests')
-@ApiNotFoundResponse({
-  description: 'Request not found',
-  schema: {
-    example: { message: 'Request not found' },
-  },
-})
+@ApiNotFoundResponse({ description: 'Request not found' })
+@ApiBadRequestResponse({ description: 'Bad Request' })
+@ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
 @Controller('requests')
 export class RequestsController {
   constructor(private readonly requestsService: RequestsService) {}
@@ -50,6 +60,7 @@ export class RequestsController {
   @ApiResponse({
     status: 200,
     description: 'Return all requests',
+    type: [Request],
   })
   findAll() {
     return this.requestsService.findAll();
@@ -62,6 +73,7 @@ export class RequestsController {
   @ApiResponse({
     status: 200,
     description: 'Return the request',
+    type: Request,
   })
   findOne(@Param('requestId', ParseMongoIdPipe) id: string) {
     return this.requestsService.findOne(id);
@@ -74,6 +86,7 @@ export class RequestsController {
   @ApiResponse({
     status: 200,
     description: 'Return the updated request',
+    type: Request,
   })
   update(
     @Param('requestId', ParseMongoIdPipe) id: string,
@@ -88,10 +101,7 @@ export class RequestsController {
   @ApiOperation({ summary: 'Delete a request' })
   @ApiResponse({
     status: 200,
-    description: 'Request successfully deleted',
-    schema: {
-      example: { message: 'Request deleted successfully' },
-    },
+    description: 'Request deleted successfully',
   })
   remove(@Param('requestId', ParseMongoIdPipe) id: string) {
     return this.requestsService.remove(id);

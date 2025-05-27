@@ -8,6 +8,7 @@ import {
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
+  ApiOperation,
   ApiResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -78,6 +79,7 @@ export class AuthController {
     description: 'User Registered',
     type: LoginResponseDto,
   })
+  @ApiOperation({ summary: 'Register a new user' })
   registerUser(@Body() registerUserDto: RegisterUserDto) {
     return this.authService.registerUser(registerUserDto);
   }
@@ -100,6 +102,7 @@ export class AuthController {
       ],
     },
   })
+  @ApiOperation({ summary: 'Login a user' })
   loginUser(@Body() loginUserDto: LoginUserDto) {
     return this.authService.login(loginUserDto);
   }
@@ -109,6 +112,7 @@ export class AuthController {
     status: 200,
     description: 'Password updated',
   })
+  @ApiOperation({ summary: 'Reset user password' })
   resetPassword(
     @GetTokenFromHeader() token: string,
     @Body() changePasswordDto: ChangePasswordDto,
@@ -121,6 +125,7 @@ export class AuthController {
     status: 200,
     description: 'Email sent, check your inbox',
   })
+  @ApiOperation({ summary: 'Sends an email with a link to reset the password' })
   recoverPassword(@Body() recoverPasswordDto: RecoverPasswordDto) {
     return this.authService.recoverPassword(recoverPasswordDto);
   }
@@ -141,6 +146,7 @@ export class AuthController {
       ],
     },
   })
+  @ApiOperation({ summary: 'Refresh user token' })
   @ApiBearerAuth()
   @Auth()
   refreshToken(@GetUser() user: User) {
@@ -161,6 +167,7 @@ export class AuthController {
       ],
     },
   })
+  @ApiOperation({ summary: 'Contact via email' })
   contact(@Body() body: ContactDto) {
     return this.authService.contact(body);
   }
@@ -170,6 +177,7 @@ export class AuthController {
     description: '2FA code generated',
     type: Generate2faCodeResponseDto,
   })
+  @ApiOperation({ summary: 'Generate a new 2FA code' })
   @ApiBearerAuth()
   @Auth()
   generate2faCode(@GetUser() user: User) {
@@ -181,6 +189,7 @@ export class AuthController {
     status: 200,
     description: '2FA code activated',
   })
+  @ApiOperation({ summary: 'Activate 2FA code' })
   @ApiBearerAuth()
   @Auth()
   activateTwoFactorCode(@GetUser() user: User, @Body() token: TwoFactorDto) {
@@ -193,6 +202,7 @@ export class AuthController {
     description: '2FA code verified',
     type: LoginResponseDto,
   })
+  @ApiOperation({ summary: 'Verify 2FA code' })
   verify2faCode(@Body() verifyTwoFactorDto: VerifyTwoFactorDto) {
     return this.authService.verify2faCode(verifyTwoFactorDto);
   }
@@ -202,6 +212,7 @@ export class AuthController {
     status: 200,
     description: '2FA code disabled',
   })
+  @ApiOperation({ summary: 'Disable 2FA code' })
   @ApiBearerAuth()
   @Auth()
   disableTwoFactor(@GetUser() user: User) {

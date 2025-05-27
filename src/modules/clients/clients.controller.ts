@@ -6,6 +6,7 @@ import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
+  ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -36,6 +37,7 @@ export class ClientsController {
     description: 'List of all clients',
     type: [Client],
   })
+  @ApiOperation({ summary: 'Get all clients' })
   findAll() {
     return this.clientsService.findAll();
   }
@@ -46,6 +48,7 @@ export class ClientsController {
     description: 'Client found',
     type: Client,
   })
+  @ApiOperation({ summary: 'Get client by ID' })
   findOne(@Param('id', ParseMongoIdPipe) id: string) {
     return this.clientsService.findOne(id);
   }
@@ -56,6 +59,7 @@ export class ClientsController {
     description: 'Client updated',
     type: Client,
   })
+  @ApiOperation({ summary: 'Update client by ID' })
   update(
     @Param('id', ParseMongoIdPipe) id: string,
     @Body() updateClientDto: UpdateClientDto,

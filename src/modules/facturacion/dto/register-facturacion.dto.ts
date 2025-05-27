@@ -1,4 +1,4 @@
-// Objective: RegisterUserDto class to define the structure of the data to be received in the register endpoint
+// Objective: RegisterFacturacionDto class definition
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,

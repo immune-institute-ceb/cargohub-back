@@ -7,6 +7,7 @@ import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
+  ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -37,6 +38,7 @@ export class CarriersController {
     description: 'List of all carriers',
     type: [Carrier],
   })
+  @ApiOperation({ summary: 'Get all carriers' })
   findAll() {
     return this.carriersService.findAll();
   }
@@ -47,6 +49,7 @@ export class CarriersController {
     description: 'Carrier found',
     type: Carrier,
   })
+  @ApiOperation({ summary: 'Get carrier by ID' })
   findOne(@Param('id', ParseMongoIdPipe) id: string) {
     return this.carriersService.findOne(id);
   }
@@ -57,6 +60,7 @@ export class CarriersController {
     description: 'Carrier updated',
     type: Carrier,
   })
+  @ApiOperation({ summary: 'Update carrier by ID' })
   update(
     @Param('id', ParseMongoIdPipe) id: string,
     @Body() updateCarrierDto: UpdateCarrierDto,

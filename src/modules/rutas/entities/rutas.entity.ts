@@ -1,4 +1,4 @@
-// Objective: Define the user entity schema and model for the database
+// Objective: Define the Ruta entity schema and model for the database
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';

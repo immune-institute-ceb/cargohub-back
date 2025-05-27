@@ -1,9 +1,20 @@
+// Objective: Implement the service to manage requests in a NestJS application.
+
+//* NestJS modules
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+
+//* External modules
 import { Model } from 'mongoose';
 
+//* DTOs
+import { CreateRequestDto } from './dto/create-request.dto';
+import { UpdateRequestDto } from './dto/update-request.dto';
+
+//* Entities
 import { Request } from './entities/request.entity';
-import { CreateRequestDto, UpdateRequestDto } from './dto';
+
+//* Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 
 @Injectable()

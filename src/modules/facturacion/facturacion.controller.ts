@@ -18,6 +18,7 @@ import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
   ApiResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 
 //* Pipes
@@ -47,6 +48,7 @@ export class FacturacionController {
     description: 'Facturación created successfully',
     type: Facturacion,
   })
+  @ApiOperation({ summary: 'Create a new factura' })
   create(@Body() registerFacturacionDto: RegisterFacturacionDto) {
     return this.facturacionService.create(registerFacturacionDto);
   }
@@ -57,6 +59,7 @@ export class FacturacionController {
     description: 'Factura updated',
     type: Facturacion,
   })
+  @ApiOperation({ summary: 'Update an existing factura by Id' })
   async update(
     @Param('id', ParseMongoIdPipe) id: string,
     @Body() updateFacturacionDto: UpdateFacturacionDto,
@@ -67,6 +70,7 @@ export class FacturacionController {
 
   @Delete('delete-factura/:id')
   @ApiCreatedResponse({ description: 'Factura deleted' })
+  @ApiOperation({ summary: 'Delete a factura by Id' })
   async delete(@Param('id', ParseMongoIdPipe) id: string) {
     const facturacion = await this.facturacionService.findFacturaById(id);
     return this.facturacionService.deleteFactura(facturacion);
@@ -78,6 +82,7 @@ export class FacturacionController {
     description: 'All facturas',
     type: [Facturacion],
   })
+  @ApiOperation({ summary: 'Get all facturas' })
   findAll() {
     return this.facturacionService.findAllFacturas();
   }
@@ -88,6 +93,7 @@ export class FacturacionController {
     description: 'Factura found',
     type: Facturacion,
   })
+  @ApiOperation({ summary: 'Get factura by ID' })
   findOne(@Param('id', ParseMongoIdPipe) id: string) {
     return this.facturacionService.findFacturaById(id);
   }
@@ -98,6 +104,8 @@ export class FacturacionController {
     description: 'Facturas by status',
     type: [Facturacion],
   })
+  @ApiOperation({ summary: 'Get facturas by status' })
+  @ApiNotFoundResponse({ description: 'No facturas found with status :status' })
   findByStatus(@Param('status') status: string) {
     return this.facturacionService.findFacturasByStatus(status);
   }

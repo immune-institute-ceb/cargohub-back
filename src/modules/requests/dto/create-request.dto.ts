@@ -1,7 +1,27 @@
+// Objective: Define a DTO for creating a Request with validation and transformation rules.
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
+import { IsString, IsNotEmpty, IsOptional, IsDate } from 'class-validator';
 
+//*Interfaces
+import { RequestPriority } from '../interfaces/request-priority.interface';
+import { RequestStatus } from '../interfaces/request-status.interface';
+
+/**
+ * Data transfer object for creating a request
+ * @export
+ * @class CreateRequestDto
+ * @example
+ * {
+ *   "nombre_cliente": "Empresa ABC",
+ *  "origen": "Madrid",
+ *  "destino": "Barcelona",
+ * "fecha_solicitud": "2023-08-15T10:30:00Z",
+ * "fecha_entrega": "2023-08-20T14:00:00Z",
+ * "estado": "delivered",
+ * "prioridad": "high"
+ * }
+ */
 export class CreateRequestDto {
   @ApiProperty({
     description: 'Nombre del cliente',
@@ -33,8 +53,7 @@ export class CreateRequestDto {
   })
   @Type(() => Date)
   @IsDate()
-  @IsOptional()
-  fecha_solicitud?: Date;
+  fecha_solicitud: Date;
 
   @ApiProperty({
     description: 'Fecha de entrega estimada',
@@ -43,12 +62,14 @@ export class CreateRequestDto {
   @Type(() => Date)
   @IsDate()
   @IsNotEmpty()
-  fecha_entrega: Date;
+  @IsOptional()
+  fecha_entrega?: Date;
 
   @ApiProperty({
     description: 'Estado de la solicitud',
     example: 'pendiente',
-    enum: ['pendiente', 'en_transito', 'entregado', 'cancelado'],
+    enum: RequestStatus,
+    default: RequestStatus.pending,
   })
   @IsString()
   @IsOptional()
@@ -57,7 +78,8 @@ export class CreateRequestDto {
   @ApiProperty({
     description: 'Prioridad de la solicitud',
     example: 'alta',
-    enum: ['baja', 'normal', 'alta', 'urgente'],
+    enum: RequestPriority,
+    default: RequestPriority.medium,
   })
   @IsString()
   @IsOptional()
