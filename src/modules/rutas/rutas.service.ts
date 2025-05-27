@@ -10,16 +10,16 @@ import { InjectModel } from '@nestjs/mongoose';
 
 //* External modules
 import { Model } from 'mongoose';
-import { instanceToPlain } from 'class-transformer';
 
 //* DTOs
-import { RegisterRutaDto, UpdateRutaDto } from '@modules/rutas/dto';
-
-//* Services
-import { ExceptionsService } from '@common/exceptions/exceptions.service';
+import { RegisterRutaDto } from './dto/register-ruta.dto';
+import { UpdateRutaDto } from './dto/update-ruta.dto';
 
 //* Entities
 import { Ruta } from './entities/rutas.entity';
+
+//* Services
+import { ExceptionsService } from '@common/exceptions/exceptions.service';
 
 @Injectable()
 export class RutasService {
@@ -40,7 +40,7 @@ export class RutasService {
 
   async update(ruta: Ruta, updateRutaDto: UpdateRutaDto) {
     try {
-      const { ...update } = instanceToPlain(updateRutaDto);
+      const { ...update } = updateRutaDto;
 
       const rutaUpdated = await this.rutaModel.findOneAndUpdate(
         { _id: ruta._id },

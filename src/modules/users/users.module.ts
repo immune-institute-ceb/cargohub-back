@@ -6,9 +6,6 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
-//* Modules
-import { CommonModule } from '@common/common.module';
-
 //* Services
 import { UsersService } from './users.service';
 
@@ -19,6 +16,7 @@ import { UsersController } from './users.controller';
 import { User, UserSchema } from './entities/user.entity';
 
 //* Modules
+import { CommonModule } from '@common/common.module';
 import { ClientsModule } from '@modules/clients/clients.module';
 import { CarriersModule } from '@modules/carriers/carriers.module';
 

@@ -1,8 +1,20 @@
+// Objective: Implement the module to manage clients in the application.
+
+//* NestJS modules
 import { Module } from '@nestjs/common';
-import { ClientsService } from './clients.service';
-import { ClientsController } from './clients.controller';
 import { MongooseModule } from '@nestjs/mongoose';
+
+// * Services
+import { ClientsService } from './clients.service';
+
+// * Controllers
+import { ClientsController } from './clients.controller';
+
+// * Entities
 import { Client, ClientSchema } from './entities/client.entity';
+import { User, UserSchema } from '@modules/users/entities/user.entity';
+
+// * Modules
 import { CommonModule } from '@common/common.module';
 
 @Module({
@@ -15,6 +27,10 @@ import { CommonModule } from '@common/common.module';
       {
         name: Client.name,
         schema: ClientSchema,
+      },
+      {
+        name: User.name,
+        schema: UserSchema,
       },
     ]),
   ],

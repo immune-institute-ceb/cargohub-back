@@ -6,9 +6,6 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
-//* Modules
-import { CommonModule } from '@common/common.module';
-
 //* Services
 import { FacturacionService } from './facturacion.service';
 
@@ -17,6 +14,9 @@ import { FacturacionController } from './facturacion.controller';
 
 //* Entities
 import { Facturacion, FacturacionSchema } from './entities/facturacion.entity';
+
+//* Modules
+import { CommonModule } from '@common/common.module';
 
 @Module({
   controllers: [FacturacionController],

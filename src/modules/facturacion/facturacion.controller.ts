@@ -17,22 +17,21 @@ import {
   ApiNotFoundResponse,
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
+  ApiResponse,
 } from '@nestjs/swagger';
-
-//* DTOs
-import {
-  RegisterFacturacionDto,
-  UpdateFacturacionDto,
-} from '@modules/facturacion/dto';
 
 //* Pipes
 import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
-//* Services
-import { FacturacionService } from './facturacion.service';
+//* DTOs
+import { RegisterFacturacionDto } from './dto/register-facturacion.dto';
+import { UpdateFacturacionDto } from './dto/update-facturacion.dto';
 
 //* Entities
 import { Facturacion } from './entities/facturacion.entity';
+
+//* Services
+import { FacturacionService } from './facturacion.service';
 
 @ApiTags('Facturacion')
 @ApiBearerAuth()
@@ -53,7 +52,11 @@ export class FacturacionController {
   }
 
   @Patch('update-factura/:id')
-  @ApiCreatedResponse({ description: 'Factura updated', type: Facturacion })
+  @ApiResponse({
+    status: 200,
+    description: 'Factura updated',
+    type: Facturacion,
+  })
   async update(
     @Param('id', ParseMongoIdPipe) id: string,
     @Body() updateFacturacionDto: UpdateFacturacionDto,
@@ -70,19 +73,28 @@ export class FacturacionController {
   }
 
   @Get()
-  @ApiCreatedResponse({ description: 'All facturas', type: [Facturacion] })
+  @ApiResponse({
+    status: 200,
+    description: 'All facturas',
+    type: [Facturacion],
+  })
   findAll() {
     return this.facturacionService.findAllFacturas();
   }
 
   @Get(':id')
-  @ApiCreatedResponse({ description: 'Factura found', type: Facturacion })
+  @ApiResponse({
+    status: 200,
+    description: 'Factura found',
+    type: Facturacion,
+  })
   findOne(@Param('id', ParseMongoIdPipe) id: string) {
     return this.facturacionService.findFacturaById(id);
   }
 
   @Get('status/:status')
-  @ApiCreatedResponse({
+  @ApiResponse({
+    status: 200,
     description: 'Facturas by status',
     type: [Facturacion],
   })

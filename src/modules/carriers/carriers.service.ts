@@ -1,10 +1,10 @@
 // Objective: Implement the service of the carriers module to manage carrier entities.
 //* NestJS modules
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 // * External modules
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 
 // * DTOs
 import { CreateCarrierDto } from './dto/create-carrier.dto';
@@ -23,13 +23,13 @@ export class CarriersService {
     private readonly carrierModel: Model<Carrier>,
     private readonly exceptionsService: ExceptionsService,
   ) {}
-  async create(createCarrierDto: CreateCarrierDto, userId?: string) {
+  async create(createCarrierDto: CreateCarrierDto, userId: ObjectId) {
     try {
       // If userId is provided, set it in the DTO
-      if (userId) {
-        createCarrierDto.userId = userId;
-      }
-      const carrierCreated = await this.carrierModel.create(createCarrierDto);
+      const carrierCreated = await this.carrierModel.create({
+        ...createCarrierDto,
+        userId,
+      });
       return carrierCreated;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -40,7 +40,7 @@ export class CarriersService {
     try {
       const carriers = await this.carrierModel
         .find()
-        .populate('user', 'name lastName1 lastName2 phone email');
+        .populate('userId', 'name lastName1 lastName2 phone email');
       return carriers;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -51,8 +51,8 @@ export class CarriersService {
     try {
       const carrier = await this.carrierModel
         .findById(id)
-        .populate('user', 'name lastName1 lastName2 phone email');
-      if (!carrier) throw new Error('Carrier not found');
+        .populate('userId', 'name lastName1 lastName2 phone email');
+      if (!carrier) throw new NotFoundException('Carrier not found');
       return carrier;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -70,7 +70,7 @@ export class CarriersService {
           new: true,
         },
       );
-      if (!carrierUpdated) throw new Error('Carrier not found');
+      if (!carrierUpdated) throw new NotFoundException('Carrier not found');
       return {
         message: 'Carrier updated',
         carrierUpdated,
@@ -83,7 +83,7 @@ export class CarriersService {
   async remove(id: string) {
     try {
       const carrierDeleted = await this.carrierModel.findByIdAndDelete(id);
-      if (!carrierDeleted) throw new Error('Carrier not found');
+      if (!carrierDeleted) throw new NotFoundException('Carrier not found');
       return {
         message: 'Carrier deleted',
         carrierDeleted,

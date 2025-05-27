@@ -1,7 +1,27 @@
+// Purpose: Define the client entity schema and model for the database
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import mongoose, { Document, Types } from 'mongoose';
 
+/**
+ * Client entity schema
+ * @param _id Client id
+ * @param companyName Company name
+ * @param companyCIF Company CIF
+ * @param companyAddress Company address
+ * @param status Client status
+ * @param userId User id
+ * @returns Client entity schema
+ * @example
+ * {
+ *   _id: '5f4e6d6f4f6d4f6d4f6d4f6d',
+ *  companyName: 'Test Company',
+ *  companyCIF: 'B12345678',
+ * companyAddress: '123 Main St, Madrid',
+ * status: ['active'],
+ * userId: '5f4e6d6f4f6d4f6d4f6d4f6d'
+ * }
+ */
 @Schema({ timestamps: true })
 export class Client extends Document {
   @ApiProperty({
@@ -51,14 +71,21 @@ export class Client extends Document {
 
   @ApiProperty({
     description: 'User id',
-    example: '5f4e6d6f4f6d4f6d4f6d4f6d',
+    example: {
+      _id: '5f4e6d6f4f6d4f6d4f6d4f6d',
+      email: 'test@gmail.com',
+      firstName: 'Test',
+      lastName: 'User',
+      phone: '123456789',
+    },
     type: 'string',
   })
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
+    default: null,
   })
-  user: Types.ObjectId;
+  userId?: Types.ObjectId;
 }
 
 export const ClientSchema = SchemaFactory.createForClass(Client);

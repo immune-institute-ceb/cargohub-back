@@ -19,20 +19,18 @@ import {
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
 
-//* External modules
-// import { Express } from 'express';
-
-//* DTOs
-import { RegisterRutaDto, UpdateRutaDto } from '@modules/rutas/dto';
-
 //* Pipes
 import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
-//* Services
-import { RutasService } from './rutas.service';
+//* DTOs
+import { RegisterRutaDto } from './dto/register-ruta.dto';
+import { UpdateRutaDto } from './dto/update-ruta.dto';
 
 //* Entities
 import { Ruta } from '@modules/rutas/entities/rutas.entity';
+
+//* Services
+import { RutasService } from './rutas.service';
 
 @ApiTags('Rutas')
 @ApiBearerAuth()

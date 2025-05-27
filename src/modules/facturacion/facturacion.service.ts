@@ -6,19 +6,16 @@ import { InjectModel } from '@nestjs/mongoose';
 
 //* External modules
 import { Model } from 'mongoose';
-import { instanceToPlain } from 'class-transformer';
 
 //* DTOs
-import {
-  RegisterFacturacionDto,
-  UpdateFacturacionDto,
-} from '@modules/facturacion/dto';
-
-//* Services
-import { ExceptionsService } from '@common/exceptions/exceptions.service';
+import { RegisterFacturacionDto } from './dto/register-facturacion.dto';
+import { UpdateFacturacionDto } from './dto/update-facturacion.dto';
 
 //* Entities
 import { Facturacion } from './entities/facturacion.entity';
+
+//* Services
+import { ExceptionsService } from '@common/exceptions/exceptions.service';
 
 @Injectable()
 export class FacturacionService {
@@ -44,7 +41,7 @@ export class FacturacionService {
     updateFacturacionDto: UpdateFacturacionDto,
   ) {
     try {
-      const { ...update } = instanceToPlain(updateFacturacionDto);
+      const { ...update } = updateFacturacionDto;
 
       const facturacionUpdated = await this.facturacionModel.findOneAndUpdate(
         { _id: facturacion._id },
@@ -54,7 +51,8 @@ export class FacturacionService {
         },
       );
 
-      if (!facturacionUpdated) throw new NotFoundException('Facturación not found');
+      if (!facturacionUpdated)
+        throw new NotFoundException('Facturación not found');
 
       return facturacionUpdated;
     } catch (error) {

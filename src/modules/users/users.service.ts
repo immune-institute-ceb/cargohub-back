@@ -9,7 +9,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 
 //* External modules
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 
 //* DTOs
@@ -20,11 +20,11 @@ import {
   UpdateUserDto,
 } from '@modules/auth/dto';
 
-//* Services
-import { ExceptionsService } from '@common/exceptions/exceptions.service';
-
 //* Entities
 import { User } from './entities/user.entity';
+
+//* Services
+import { ExceptionsService } from '@common/exceptions/exceptions.service';
 
 //* Modules
 import { CarriersService } from '@modules/carriers/carriers.service';
@@ -59,15 +59,13 @@ export class UsersService {
         throw new BadRequestException('User already exists in the database');
       // 1. Crear usuario base
       const createdUser = await this.userModel.create(userData);
-      console.log(roles.includes(ValidRoles.client));
-      console.log(roles.includes(ValidRoles.carrier));
       // 2. Según rol, crear entidad relacionada
       if (roles.includes(ValidRoles.client) && clientData) {
         const client = await this.clientsService.create(
           {
             ...clientData,
           },
-          createdUser._id.toString(),
+          createdUser._id as unknown as ObjectId,
         );
         createdUser.clientId = client._id;
       }
@@ -77,7 +75,7 @@ export class UsersService {
           {
             ...carrierData,
           },
-          createdUser._id.toString(),
+          createdUser._id as unknown as ObjectId,
         );
         createdUser.carrierId = carrier._id;
       }
