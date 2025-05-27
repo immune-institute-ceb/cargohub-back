@@ -13,75 +13,75 @@ import { RequestStatus } from '../interfaces/request-status.interface';
  * @class CreateRequestDto
  * @example
  * {
- *   "nombre_cliente": "Empresa ABC",
- *  "origen": "Madrid",
- *  "destino": "Barcelona",
- * "fecha_solicitud": "2023-08-15T10:30:00Z",
- * "fecha_entrega": "2023-08-20T14:00:00Z",
- * "estado": "delivered",
- * "prioridad": "high"
+ *   "client_name": "ABC Company",
+ *   "origin": "Madrid",
+ *   "destination": "Barcelona",
+ *   "request_date": "2023-08-15T10:30:00Z",
+ *   "delivery_date": "2023-08-20T14:00:00Z",
+ *   "status": "delivered",
+ *   "priority": "high"
  * }
  */
 export class CreateRequestDto {
   @ApiProperty({
-    description: 'Nombre del cliente',
-    example: 'Empresa ABC',
+    description: 'Client name',
+    example: 'ABC Company',
   })
   @IsString()
   @IsNotEmpty()
-  nombre_cliente: string;
+  client_name: string;
 
   @ApiProperty({
-    description: 'Origen del envío',
+    description: 'Origin of the shipment',
     example: 'Madrid',
   })
   @IsString()
   @IsNotEmpty()
-  origen: string;
+  origin: string;
 
   @ApiProperty({
-    description: 'Destino del envío',
+    description: 'Destination of the shipment',
     example: 'Barcelona',
   })
   @IsString()
   @IsNotEmpty()
-  destino: string;
+  destination: string;
 
   @ApiProperty({
-    description: 'Fecha de solicitud',
+    description: 'Request date',
     example: '2023-08-15T10:30:00Z',
   })
   @Type(() => Date)
   @IsDate()
-  fecha_solicitud: Date;
+  request_date: Date;
 
   @ApiProperty({
-    description: 'Fecha de entrega estimada',
+    description: 'Estimated delivery date',
     example: '2023-08-20T14:00:00Z',
   })
   @Type(() => Date)
   @IsDate()
   @IsNotEmpty()
   @IsOptional()
-  fecha_entrega?: Date;
+  delivery_date?: Date;
 
   @ApiProperty({
-    description: 'Estado de la solicitud',
-    example: 'pendiente',
+    description: 'Request status',
+    example: 'pending',
     enum: RequestStatus,
     default: RequestStatus.pending,
   })
   @IsString()
   @IsOptional()
-  estado?: string;
+  status?: string;
 
   @ApiProperty({
-    description: 'Prioridad de la solicitud',
-    example: 'alta',
+    description: 'Request priority',
+    example: 'high',
     enum: RequestPriority,
     default: RequestPriority.medium,
   })
   @IsString()
   @IsOptional()
-  prioridad?: string;
+  priority?: string;
 }

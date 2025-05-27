@@ -6,13 +6,13 @@ import { Document, Types } from 'mongoose';
 /**
  * Request entity schema
  * @param _id Request id
- * @param nombre_cliente Nombre del cliente
- * @param origen Origen del envío
- * @param destino Destino del envío
- * @param fecha_solicitud Fecha de solicitud
- * @param fecha_entrega Fecha de entrega estimada
- * @param estado Estado de la solicitud (pendiente, en proceso, entregado)
- * @param prioridad Prioridad de la solicitud (normal, alta, urgente)
+ * @param client_name Client name
+ * @param origin Shipment origin
+ * @param destination Shipment destination
+ * @param request_date Request date
+ * @param delivery_date Estimated delivery date
+ * @param status Request status (pending, in progress, delivered)
+ * @param priority Request priority (normal, high, urgent)
  * @returns Request entity schema
  */
 @Schema({ timestamps: true })
@@ -25,71 +25,71 @@ export class Request extends Document {
   _id: Types.ObjectId;
 
   @ApiProperty({
-    description: 'Nombre del cliente',
-    example: 'Empresa ABC',
+    description: 'Client name',
+    example: 'ABC Company',
   })
   @Prop({
     index: true,
     required: true,
   })
-  nombre_cliente: string;
+  client_name: string;
 
   @ApiProperty({
-    description: 'Origen del envío',
+    description: 'Shipment origin',
     example: 'Madrid',
   })
   @Prop({
     index: true,
   })
-  origen: string;
+  origin: string;
 
   @ApiProperty({
-    description: 'Destino del envío',
+    description: 'Shipment destination',
     example: 'Barcelona',
   })
   @Prop({
     index: true,
   })
-  destino: string;
+  destination: string;
 
   @ApiProperty({
-    description: 'Fecha de solicitud',
+    description: 'Request date',
     example: '2023-08-15T10:30:00Z',
   })
   @Prop({
     index: true,
     default: Date.now,
   })
-  fecha_solicitud: Date;
+  request_date: Date;
 
   @ApiProperty({
-    description: 'Fecha de entrega estimada',
+    description: 'Estimated delivery date',
     example: '2023-08-20T14:00:00Z',
   })
   @Prop({
     index: true,
   })
-  fecha_entrega: Date;
+  delivery_date: Date;
 
   @ApiProperty({
-    description: 'Estado de la solicitud',
-    example: 'pendiente',
+    description: 'Request status',
+    example: 'pending',
   })
   @Prop({
     index: true,
-    default: 'pendiente',
+    default: 'pending',
   })
-  estado: string;
+  status: string;
 
   @ApiProperty({
-    description: 'Prioridad de la solicitud',
-    example: 'alta',
+    description: 'Request priority',
+    example: 'high',
   })
   @Prop({
     index: true,
     default: 'normal',
   })
-  prioridad: string;
+  priority: string;
 }
 
 export const RequestSchema = SchemaFactory.createForClass(Request);
