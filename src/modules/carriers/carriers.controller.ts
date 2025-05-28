@@ -2,7 +2,7 @@
 // Endpoints:
 
 //* NestJS Modules
-import { Controller, Get, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
@@ -15,9 +15,6 @@ import {
 //* Pipes
 import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
-//* DTOs
-import { UpdateCarrierDto } from './dto/update-carrier.dto';
-
 // * Entities
 import { Carrier } from './entities/carrier.entity';
 
@@ -25,7 +22,15 @@ import { Carrier } from './entities/carrier.entity';
 import { CarriersService } from './carriers.service';
 
 @ApiTags('Carriers')
-@ApiNotFoundResponse({ description: 'Carrier not found' })
+@ApiNotFoundResponse({
+  description: 'Not Found',
+  schema: {
+    oneOf: [
+      { example: { message: 'Carrier not found' } },
+      { example: { message: 'No carriers found' } },
+    ],
+  },
+})
 @ApiBadRequestResponse({ description: 'Bad Request' })
 @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
 @Controller('carriers')
@@ -52,19 +57,5 @@ export class CarriersController {
   @ApiOperation({ summary: 'Get carrier by ID' })
   findOne(@Param('id', ParseMongoIdPipe) id: string) {
     return this.carriersService.findOne(id);
-  }
-
-  @Patch(':id')
-  @ApiResponse({
-    status: 200,
-    description: 'Carrier updated',
-    type: Carrier,
-  })
-  @ApiOperation({ summary: 'Update carrier by ID' })
-  update(
-    @Param('id', ParseMongoIdPipe) id: string,
-    @Body() updateCarrierDto: UpdateCarrierDto,
-  ) {
-    return this.carriersService.update(id, updateCarrierDto);
   }
 }

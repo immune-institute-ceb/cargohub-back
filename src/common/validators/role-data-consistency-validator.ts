@@ -35,7 +35,6 @@ export class RoleDataConsistencyConstraint
   defaultMessage(args: ValidationArguments): string {
     const object = args.object as any;
     const roles = object.roles || [];
-
     // Ensure that roles is an array and has a default value if not provided
     const hasClientData = object.clientData !== undefined;
     const hasCarrierData = object.carrierData !== undefined;

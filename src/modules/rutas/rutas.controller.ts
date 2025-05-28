@@ -68,22 +68,6 @@ export class RutasController {
     return this.rutasService.deleteRuta(ruta);
   }
 
-  @Delete('archive-route/:id')
-  @ApiCreatedResponse({ description: 'Ruta archived' })
-  @ApiOperation({ summary: 'Archive a ruta by Id' })
-  async archive(@Param('id', ParseMongoIdPipe) id: string) {
-    const ruta = await this.rutasService.findRutaById(id);
-    return this.rutasService.archiveRuta(ruta);
-  }
-
-  @Patch('restore/:id')
-  @ApiCreatedResponse({ description: 'Ruta restored' })
-  @ApiOperation({ summary: 'Restore a ruta arhived by Id' })
-  async restore(@Param('id', ParseMongoIdPipe) id: string) {
-    const ruta = await this.rutasService.findRutaById(id);
-    return this.rutasService.restoreRuta(ruta);
-  }
-
   @Get()
   @ApiCreatedResponse({ description: 'All rutas', type: [Ruta] })
   @ApiOperation({ summary: 'Get all rutas' })

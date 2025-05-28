@@ -1,14 +1,7 @@
 // Objective: Define a DTO for creating a client with validation and transformation rules.
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {
-  IsAlphanumeric,
-  IsMongoId,
-  IsOptional,
-  IsString,
-  Matches,
-  MinLength,
-} from 'class-validator';
+import { IsAlphanumeric, IsString, Matches, MinLength } from 'class-validator';
 
 /**
  * Data transfer object for creating a client
@@ -55,19 +48,4 @@ export class CreateClientDto {
   @IsString()
   @MinLength(1)
   companyAddress: string;
-
-  @ApiProperty({
-    description: 'User id',
-    example: {
-      _id: '5f4e6d6f4f6d4f6d4f6d4f6d',
-      email: 'test@gmail.com',
-      firstName: 'Test',
-      lastName: 'User',
-      phone: '123456789',
-    },
-  })
-  @IsString()
-  @IsOptional()
-  @IsMongoId()
-  userId?: string;
 }

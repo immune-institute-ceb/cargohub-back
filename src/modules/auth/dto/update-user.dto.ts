@@ -1,27 +1,35 @@
-// Objective: Define the data transfer object to update a user data.
-import { OmitType, PartialType } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
+// update-user.dto.ts
+import {
+  ApiHideProperty,
+  ApiPropertyOptional,
+  OmitType,
+} from '@nestjs/swagger';
+import { ValidateNested } from 'class-validator';
+import { Exclude, Type } from 'class-transformer';
+import { BaseUserFieldsDto } from './base-user-fields.dto';
+import { UpdateClientDto } from '@modules/clients/dto/update-client.dto';
+import { UpdateCarrierDto } from '@modules/carriers/dto/update-carrier.dto';
+import { ValidRoles } from '../interfaces';
 
-import { RegisterUserDto } from './register-user.dto';
-
-/**
- * Data transfer object for update user
- * @export
- * @class UpdateUserDto
- * @extends {PartialType(OmitType(RegisterUserDto, ['email', 'password']))}
- * @example
- * {
- *  "name": "John Doe",
- *  "username": "johndoe",
- *  "phone": "+1234567890"
- * }
- */
-export class UpdateUserDto extends PartialType(
-  OmitType(RegisterUserDto, ['email', 'password']),
-) {
+export class UpdateUserDto extends OmitType(BaseUserFieldsDto, [
+  'email',
+  'roles',
+]) {
+  @ApiHideProperty()
   @Exclude()
   email?: string;
 
+  @ApiHideProperty()
   @Exclude()
-  password?: string;
+  roles?: ValidRoles[];
+
+  @ValidateNested()
+  @Type(() => UpdateClientDto)
+  @ApiPropertyOptional({ type: () => UpdateClientDto })
+  clientData?: UpdateClientDto;
+
+  @ValidateNested()
+  @Type(() => UpdateCarrierDto)
+  @ApiPropertyOptional({ type: () => UpdateCarrierDto })
+  carrierData?: UpdateCarrierDto;
 }

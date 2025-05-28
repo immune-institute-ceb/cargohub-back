@@ -1,12 +1,6 @@
 // Purpose: DTO for carrier creation with validation rules
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsAlphanumeric,
-  IsMongoId,
-  IsOptional,
-  IsString,
-  Matches,
-} from 'class-validator';
+import { IsAlphanumeric, Matches } from 'class-validator';
 
 /**
  * Data transfer object for creating a carrier
@@ -28,7 +22,7 @@ import {
 export class CreateCarrierDto {
   @ApiProperty({
     description: 'Carrier DNI',
-    example: '123456789A',
+    example: '12345678A',
   })
   @IsAlphanumeric()
   @Matches(/^\d{8}[A-Z]$/, {
@@ -44,19 +38,4 @@ export class CreateCarrierDto {
     message: 'License number must be a letter followed by a dash and 6 digits',
   })
   licenseNumber: string;
-
-  @ApiProperty({
-    description: 'User id',
-    example: {
-      _id: '5f4e6d6f4f6d4f6d4f6d4f6d',
-      email: 'test@gmail.com',
-      firstName: 'Test',
-      lastName: 'User',
-      phone: '123456789',
-    },
-  })
-  @IsString()
-  @IsOptional()
-  @IsMongoId()
-  userId?: string;
 }

@@ -46,7 +46,6 @@ export class Client extends Document {
   })
   @Prop({
     index: true,
-    select: false,
   })
   companyCIF: string;
 
@@ -84,8 +83,9 @@ export class Client extends Document {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null,
+    select: false,
   })
-  userId?: Types.ObjectId;
+  user?: Types.ObjectId;
 }
 
 export const ClientSchema = SchemaFactory.createForClass(Client);

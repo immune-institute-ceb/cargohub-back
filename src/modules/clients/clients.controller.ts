@@ -1,7 +1,7 @@
 // Objective: Implement the controller of the clients module to manage client entities.
 
 //* NestJS modules
-import { Controller, Get, Body, Patch, Param } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
@@ -14,9 +14,6 @@ import {
 //* Pipes
 import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
-//* DTOs
-import { UpdateClientDto } from './dto/update-client.dto';
-
 //* Entities
 import { Client } from './entities/client.entity';
 
@@ -24,7 +21,15 @@ import { Client } from './entities/client.entity';
 import { ClientsService } from './clients.service';
 
 @ApiTags('Clients')
-@ApiNotFoundResponse({ description: 'Client not found' })
+@ApiNotFoundResponse({
+  description: 'Not Found',
+  schema: {
+    oneOf: [
+      { example: { message: 'Client not found' } },
+      { example: { message: 'No clients found' } },
+    ],
+  },
+})
 @ApiBadRequestResponse({ description: 'Bad Request' })
 @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
 @Controller('clients')
@@ -51,19 +56,5 @@ export class ClientsController {
   @ApiOperation({ summary: 'Get client by ID' })
   findOne(@Param('id', ParseMongoIdPipe) id: string) {
     return this.clientsService.findOne(id);
-  }
-
-  @Patch(':id')
-  @ApiResponse({
-    status: 200,
-    description: 'Client updated',
-    type: Client,
-  })
-  @ApiOperation({ summary: 'Update client by ID' })
-  update(
-    @Param('id', ParseMongoIdPipe) id: string,
-    @Body() updateClientDto: UpdateClientDto,
-  ) {
-    return this.clientsService.update(id, updateClientDto);
   }
 }

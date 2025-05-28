@@ -28,7 +28,7 @@ export class CarriersService {
       // If userId is provided, set it in the DTO
       const carrierCreated = await this.carrierModel.create({
         ...createCarrierDto,
-        userId,
+        user: userId,
       });
       return carrierCreated;
     } catch (error) {
@@ -40,7 +40,10 @@ export class CarriersService {
     try {
       const carriers = await this.carrierModel
         .find()
-        .populate('userId', 'name lastName1 lastName2 phone email');
+        .populate('user', 'name lastName1 lastName2 phone email');
+      if (!carriers || carriers.length === 0) {
+        throw new NotFoundException('No carriers found');
+      }
       return carriers;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -51,7 +54,7 @@ export class CarriersService {
     try {
       const carrier = await this.carrierModel
         .findById(id)
-        .populate('userId', 'name lastName1 lastName2 phone email');
+        .populate('user', 'name lastName1 lastName2 phone email');
       if (!carrier) throw new NotFoundException('Carrier not found');
       return carrier;
     } catch (error) {

@@ -30,7 +30,7 @@ export class ClientsService {
 
       const clientCreated = await this.clientModel.create({
         ...createClientDto,
-        userId,
+        user: userId,
       });
       return clientCreated;
     } catch (error) {
@@ -42,7 +42,10 @@ export class ClientsService {
     try {
       const clients = await this.clientModel
         .find()
-        .populate('userId', 'name lastName1 lastName2 phone email');
+        .populate('user', 'name lastName1 lastName2 phone email');
+      if (!clients || clients.length === 0) {
+        throw new NotFoundException('No clients found');
+      }
       return clients;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -53,7 +56,7 @@ export class ClientsService {
     try {
       const client = await this.clientModel
         .findById(id)
-        .populate('userId', 'name lastName1 lastName2 phone email');
+        .populate('user', 'name lastName1 lastName2 phone email');
       if (!client) throw new NotFoundException('Client not found');
       return client;
     } catch (error) {
@@ -64,7 +67,6 @@ export class ClientsService {
   async update(id: string, updateClientDto: UpdateClientDto) {
     try {
       const { ...update } = updateClientDto;
-
       const clientUpdated = await this.clientModel.findOneAndUpdate(
         { _id: id },
         update,

@@ -1,7 +1,7 @@
 // Objective: Implement the controller of the authentication module, with the endpoints for the user to register,
 //  login, reset password, recover password, refresh token, contact, generate 2fa code, verify 2fa code and disable 2fa code.
 //* Nest Modules
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Patch } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -35,6 +35,7 @@ import { User } from '../users/entities/user.entity';
 
 //* Services
 import AuthService from './auth.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Auth')
 @ApiNotFoundResponse({
@@ -49,7 +50,7 @@ import AuthService from './auth.service';
     oneOf: [
       { example: { message: 'Passwords do not match' } },
       { example: { message: 'Email confirmation token expired' } },
-      { example: { message: 'Not valid credentials (email)' } },
+      { example: { message: 'Not valid credentials' } },
       { example: { message: 'Failed to generate OTP Auth URL' } },
       { example: { message: '2FA already enabled' } },
       { example: { message: '2FA not enabled' } },
@@ -93,8 +94,8 @@ export class AuthController {
     description: 'Unauthorized - Authentication failure',
     schema: {
       oneOf: [
-        { example: { message: 'Not valid credentials (email)' } },
-        { example: { message: 'Not valid credentials (password)' } },
+        { example: { message: 'Not valid credentials' } },
+        { example: { message: 'Not valid credentials' } },
         { example: { message: 'User is archived' } },
         { example: { message: 'User is inactive, talk with an admin' } },
         { example: { message: '2FA code is required' } },
@@ -112,7 +113,28 @@ export class AuthController {
     status: 200,
     description: 'Password updated',
   })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal Server Error, check the logs',
+    schema: {
+      oneOf: [
+        { example: { message: 'Token not found (request)' } },
+        { example: { message: 'Token expired' } },
+      ],
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request - Invalid token or password mismatch',
+    schema: {
+      oneOf: [
+        { example: { message: 'Email confirmation token expired' } },
+        { example: { message: 'Passwords do not match' } },
+        { example: { message: 'Invalid token purpose' } },
+      ],
+    },
+  })
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Reset user password' })
+  @UseGuards(AuthGuard('jwt-recover-password'))
   resetPassword(
     @GetTokenFromHeader() token: string,
     @Body() changePasswordDto: ChangePasswordDto,
@@ -149,8 +171,29 @@ export class AuthController {
   @ApiOperation({ summary: 'Refresh user token' })
   @ApiBearerAuth()
   @Auth()
-  refreshToken(@GetUser() user: User) {
-    return this.authService.refreshToken(user);
+  refreshTokenUser(@GetUser() user) {
+    return this.authService.refreshToken(user as User);
+  }
+
+  @Get('verify-token')
+  @ApiResponse({
+    status: 200,
+    description: 'Token is valid',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Authentication failure',
+    schema: {
+      oneOf: [
+        { example: { message: 'Not valid token' } },
+        { example: { message: 'Unauthorized' } },
+      ],
+    },
+  })
+  @ApiOperation({ summary: 'Verify user token' })
+  @ApiBearerAuth()
+  @Auth()
+  verifyTokenUser(@GetTokenFromHeader() token: string) {
+    return this.authService.verifyToken(token);
   }
 
   @Post('contact')
@@ -180,8 +223,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Generate a new 2FA code' })
   @ApiBearerAuth()
   @Auth()
-  generate2faCode(@GetUser() user: User) {
-    return this.authService.generate2faCode(user);
+  generate2faCode(@GetUser() user) {
+    return this.authService.generate2faCode(user as User);
   }
 
   @Post('2fa/activate')
@@ -192,8 +235,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Activate 2FA code' })
   @ApiBearerAuth()
   @Auth()
-  activateTwoFactorCode(@GetUser() user: User, @Body() token: TwoFactorDto) {
-    return this.authService.activateTwoFactorCode(user, token);
+  activateTwoFactorCode(@GetUser() user, @Body() token: TwoFactorDto) {
+    return this.authService.activateTwoFactorCode(user as User, token);
   }
 
   @Post('2fa/verify')
@@ -207,7 +250,7 @@ export class AuthController {
     return this.authService.verify2faCode(verifyTwoFactorDto);
   }
 
-  @Post('2fa/disable')
+  @Patch('2fa/disable')
   @ApiResponse({
     status: 200,
     description: '2FA code disabled',
@@ -215,7 +258,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Disable 2FA code' })
   @ApiBearerAuth()
   @Auth()
-  disableTwoFactor(@GetUser() user: User) {
-    return this.authService.disableTwoFactor(user);
+  disableTwoFactor(@GetUser() user) {
+    return this.authService.disableTwoFactor(user as User);
   }
 }

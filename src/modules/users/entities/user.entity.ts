@@ -2,6 +2,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, Types } from 'mongoose';
+import { ValidRoles } from '@modules/auth/interfaces';
 
 /**
  * User entity schema
@@ -22,8 +23,8 @@ import mongoose, { Document, Types } from 'mongoose';
  * @param twoFactorAuth User two-factor authentication code
  * @param twoFactorQrCode User two-factor authentication QR code
  * @param twoFactorAuthEnabled Tells if the user has two-factor authentication enabled
- * @param clientId Client id associated with the user
- * @param carrierId Carrier id associated with the user
+ * @param client Client id associated with the user
+ * @param carrier Carrier id associated with the user
  * @export
  * @class User
  */
@@ -57,11 +58,12 @@ export class User extends Document {
 
   @ApiProperty({
     description: 'User password',
-    example: 'Test1234',
+    example: 'Password123',
   })
   @Prop({
     index: true,
     select: false,
+    default: '',
   })
   password: string;
 
@@ -112,13 +114,23 @@ export class User extends Document {
   isActive: boolean;
 
   @ApiProperty({
+    description: 'Email verified',
+    example: 'true',
+  })
+  @Prop({
+    index: true,
+    default: false,
+  })
+  emailVerified: boolean;
+
+  @ApiProperty({
     description: 'User roles',
-    example: ['admin', 'client', 'carrier'],
+    example: ['client'],
   })
   @Prop({
     index: true,
   })
-  roles: string[];
+  roles: ValidRoles[];
 
   @ApiProperty({
     description: 'User permissions',
@@ -190,7 +202,7 @@ export class User extends Document {
   twoFactorAuthEnabled: boolean;
 
   @ApiProperty({
-    description: 'Client id associated with the user',
+    description: 'Client Id associated with the user',
     example: '5f4e6d6f4f6d4f6d4f6d4f6d',
   })
   @Prop({
@@ -201,7 +213,7 @@ export class User extends Document {
   clientId?: Types.ObjectId;
 
   @ApiProperty({
-    description: 'Carrier id associated with the user',
+    description: 'Carrier Id associated with the user',
     example: '5f4e6d6f4f6d4f6d4f6d4f6d',
   })
   @Prop({

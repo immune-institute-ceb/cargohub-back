@@ -3,7 +3,6 @@
 //* Nest Modules
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { ConfigService } from '@nestjs/config';
 
 //* External Modules
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -15,7 +14,7 @@ import { JwtPayload } from '../interfaces';
 import { envs } from '@config/envs';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtLoginStrategy extends PassportStrategy(Strategy, 'jwt-login') {
   constructor(private readonly usersService: UsersService) {
     super({
       secretOrKey: envs.jwtSecret,
@@ -25,15 +24,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(req: Request, payload: JwtPayload): Promise<User> {
-    const { _id } = payload;
-    const user = await this.usersService.findUserById(_id);
+    const { _id, message } = payload;
+    if (message !== 'login')
+      throw new UnauthorizedException('Not valid session token');
 
-    if (!user) throw new UnauthorizedException('Not valid token');
-    if (!user.isActive)
+    const user = await this.usersService.findUserById(_id);
+    if (!user) throw new UnauthorizedException('Not valid session token');
+    if (!user.isActive || !user.emailVerified)
       throw new UnauthorizedException('User is inactive, talk with an admin');
 
     if (user.isDeleted) throw new UnauthorizedException('User is archived');
-
     return user;
   }
 }
