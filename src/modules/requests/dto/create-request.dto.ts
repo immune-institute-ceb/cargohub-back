@@ -1,7 +1,13 @@
 // Objective: Define a DTO for creating a Request with validation and transformation rules.
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsString, IsNotEmpty, IsOptional, IsDate } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDate,
+  IsEnum,
+} from 'class-validator';
 
 //*Interfaces
 import { RequestPriority } from '../interfaces/request-priority.interface';
@@ -24,19 +30,12 @@ import { RequestStatus } from '../interfaces/request-status.interface';
  */
 export class CreateRequestDto {
   @ApiProperty({
-    description: 'Client name',
-    example: 'ABC Company',
-  })
-  @IsString()
-  @IsNotEmpty()
-  client_name: string;
-
-  @ApiProperty({
     description: 'Origin of the shipment',
     example: 'Madrid',
   })
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => value.trim().toLowerCase())
   origin: string;
 
   @ApiProperty({
@@ -45,6 +44,7 @@ export class CreateRequestDto {
   })
   @IsString()
   @IsNotEmpty()
+  @Transform(({ value }) => value.trim().toLowerCase())
   destination: string;
 
   @ApiProperty({
@@ -68,20 +68,26 @@ export class CreateRequestDto {
   @ApiProperty({
     description: 'Request status',
     example: 'pending',
-    enum: RequestStatus,
     default: RequestStatus.pending,
   })
   @IsString()
   @IsOptional()
-  status?: string;
+  @IsEnum(RequestStatus, {
+    each: true,
+    message: `status must be one of: ${Object.values(RequestStatus).join(', ')}`,
+  })
+  status?: RequestStatus[];
 
   @ApiProperty({
     description: 'Request priority',
     example: 'high',
-    enum: RequestPriority,
     default: RequestPriority.medium,
   })
   @IsString()
   @IsOptional()
-  priority?: string;
+  @IsEnum(RequestPriority, {
+    each: true,
+    message: `priority must be one of: ${Object.values(RequestPriority).join(', ')}`,
+  })
+  priority?: RequestPriority[];
 }
