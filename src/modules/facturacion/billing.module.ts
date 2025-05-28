@@ -7,21 +7,21 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
 //* Services
-import { FacturacionService } from './facturacion.service';
+import { BillingService } from './billing.service';
 
 //* Controllers
-import { FacturacionController } from './facturacion.controller';
+import { BillingController } from './billing.controller';
 
 //* Entities
-import { Facturacion, FacturacionSchema } from './entities/facturacion.entity';
+import { Billing, BillingSchema } from './entities/billing.entity';
 
 //* Modules
 import { CommonModule } from '@common/common.module';
 
 @Module({
-  controllers: [FacturacionController],
-  providers: [FacturacionService],
-  exports: [FacturacionService],
+  controllers: [BillingController],
+  providers: [BillingService],
+  exports: [BillingService],
   imports: [
     CommonModule,
     ConfigModule,
@@ -30,10 +30,10 @@ import { CommonModule } from '@common/common.module';
     }),
     MongooseModule.forFeature([
       {
-        name: Facturacion.name,
-        schema: FacturacionSchema,
+        name: Billing.name,
+        schema: BillingSchema,
       },
     ]),
   ],
 })
-export class FacturacionModule {}
+export class BillingModule {}
