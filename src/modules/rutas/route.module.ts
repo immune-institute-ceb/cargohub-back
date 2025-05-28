@@ -7,25 +7,25 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
 
 //* Services
-import { RutasService } from './rutas.service';
+import { RoutesService } from './route.service';
 
 //* Controllers
-import { RutasController } from './rutas.controller';
+import { RoutesController } from './route.controller';
 
 //* Entities
-import { Ruta, RutaSchema } from './entities/rutas.entity';
+import { Route, RouteSchema } from './entities/route.entity';
 
 //* Modules
 import { CommonModule } from '@common/common.module';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Ruta.name, schema: RutaSchema }]),
+    MongooseModule.forFeature([{ name: Route.name, schema: RouteSchema }]),
     CommonModule,
     ConfigModule,
     PassportModule,
   ],
-  controllers: [RutasController],
-  providers: [RutasService],
+  controllers: [RoutesController],
+  providers: [RoutesService],
 })
-export class RutasModule {}
+export class RoutesModule {}

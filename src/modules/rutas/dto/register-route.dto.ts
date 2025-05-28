@@ -7,18 +7,18 @@ import { Transform, Type } from 'class-transformer';
 /**
  * Data transfer object for register route
  * @export
- * @class RegisterRutaDto
+ * @class RegisterRouteDto
  * @example
  * {
  *  "type": "National",
- *  "origen": "Madrid",
- *  "destino": "Málaga",
- *  "distancia": 523,
- *  "tiempoEstimado": 5,
+ *  "origin": "Madrid",
+ *  "destination": "Málaga",
+ *  "distance": 523,
+ *  "estimatedTime": 5,
  *  "...": "..."
  * }
  */
-export class RegisterRutaDto {
+export class RegisterRouteDto {
   @ApiProperty({
     description: 'Route type',
     example: 'National',
@@ -29,22 +29,22 @@ export class RegisterRutaDto {
   type: string;
 
   @ApiProperty({
-    description: 'Route origen',
+    description: 'Route origin',
     example: 'Madrid',
   })
   @IsString()
   @Transform(({ value }) => value.toLowerCase().trim())
   @MinLength(1)
-  origen: string;
+  origin: string;
 
   @ApiProperty({
-    description: 'Route destino',
+    description: 'Route destination',
     example: 'Málaga',
   })
   @IsString()
   @Transform(({ value }) => value.toLowerCase().trim())
   @MinLength(1)
-  destino: string;
+  destination: string;
 
   @ApiProperty({
     description: 'Route distance',
@@ -52,13 +52,13 @@ export class RegisterRutaDto {
   })
   @IsNumber()
   @Type(() => Number)
-  distancia: number;
+  distance: number;
 
   @ApiProperty({
-    description: 'Route type',
-    example: 'National',
+    description: 'Route estimated time',
+    example: 5,
   })
   @IsNumber()
   @Type(() => Number)
-  tiempoEstimado: number;
+  estimatedTime: number;
 }
