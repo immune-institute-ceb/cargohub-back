@@ -55,7 +55,7 @@ export class RequestsController {
     return this.requestsService.create(createRequestDto, user as User);
   }
 
-  @Get(':clientId')
+  @Get('clientRequest/:clientId')
   @ApiBearerAuth()
   @Auth()
   @ApiOperation({ summary: 'Get all requests by Client Id (not userId)' })
@@ -80,6 +80,7 @@ export class RequestsController {
     type: Request,
   })
   findOne(@Param('requestId', ParseMongoIdPipe) id: string) {
+    console.log(id);
     return this.requestsService.findOne(id);
   }
 
