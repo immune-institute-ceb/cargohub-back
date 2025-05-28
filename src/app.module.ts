@@ -17,6 +17,7 @@ import { RutasModule } from './modules/rutas/rutas.module';
 import { ClientsModule } from './modules/clients/clients.module';
 import { CarriersModule } from './modules/carriers/carriers.module';
 import { RequestsModule } from '@modules/requests/requests.module';
+import { TrucksModule } from './modules/trucks/trucks.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { RequestsModule } from '@modules/requests/requests.module';
     ClientsModule,
     CarriersModule,
     RequestsModule,
+    TrucksModule,
   ],
 })
 export class AppModule {}

@@ -77,7 +77,7 @@ export class Request extends Document {
 
   @ApiProperty({
     description: 'Request status',
-    example: 'pending',
+    example: RequestStatus.pending,
   })
   @Prop({
     index: true,
@@ -88,7 +88,7 @@ export class Request extends Document {
 
   @ApiProperty({
     description: 'Request priority',
-    example: 'high',
+    example: RequestPriority.medium,
   })
   @Prop({
     index: true,

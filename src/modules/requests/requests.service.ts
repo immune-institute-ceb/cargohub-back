@@ -57,10 +57,14 @@ export class RequestsService {
         throw new NotFoundException('Request already exists for this client');
       }
       console.log(request);
-      await this.clientsService.addRequestToClient(
-        client._id.toString(),
-        request,
-      );
+      const { clientWithRequest } =
+        await this.clientsService.addRequestToClient(
+          client._id.toString(),
+          request,
+        );
+      if (!clientWithRequest) {
+        throw new NotFoundException('Client not found after adding request');
+      }
       request.clientId = client._id.toString();
       await request.save();
 
@@ -116,12 +120,19 @@ export class RequestsService {
 
   async remove(id: string) {
     try {
-      const result = await this.requestModel.findByIdAndDelete(id);
+      const result = await this.requestModel.findById(id);
       if (!result) throw new NotFoundException('Request not found');
-      await this.clientsService.removeRequestFromClient(
+      const { client } = await this.clientsService.removeRequestFromClient(
         result.clientId.toString(),
         id,
       );
+      if (!client) {
+        throw new NotFoundException('Client not found after removing request');
+      }
+      const requestDeleted = await this.requestModel.findByIdAndDelete(id);
+      if (!requestDeleted) {
+        throw new NotFoundException('Request could not be deleted');
+      }
       return {
         message: 'Request deleted successfully',
       };

@@ -2,6 +2,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import mongoose, { Document, Types } from 'mongoose';
+import { CarrierStatus } from '../interfaces/carrier-status.interface';
 
 /**
  * Carrier entity schema
@@ -42,13 +43,14 @@ export class Carrier extends Document {
 
   @ApiProperty({
     description: 'Client status',
-    example: ['available', 'on route', 'resting', 'inactive'],
+    example: CarrierStatus.available,
   })
   @Prop({
     index: true,
-    default: ['available'],
+    enum: CarrierStatus,
+    default: CarrierStatus.available,
   })
-  status: string[];
+  status: CarrierStatus;
 
   @ApiProperty({
     description: 'User id',
@@ -66,7 +68,26 @@ export class Carrier extends Document {
     ref: 'User',
     default: null,
   })
-  user?: Types.ObjectId;
+  user?: Types.ObjectId | null;
+
+  @ApiProperty({
+    description: 'Truck associated with the carrier',
+    example: {
+      _id: '5f4e6d6f4f6d4f6d4f6d4f6d',
+      licensePlate: '1234ABC',
+      carModel: 'Volvo FH',
+      capacity: 20000,
+      fuelType: 'diesel',
+      status: 'available',
+    },
+    type: 'string',
+  })
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Truck',
+    default: null,
+  })
+  truck?: Types.ObjectId | null;
 }
 
 export const CarrierSchema = SchemaFactory.createForClass(Carrier);

@@ -115,14 +115,18 @@ export class ClientsService {
 
   async addRequestToClient(clientId: string, request: Request) {
     try {
-      const client = await this.clientModel
+      const clientWithRequest = await this.clientModel
         .findByIdAndUpdate(
           clientId,
           { $addToSet: { requests: request } },
           { new: true },
         )
         .populate('user', 'name lastName1 lastName2 phone email');
-      if (!client) throw new NotFoundException('Client not found');
+      if (!clientWithRequest) throw new NotFoundException('Client not found');
+      return {
+        message: 'Request added to client successfully',
+        clientWithRequest,
+      };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -138,6 +142,10 @@ export class ClientsService {
         )
         .populate('user', 'name lastName1 lastName2 phone email');
       if (!client) throw new NotFoundException('Client not found');
+      return {
+        message: 'Request removed from client successfully',
+        client,
+      };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
