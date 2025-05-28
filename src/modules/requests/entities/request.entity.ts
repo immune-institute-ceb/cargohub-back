@@ -2,6 +2,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { RequestStatus } from '../interfaces/request-status.interface';
+import { RequestPriority } from '../interfaces/request-priority.interface';
 
 /**
  * Request entity schema
@@ -25,14 +27,16 @@ export class Request extends Document {
   _id: Types.ObjectId;
 
   @ApiProperty({
-    description: 'Client name',
-    example: 'ABC Company',
+    description: 'Client Id',
+    example: '5f4e6d6f4f6d4f6d4f6d4f6d',
+    type: 'string',
   })
   @Prop({
     index: true,
-    required: true,
+    type: Types.ObjectId,
+    ref: 'Client',
   })
-  client_name: string;
+  clientId: string;
 
   @ApiProperty({
     description: 'Shipment origin',
@@ -77,9 +81,10 @@ export class Request extends Document {
   })
   @Prop({
     index: true,
-    default: 'pending',
+    enum: RequestStatus,
+    default: RequestStatus.pending,
   })
-  status: string;
+  status: RequestStatus;
 
   @ApiProperty({
     description: 'Request priority',
@@ -87,9 +92,10 @@ export class Request extends Document {
   })
   @Prop({
     index: true,
-    default: 'normal',
+    enum: RequestPriority,
+    default: RequestPriority.medium,
   })
-  priority: string;
+  priority: RequestPriority;
 }
 
 export const RequestSchema = SchemaFactory.createForClass(Request);

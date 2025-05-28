@@ -125,7 +125,8 @@ export class User extends Document {
 
   @ApiProperty({
     description: 'User roles',
-    example: ['client'],
+    enum: ValidRoles,
+    example: ValidRoles.client,
   })
   @Prop({
     index: true,

@@ -15,14 +15,14 @@ import { Request, RequestSchema } from './entities/request.entity';
 
 // * Modules
 import { CommonModule } from '@common/common.module';
-import { AuthModule } from '@modules/auth/auth.module';
+import { ClientsModule } from '@modules/clients/clients.module';
 
 @Module({
   controllers: [RequestsController],
   providers: [RequestsService],
   imports: [
     CommonModule,
-    AuthModule,
+    ClientsModule,
     MongooseModule.forFeature([
       {
         name: Request.name,

@@ -29,10 +29,12 @@ import { CreateRequestDto } from './dto/create-request.dto';
 import { UpdateRequestDto } from './dto/update-request.dto';
 
 // * Decorators
-import { Auth } from '@modules/auth/decorators';
+import { Auth, GetUser } from '@modules/auth/decorators';
 
 //* Services
 import { RequestsService } from './requests.service';
+import { ValidRoles } from '@modules/auth/interfaces';
+import { User } from '@modules/users/entities/user.entity';
 
 @ApiTags('Requests')
 @ApiNotFoundResponse({ description: 'Request not found' })
@@ -44,26 +46,28 @@ export class RequestsController {
 
   @Post()
   @ApiBearerAuth()
-  @Auth()
+  @Auth(ValidRoles.client)
   @ApiOperation({ summary: 'Create a new request' })
   @ApiCreatedResponse({
     description: 'Request created successfully',
   })
-  create(@Body() createRequestDto: CreateRequestDto) {
-    return this.requestsService.create(createRequestDto);
+  create(@Body() createRequestDto: CreateRequestDto, @GetUser() user) {
+    return this.requestsService.create(createRequestDto, user as User);
   }
 
-  @Get()
+  @Get(':clientId')
   @ApiBearerAuth()
   @Auth()
-  @ApiOperation({ summary: 'Get all requests' })
+  @ApiOperation({ summary: 'Get all requests by Client Id (not userId)' })
   @ApiResponse({
     status: 200,
-    description: 'Return all requests',
+    description: 'Return all requests from the client',
     type: [Request],
   })
-  findAll() {
-    return this.requestsService.findAll();
+  findAllRequestsByClientId(
+    @Param('clientId', ParseMongoIdPipe) clientId: string,
+  ) {
+    return this.requestsService.findAllRequestsByClientId(clientId);
   }
 
   @Get(':requestId')

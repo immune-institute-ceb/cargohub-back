@@ -16,6 +16,7 @@ import { Client } from './entities/client.entity';
 
 // * Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
+import { Request } from '@modules/requests/entities/request.entity';
 
 @Injectable()
 export class ClientsService {
@@ -42,7 +43,8 @@ export class ClientsService {
     try {
       const clients = await this.clientModel
         .find()
-        .populate('user', 'name lastName1 lastName2 phone email');
+        .populate('user', 'name lastName1 lastName2 phone email')
+        .populate('requests');
       if (!clients || clients.length === 0) {
         throw new NotFoundException('No clients found');
       }
@@ -56,7 +58,8 @@ export class ClientsService {
     try {
       const client = await this.clientModel
         .findById(id)
-        .populate('user', 'name lastName1 lastName2 phone email');
+        .populate('user', 'name lastName1 lastName2 phone email')
+        .populate('requests');
       if (!client) throw new NotFoundException('Client not found');
       return client;
     } catch (error) {
@@ -92,6 +95,49 @@ export class ClientsService {
         message: 'Client deleted',
         clientDeleted,
       };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async findOneByUserId(userId: string): Promise<Client> {
+    try {
+      const client = await this.clientModel
+        .findOne({ user: userId })
+        .populate('user', 'name lastName1 lastName2 phone email')
+        .populate('requests');
+      if (!client) throw new NotFoundException('Client not found');
+      return client;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async addRequestToClient(clientId: string, request: Request) {
+    try {
+      const client = await this.clientModel
+        .findByIdAndUpdate(
+          clientId,
+          { $addToSet: { requests: request } },
+          { new: true },
+        )
+        .populate('user', 'name lastName1 lastName2 phone email');
+      if (!client) throw new NotFoundException('Client not found');
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async removeRequestFromClient(clientId: string, requestId: string) {
+    try {
+      const client = await this.clientModel
+        .findByIdAndUpdate(
+          clientId,
+          { $pull: { requests: requestId } },
+          { new: true },
+        )
+        .populate('user', 'name lastName1 lastName2 phone email');
+      if (!client) throw new NotFoundException('Client not found');
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }

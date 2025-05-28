@@ -86,6 +86,27 @@ export class Client extends Document {
     select: false,
   })
   user?: Types.ObjectId;
+
+  @ApiProperty({
+    description: 'Client requests',
+    example: [
+      {
+        _id: '5f4e6d6f4f6d4f6d4f6d4f6d',
+        origin: 'Madrid',
+        destination: 'Barcelona',
+        request_date: '2023-08-15T10:30:00Z',
+        delivery_date: '2023-08-20T14:00:00Z',
+        status: 'pending',
+        prioriy: 'normal',
+      },
+    ],
+    type: 'array',
+  })
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Request' }],
+    default: [],
+  })
+  requests?: Types.ObjectId[];
 }
 
 export const ClientSchema = SchemaFactory.createForClass(Client);
