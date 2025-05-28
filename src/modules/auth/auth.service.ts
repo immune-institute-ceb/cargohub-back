@@ -79,49 +79,84 @@ class AuthService {
 
   async registerUser(registerUserDto: RegisterUserDto) {
     try {
-      registerUserDto.password = bcrypt.hashSync(registerUserDto.password, 10);
       const user = await this.usersService.create(registerUserDto);
-      return this.refreshToken(user);
+      if (!user) throw new BadRequestException('User not created');
+      await this.sendEmail(
+        'Welcome to CargoHub',
+        'confirm your Email',
+        user.email,
+        this.getJwtToken(
+          {
+            _id: user._id.toString(),
+            message: 'confirmEmail',
+          } as JwtPayloadRecoverPassword,
+          '15m',
+        ),
+      );
+      return {
+        message: 'User created, check your email to confirm your account',
+      };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
   }
 
   async login(loginUserDto: LoginUserDto) {
-    const { email, password } = loginUserDto;
+    try {
+      const { email, password } = loginUserDto;
 
-    const user = (await this.usersService.findUserWithPassword(email)) as User;
+      const user = (await this.usersService.findUserWithPassword(
+        email,
+      )) as User;
 
-    if (!user) throw new UnauthorizedException(`Not valid credentials (email)`);
-    if (user?.isDeleted) throw new UnauthorizedException('User is archived');
-    if (!user?.isActive)
-      throw new UnauthorizedException('User is inactive, talk with an admin');
+      if (!user) throw new UnauthorizedException(`Not valid credentials`);
+      if (user?.isDeleted) throw new UnauthorizedException('User is archived');
+      if (!user?.isActive || !user?.emailVerified)
+        throw new UnauthorizedException('User is inactive, talk with an admin');
 
-    if (!bcrypt.compareSync(password, user.password))
-      throw new UnauthorizedException(`Not valid credentials (password)`);
+      if (!bcrypt.compareSync(password, user.password))
+        throw new UnauthorizedException(`Not valid credentials`);
 
-    if (user.twoFactorAuthEnabled) {
-      return {
-        user: user.email,
-        message: '2FA code is required',
-      };
+      if (user.twoFactorAuthEnabled) {
+        return {
+          user: user.email,
+          message: '2FA code is required',
+        };
+      }
+
+      return this.refreshToken(user);
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
     }
-
-    return this.refreshToken(user);
   }
 
   refreshToken(user: User) {
     return {
       user,
-      token: this.getJwtToken({
-        _id: user._id.toString(),
-        name: user.name,
-        phone: user.phone,
-        email: user.email,
-        role: user.roles,
-        permissions: user.permissions,
-      }),
+      token: this.getJwtToken(
+        {
+          _id: user._id.toString(),
+          name: user.name,
+          phone: user.phone,
+          email: user.email,
+          role: user.roles,
+          permissions: user.permissions,
+          message: 'login',
+        } as JwtPayload,
+        '1d',
+      ),
     };
+  }
+
+  async verifyToken(token: string) {
+    try {
+      await this.jwtService.verifyAsync(token, {
+        secret: envs.jwtSecret,
+      });
+      return { message: 'Token is valid' };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
   }
 
   async resetPassword(token: string, changePasswordDto: ChangePasswordDto) {
@@ -158,11 +193,19 @@ class AuthService {
 
       const user = (await this.usersService.findUserByEmail(email)) as User;
 
-      if (!user) throw new BadRequestException('Not valid credentials (email)');
+      if (!user) throw new BadRequestException('Not valid credentials');
 
       await this.sendEmail(
+        'CargoHub - Recover Password',
+        'recover your Password',
         email,
-        this.getJwtToken({ _id: user._id.toString() }),
+        this.getJwtToken(
+          {
+            _id: user._id.toString(),
+            message: 'recoverPassword',
+          } as JwtPayloadRecoverPassword,
+          '15m',
+        ),
       );
 
       return { message: 'Email sent, check your inbox' };
@@ -202,7 +245,7 @@ class AuthService {
       if (!userTo2fa) throw new NotFoundException('User not found');
 
       const secret = speakeasy.generateSecret({
-        name: `TradeHub - ${userTo2fa.email}`,
+        name: `CargoHub - ${userTo2fa.email}`,
       });
 
       const otpauth_url = secret.otpauth_url;
@@ -293,19 +336,29 @@ class AuthService {
     }
   }
 
-  private getJwtToken(payload: JwtPayload | JwtPayloadRecoverPassword) {
-    const token = this.jwtService.sign(payload);
+  private getJwtToken(
+    payload: JwtPayload | JwtPayloadRecoverPassword,
+    expiresIn: string,
+  ) {
+    const token = this.jwtService.sign(payload, {
+      expiresIn: expiresIn || '1h',
+    });
     return token;
   }
 
-  private async sendEmail(email: string, token: string) {
+  private async sendEmail(
+    title: string,
+    message: string,
+    email: string,
+    token: string,
+  ) {
     try {
       const url = `${envs.frontendUrl}api/auth/reset-password?_t=${token}`;
       await this.transporter.sendMail({
         from: envs.emailUser,
         to: email,
-        subject: 'Recover your password',
-        html: `<a href="${url}">Click here to recover your password</a>`,
+        subject: title,
+        html: `<a href="${url}">Click here to ${message}</a>`,
       });
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

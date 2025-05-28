@@ -10,15 +10,9 @@ import { InjectModel } from '@nestjs/mongoose';
 
 //* External modules
 import { Model, ObjectId } from 'mongoose';
-import * as bcrypt from 'bcrypt';
 
 //* DTOs
-import {
-  ChangePasswordDto,
-  RegisterUserDto,
-  RestoreUserDto,
-  UpdateUserDto,
-} from '@modules/auth/dto';
+import { RegisterUserDto, UpdateUserDto } from '@modules/auth/dto';
 
 //* Entities
 import { User } from './entities/user.entity';
@@ -48,8 +42,6 @@ export class UsersService {
       const userData: Partial<User> = {
         ...rest,
         roles: Array.isArray(roles) ? roles : [roles],
-        isActive: true,
-        isDeleted: false,
       };
 
       const userExists = await this.userModel.findOne({
@@ -89,45 +81,54 @@ export class UsersService {
 
   async update(user: User, updateUserDto: UpdateUserDto) {
     try {
+      if (user.roles.includes(ValidRoles.client) && updateUserDto.carrierData) {
+        throw new BadRequestException(
+          'Carrier data is not allowed for users with client role',
+        );
+      } else if (
+        user.roles.includes(ValidRoles.carrier) &&
+        updateUserDto.clientData
+      ) {
+        throw new BadRequestException(
+          'Client data is not allowed for users with carrier role',
+        );
+      }
       const { ...update } = updateUserDto;
-
-      const userUpdated = await this.userModel.findOneAndUpdate(
-        { _id: user._id },
-        update,
-        {
+      const userUpdated = await this.userModel
+        .findOneAndUpdate({ _id: user._id }, update, {
           new: true,
-        },
-      );
+        })
+        .populate('clientId')
+        .populate('carrierId')
+        .exec();
 
       if (!userUpdated) throw new NotFoundException('User not found');
+      console.log(userUpdated, update);
+      if (userUpdated.roles.includes(ValidRoles.client)) {
+        if (!userUpdated.clientId) {
+          throw new NotFoundException('Client ID not found for user');
+        }
+        if (update.clientData) {
+          await this.clientsService.update(
+            userUpdated.clientId._id.toString(),
+            update.clientData,
+          );
+        }
+      } else if (userUpdated.roles.includes(ValidRoles.carrier)) {
+        if (!userUpdated.carrierId) {
+          throw new NotFoundException('Carrier ID not found for user');
+        }
+        if (update.carrierData) {
+          await this.carriersService.update(
+            userUpdated.carrierId._id.toString(),
+            update.carrierData,
+          );
+        }
+      }
 
       return {
         message: 'User updated',
-        userUpdated,
-      };
-    } catch (error) {
-      this.exceptionsService.handleDBExceptions(error);
-    }
-  }
-
-  async updatePassword(changePasswordDto: ChangePasswordDto, user: User) {
-    try {
-      const { password, passwordConfirmed } = changePasswordDto;
-
-      if (password !== passwordConfirmed)
-        throw new BadRequestException('Passwords do not match');
-
-      const passwordHashed = await bcrypt.hash(password, 10);
-      const userUpdated = await this.userModel.findOneAndUpdate(
-        { _id: user._id },
-        { password: passwordHashed },
-        { new: true },
-      );
-
-      if (!userUpdated) throw new NotFoundException('User not found');
-
-      return {
-        message: 'Password updated',
+        userUpdated: await this.findUserById(userUpdated._id.toString()),
       };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -163,7 +164,7 @@ export class UsersService {
     try {
       return await this.userModel.findOneAndUpdate(
         { _id },
-        { password },
+        { password, emailVerified: true },
         { new: true },
       );
     } catch (error) {
@@ -173,51 +174,19 @@ export class UsersService {
 
   async deleteUser(user: User) {
     try {
+      if (user.roles.includes(ValidRoles.client)) {
+        if (!user.clientId) {
+          throw new NotFoundException('Client ID not found for user');
+        }
+        await this.clientsService.remove(user.clientId._id.toString());
+      } else if (user.roles.includes(ValidRoles.carrier)) {
+        if (!user.carrierId) {
+          throw new NotFoundException('Carrier ID not found for user');
+        }
+        await this.carriersService.remove(user.carrierId._id.toString());
+      }
       await this.userModel.findOneAndDelete({ _id: user._id });
       return { message: 'User deleted' };
-    } catch (error) {
-      this.exceptionsService.handleDBExceptions(error);
-    }
-  }
-
-  async archiveUser(user: User) {
-    try {
-      const userToDelete = await this.findUserByEmail(user.email);
-
-      if (userToDelete?.isDeleted === true)
-        throw new BadRequestException('User already archived');
-
-      const userArchived = await this.userModel.findOneAndUpdate(
-        { _id: user._id },
-        { isDeleted: true, deletedAt: new Date() },
-        { new: true },
-      );
-
-      if (!userArchived) throw new NotFoundException('User not found');
-
-      return { message: 'User archived' };
-    } catch (error) {
-      this.exceptionsService.handleDBExceptions(error);
-    }
-  }
-
-  async restoreUser(restoreUserDto: RestoreUserDto) {
-    try {
-      const { email } = restoreUserDto;
-      const user = await this.findUserByEmail(email);
-
-      if (user?.isDeleted === false)
-        throw new BadRequestException('User not archived');
-
-      const userRestored = await this.userModel.findOneAndUpdate(
-        { email },
-        { isDeleted: false, deletedAt: null },
-        { new: true },
-      );
-
-      if (!userRestored) throw new NotFoundException('User not found');
-
-      return { message: 'User restored' };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -229,5 +198,11 @@ export class UsersService {
       .populate('clientId')
       .populate('carrierId')
       .exec();
+  }
+
+  async getUser(user: User) {
+    const foundUser = await this.findUserById(user._id.toString());
+    if (!foundUser) throw new NotFoundException('User not found');
+    return foundUser;
   }
 }

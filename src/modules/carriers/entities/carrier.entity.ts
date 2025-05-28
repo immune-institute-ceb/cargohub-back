@@ -66,7 +66,7 @@ export class Carrier extends Document {
     ref: 'User',
     default: null,
   })
-  userId?: Types.ObjectId;
+  user?: Types.ObjectId;
 }
 
 export const CarrierSchema = SchemaFactory.createForClass(Carrier);

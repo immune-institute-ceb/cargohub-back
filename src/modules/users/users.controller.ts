@@ -1,33 +1,22 @@
 // Objective: Implement the controller for the users module
 
 //* NestJS modules
-import { Controller, Body, Patch, Delete } from '@nestjs/common';
+import { Controller, Body, Patch, Delete, Get } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
-  ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
 
-//* Pipes
-import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
-
 //* DTOs
-import {
-  ChangePasswordDto,
-  RestoreUserDto,
-  UpdateUserDto,
-} from '@modules/auth/dto';
+import { UpdateUserDto } from '@modules/auth/dto';
 
 //* Decorators
 import { Auth, GetUser } from '@modules/auth/decorators';
-
-//* Interfaces
-import { ValidRoles } from '@modules/auth/interfaces';
 
 //* Entities
 import { User } from '@modules/users/entities/user.entity';
@@ -35,6 +24,7 @@ import { UserWithRelations } from './interfaces/user-with-relations';
 
 //* Services
 import { UsersService } from './users.service';
+import { ValidRoles } from '@modules/auth/interfaces';
 
 @ApiTags('Users')
 @ApiNotFoundResponse({
@@ -62,10 +52,39 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Get()
+  @ApiCreatedResponse({
+    description: 'User found',
+    type: User,
+  })
+  @ApiOperation({ summary: 'Get user information by Token' })
+  @ApiBearerAuth()
+  @Auth(ValidRoles.admin)
+  getUser(@GetUser() user: UserWithRelations) {
+    return this.usersService.getUser(user);
+  }
+
   @Patch('update-user')
   @ApiCreatedResponse({
     description: 'User updated',
     type: User,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request, body validation failed',
+    schema: {
+      oneOf: [
+        {
+          example: {
+            message: 'Carrier data is not allowed for users with client role',
+          },
+        },
+        {
+          example: {
+            message: 'Client data is not allowed for users with carrier role',
+          },
+        },
+      ],
+    },
   })
   @ApiOperation({ summary: 'Update user information' })
   @ApiBearerAuth()
@@ -77,56 +96,23 @@ export class UsersController {
     return this.usersService.update(user, updateUserDto);
   }
 
-  @Patch('update-user-password')
-  @ApiCreatedResponse({
-    description: 'Password updated',
-  })
-  @ApiOperation({ summary: 'Update user password' })
-  @ApiBearerAuth()
-  @Auth()
-  updatePassword(
-    @Body() changePasswordDto: ChangePasswordDto,
-    @GetUser() user: UserWithRelations,
-  ) {
-    return this.usersService.updatePassword(changePasswordDto, user);
-  }
-
   @Delete('delete-user')
   @ApiCreatedResponse({
     description: 'User deleted',
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+    schema: {
+      oneOf: [
+        { example: { message: 'Client ID not found for user' } },
+        { example: { message: 'Carrier ID not found for user' } },
+      ],
+    },
   })
   @ApiOperation({ summary: 'Delete user by Token' })
   @ApiBearerAuth()
   @Auth()
   deleteUser(@GetUser() user: UserWithRelations) {
     return this.usersService.deleteUser(user);
-  }
-
-  @Delete('archive-user')
-  @ApiCreatedResponse({
-    description: 'User archived',
-  })
-  @ApiOperation({ summary: 'Archive user by Token' })
-  @ApiBearerAuth()
-  @Auth()
-  archiveUser(@GetUser() user: UserWithRelations) {
-    return this.usersService.archiveUser(user);
-  }
-
-  @Patch('restore-user')
-  @ApiCreatedResponse({
-    description: 'User restored',
-  })
-  @ApiOperation({ summary: 'Restore user by email' })
-  @ApiForbiddenResponse({
-    description: 'Forbidden, user related',
-    schema: {
-      example: { message: 'User needs a valid role' },
-    },
-  })
-  @ApiBearerAuth()
-  @Auth(ValidRoles.admin)
-  restoreUser(@Body() restoreUserDto: RestoreUserDto) {
-    return this.usersService.restoreUser(restoreUserDto);
   }
 }

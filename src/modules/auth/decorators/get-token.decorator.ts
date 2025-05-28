@@ -13,6 +13,8 @@ import {
 export const GetTokenFromHeader = createParamDecorator(
   (data, ctx: ExecutionContext) => {
     const req = ctx.switchToHttp().getRequest();
+    if (!req.headers.authorization)
+      throw new InternalServerErrorException('Token not found (request)');
     const token = req.headers.authorization.split(' ')[1];
     if (!token)
       throw new InternalServerErrorException('Token not found (request)');

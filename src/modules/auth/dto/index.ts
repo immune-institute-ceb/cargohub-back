@@ -4,7 +4,6 @@ export { LoginUserDto } from './login-user.dto';
 export { RecoverPasswordDto } from './recover-password.dto';
 export { ChangePasswordDto } from './change-password.dto';
 export { ContactDto } from './contact.dto';
-export { RestoreUserDto } from './restore-user.dto';
 export { UpdateUserDto } from './update-user.dto';
 export { Generate2faCodeResponseDto } from './generate-2fa-code-response.dto';
 export { TwoFactorDto } from './two-factor.dto';
