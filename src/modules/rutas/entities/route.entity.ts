@@ -7,17 +7,17 @@ import { Document, Types } from 'mongoose';
  * Route entity schema
  * @param _id Route id
  * @param type Route type
- * @param origen Route origen
- * @param destino Route destino
- * @param distancia Route distance
- * @param tiempoEstimado Route time
- * @param estado Route status
+ * @param origin Route origin
+ * @param destination Route destination
+ * @param distance Route distance
+ * @param estimatedTime Route estimated time
+ * @param status Route status
  * @param deletedAt Route deletedAt
  * @param isDeleted Tells if the route is deleted
  * @returns Route entity schema
  */
 @Schema({ timestamps: true })
-export class Ruta extends Document {
+export class Route extends Document {
   @ApiProperty({
     description: 'Route id',
     example: '5f4e6d6f4f6d4f6d4f6d4f6d',
@@ -35,22 +35,22 @@ export class Ruta extends Document {
   type: string;
 
   @ApiProperty({
-    description: 'Route origen',
+    description: 'Route origin',
     example: 'Madrid',
   })
   @Prop({
     index: true,
   })
-  origen: string;
+  origin: string;
 
   @ApiProperty({
-    description: 'Route destino',
+    description: 'Route destination',
     example: 'Málaga',
   })
   @Prop({
     index: true,
   })
-  destino: string;
+  destination: string;
 
   @ApiProperty({
     description: 'Route distance',
@@ -59,7 +59,7 @@ export class Ruta extends Document {
   @Prop({
     index: true,
   })
-  distancia: number;
+  distance: number;
 
   @ApiProperty({
     description: 'Route estimated time',
@@ -68,7 +68,7 @@ export class Ruta extends Document {
   @Prop({
     index: true,
   })
-  tiempoEstimado: number;
+  estimatedTime: number;
 
   @ApiProperty({
     description: 'Route state',
@@ -77,7 +77,7 @@ export class Ruta extends Document {
   @Prop({
     index: true,
   })
-  estado: string;
+  status: string;
 
   @ApiProperty({
     description: 'Route deletedAt',
@@ -99,4 +99,4 @@ export class Ruta extends Document {
   isDeleted: boolean;
 }
 
-export const RutaSchema = SchemaFactory.createForClass(Ruta);
+export const RouteSchema = SchemaFactory.createForClass(Route);

@@ -12,8 +12,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { CommonModule } from './common/common.module';
 import { UsersModule } from './modules/users/users.module';
-import { FacturacionModule } from './modules/facturacion/facturacion.module';
-import { RutasModule } from './modules/rutas/rutas.module';
+import { BillingModule } from './modules/facturacion/billing.module';
+import { RoutesModule } from './modules/rutas/route.module';
 import { ClientsModule } from './modules/clients/clients.module';
 import { CarriersModule } from './modules/carriers/carriers.module';
 import { RequestsModule } from '@modules/requests/requests.module';
@@ -33,8 +33,8 @@ import { RequestsModule } from '@modules/requests/requests.module';
     CommonModule,
     AuthModule,
     UsersModule,
-    FacturacionModule,
-    RutasModule,
+    BillingModule,
+    RoutesModule,
     ClientsModule,
     CarriersModule,
     RequestsModule,
