@@ -12,7 +12,6 @@ import { ClientsController } from './clients.controller';
 
 // * Entities
 import { Client, ClientSchema } from './entities/client.entity';
-import { User, UserSchema } from '@modules/users/entities/user.entity';
 
 // * Modules
 import { CommonModule } from '@common/common.module';
@@ -27,10 +26,6 @@ import { CommonModule } from '@common/common.module';
       {
         name: Client.name,
         schema: ClientSchema,
-      },
-      {
-        name: User.name,
-        schema: UserSchema,
       },
     ]),
   ],

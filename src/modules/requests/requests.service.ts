@@ -2,6 +2,7 @@
 
 //* NestJS modules
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -14,24 +15,30 @@ import { Model } from 'mongoose';
 
 //* DTOs
 import { CreateRequestDto } from './dto/create-request.dto';
-import { UpdateRequestDto } from './dto/update-request.dto';
 
 //* Entities
-import { Request } from './entities/request.entity';
+import { Requests } from './entities/request.entity';
 
 //* Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { User } from '@modules/users/entities/user.entity';
 import { ClientsService } from '@modules/clients/clients.service';
+import { RoutesService } from '@modules/rutas/route.service';
+import { RequestStatus } from './interfaces/request-status.interface';
+import { RouteStatus } from '@modules/rutas/interfaces/route-status.interface';
+import { BillingService } from '@modules/facturacion/billing.service';
 
 @Injectable()
 export class RequestsService {
   constructor(
-    @InjectModel(Request.name)
-    private readonly requestModel: Model<Request>,
+    @InjectModel(Requests.name)
+    private readonly requestModel: Model<Requests>,
     private readonly exceptionsService: ExceptionsService,
     @Inject(forwardRef(() => ClientsService))
     private readonly clientsService: ClientsService,
+    @Inject(forwardRef(() => RoutesService))
+    private readonly routesService: RoutesService,
+    private readonly billingService: BillingService,
   ) {}
 
   async create(createRequestDto: CreateRequestDto, user: User) {
@@ -56,7 +63,6 @@ export class RequestsService {
         await this.requestModel.findByIdAndDelete(request._id);
         throw new NotFoundException('Request already exists for this client');
       }
-      console.log(request);
       const { clientWithRequest } =
         await this.clientsService.addRequestToClient(
           client._id.toString(),
@@ -65,7 +71,20 @@ export class RequestsService {
       if (!clientWithRequest) {
         throw new NotFoundException('Client not found after adding request');
       }
-      request.clientId = client._id.toString();
+      request.clientId = client._id;
+      await request.save();
+
+      const routeCreated = await this.routesService.create(
+        {
+          origin: createRequestDto.origin,
+          destination: createRequestDto.destination,
+        },
+        request,
+      );
+      if (!routeCreated) {
+        throw new NotFoundException('Route could not be created');
+      }
+      request.routeId = routeCreated._id;
       await request.save();
 
       return request;
@@ -80,8 +99,9 @@ export class RequestsService {
       if (!client) {
         throw new NotFoundException('Client not found');
       }
+      console.log(client);
       const requests = await this.requestModel.find({
-        clientId: client._id.toString(),
+        clientId: client._id,
       });
       if (!requests || requests.length === 0) {
         throw new NotFoundException('No requests found for this client');
@@ -102,17 +122,40 @@ export class RequestsService {
     }
   }
 
-  async update(id: string, updateRequestDto: UpdateRequestDto) {
+  async updateStatus(id: string, status: RequestStatus) {
     try {
-      const request = await this.requestModel.findByIdAndUpdate(
+      const request = await this.requestModel.findById(id);
+      if (!request) throw new NotFoundException('Request not found');
+      if (request.status === status) {
+        throw new BadRequestException('Request already has this status');
+      }
+      const route = await this.routesService.findOne(
+        request.routeId.toString(),
+      );
+      if (!route)
+        throw new BadRequestException('Route not found for this request');
+      if (status === RequestStatus.done && route.status !== RouteStatus.done) {
+        throw new BadRequestException(
+          'Route must be done before request can be marked as done',
+        );
+      }
+      const updatedRequest = await this.requestModel.findByIdAndUpdate(
         id,
-        updateRequestDto,
+        { status },
         { new: true },
       );
-
-      if (!request) throw new NotFoundException('Request not found');
-
-      return request;
+      if (!updatedRequest) throw new NotFoundException('Request not found');
+      if (status === RequestStatus.done) {
+        const billing =
+          await this.billingService.createBillingFromRequest(updatedRequest);
+        if (!billing) {
+          throw new NotFoundException('Billing could not be created');
+        }
+      }
+      return {
+        message: 'Request status updated successfully',
+        updatedRequest,
+      };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -128,6 +171,12 @@ export class RequestsService {
       );
       if (!client) {
         throw new NotFoundException('Client not found after removing request');
+      }
+      const routeDeleted = await this.routesService.deleteRoute(
+        result.routeId.toString(),
+      );
+      if (!routeDeleted) {
+        throw new NotFoundException('Route could not be deleted');
       }
       const requestDeleted = await this.requestModel.findByIdAndDelete(id);
       if (!requestDeleted) {

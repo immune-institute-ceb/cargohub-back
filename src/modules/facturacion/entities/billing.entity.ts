@@ -2,6 +2,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { BillingStatus } from '../interfaces/billing-status.interface';
 
 /**
  * Facturacion entity schema
@@ -23,20 +24,21 @@ export class Billing extends Document {
   })
   _id: Types.ObjectId;
 
-  @ApiProperty({ description: 'Client Name', example: 'Juan Perez' })
-  @Prop({ required: true, index: true })
-  clientName: string;
+  @ApiProperty({
+    description: 'Client Id',
+    example: '5f4e6d6f4f6d4f6d4f6d4f6d',
+    type: 'string',
+  })
+  @Prop({
+    index: true,
+    type: Types.ObjectId,
+    ref: 'Client',
+  })
+  clientId: Types.ObjectId;
 
   @ApiProperty({ description: 'Billing Amount', example: 100 })
   @Prop({ required: true, index: true })
   billingAmount: number;
-
-  @ApiProperty({
-    description: 'Array of service IDs',
-    example: ['bajo15935746280'],
-  })
-  @Prop({ index: true })
-  idServices: string[];
 
   @ApiProperty({
     description: 'Invoice issue date',
@@ -55,14 +57,14 @@ export class Billing extends Document {
   @ApiProperty({
     description: 'Invoice status (pending, paid, canceled)',
     example: 'pending',
-    enum: ['pending', 'paid', 'canceled'],
+    enum: BillingStatus,
   })
   @Prop({
     index: true,
     required: true,
-    enum: ['pending', 'paid', 'canceled'],
+    enum: BillingStatus,
   })
-  status: string;
+  status: BillingStatus;
 }
 
 export const BillingSchema = SchemaFactory.createForClass(Billing);

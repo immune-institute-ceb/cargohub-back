@@ -6,9 +6,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  Patch,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -17,6 +18,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -26,7 +28,6 @@ import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
 //* DTOs
 import { CreateRequestDto } from './dto/create-request.dto';
-import { UpdateRequestDto } from './dto/update-request.dto';
 
 // * Decorators
 import { Auth, GetUser } from '@modules/auth/decorators';
@@ -35,6 +36,7 @@ import { Auth, GetUser } from '@modules/auth/decorators';
 import { RequestsService } from './requests.service';
 import { ValidRoles } from '@modules/auth/interfaces';
 import { User } from '@modules/users/entities/user.entity';
+import { RequestStatus } from './interfaces/request-status.interface';
 
 @ApiTags('Requests')
 @ApiNotFoundResponse({ description: 'Request not found' })
@@ -84,20 +86,25 @@ export class RequestsController {
     return this.requestsService.findOne(id);
   }
 
-  @Patch(':requestId')
+  @Patch('status/:requestId')
   @ApiBearerAuth()
   @Auth()
-  @ApiOperation({ summary: 'Update a request' })
+  @ApiOperation({ summary: 'Update request status' })
   @ApiResponse({
     status: 200,
-    description: 'Return the updated request',
-    type: Request,
+    description: 'Request status updated successfully',
   })
-  update(
+  @ApiQuery({
+    name: 'status',
+    required: true,
+    description: 'New status for the request',
+    enum: RequestStatus,
+  })
+  updateStatus(
     @Param('requestId', ParseMongoIdPipe) id: string,
-    @Body() updateRequestDto: UpdateRequestDto,
+    @Query('status') status: RequestStatus,
   ) {
-    return this.requestsService.update(id, updateRequestDto);
+    return this.requestsService.updateStatus(id, status);
   }
 
   @Delete(':requestId')

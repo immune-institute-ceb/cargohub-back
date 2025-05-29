@@ -1,7 +1,12 @@
 // Objective: Implement the service to manage the user entity.
 
 //* NestJS modules
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 //* External modules
@@ -9,13 +14,15 @@ import { Model } from 'mongoose';
 
 //* DTOs
 import { RegisterBillingDto } from './dto/register-billing.dto';
-import { UpdateBillingDto } from './dto/update-billing.dto';
 
 //* Entities
 import { Billing } from './entities/billing.entity';
 
 //* Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
+import { Requests } from '@modules/requests/entities/request.entity';
+import { BillingStatus } from './interfaces/billing-status.interface';
+import { RoutesService } from '@modules/rutas/route.service';
 
 @Injectable()
 export class BillingService {
@@ -23,32 +30,41 @@ export class BillingService {
     @InjectModel(Billing.name)
     private readonly billingModel: Model<Billing>,
     private readonly exceptionsService: ExceptionsService,
+    @Inject(forwardRef(() => RoutesService))
+    private readonly routesService: RoutesService,
   ) {}
 
-  async create(registerBillingDto: RegisterBillingDto) {
+  async createBillingFromRequest(request: Requests) {
     try {
+      const registerBillingDto: RegisterBillingDto = {
+        requestId: request._id,
+        clientId: request.clientId,
+        billingAmount: await this.calcAmount(request.routeId.toString()),
+        issueDate: new Date(),
+        dueDate: new Date(new Date().setMonth(new Date().getMonth() + 1)), // Due date is one month from issue date
+        status: BillingStatus.pending,
+      };
       const billingCreated = await this.billingModel.create(registerBillingDto);
+      if (!billingCreated) {
+        throw new NotFoundException('Billing could not be created');
+      }
       return billingCreated;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
   }
 
-  async update(billing: Billing, updateBillingDto: UpdateBillingDto) {
+  async updateBillingStatus(billingId: string, status: BillingStatus) {
     try {
-      const { ...update } = updateBillingDto;
-
-      const billingUpdated = await this.billingModel.findOneAndUpdate(
-        { _id: billing._id },
-        update,
-        {
-          new: true,
-        },
+      const updatedBilling = await this.billingModel.findByIdAndUpdate(
+        billingId,
+        { status },
+        { new: true },
       );
-
-      if (!billingUpdated) throw new NotFoundException('Billing not found');
-
-      return billingUpdated;
+      if (!updatedBilling) {
+        throw new NotFoundException('Billing not found');
+      }
+      return updatedBilling;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -89,6 +105,18 @@ export class BillingService {
         throw new NotFoundException(`No billings found with status: ${status}`);
       }
       return billings;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async calcAmount(routeId: string) {
+    try {
+      const route = await this.routesService.findOne(routeId);
+      if (!route) throw new NotFoundException('Route not found');
+      const distance = route.distance;
+      const ratePerKm = 10;
+      return distance * ratePerKm;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }

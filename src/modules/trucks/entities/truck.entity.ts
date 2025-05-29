@@ -62,19 +62,6 @@ export class Truck extends Document {
     default: TruckStatus.available,
   })
   status: TruckStatus;
-
-  @ApiProperty({
-    description: 'Carrier id associated with the truck',
-    example: '5f4e6d6f4f6d4f6d4f6d4f6d',
-    type: 'string',
-  })
-  @Prop({
-    index: true,
-    type: Types.ObjectId,
-    default: null,
-    ref: 'Carrier',
-  })
-  carrier?: Types.ObjectId | null;
 }
 
 export const TruckSchema = SchemaFactory.createForClass(Truck);

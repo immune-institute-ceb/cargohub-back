@@ -9,7 +9,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 
 //* External modules
-import { Model, ObjectId } from 'mongoose';
+import { Model } from 'mongoose';
 
 //* DTOs
 import { RegisterUserDto, UpdateUserDto } from '@modules/auth/dto';
@@ -57,7 +57,7 @@ export class UsersService {
           {
             ...clientData,
           },
-          createdUser._id as unknown as ObjectId,
+          createdUser._id,
         );
         createdUser.clientId = client._id;
       }
@@ -67,7 +67,7 @@ export class UsersService {
           {
             ...carrierData,
           },
-          createdUser._id as unknown as ObjectId,
+          createdUser._id,
         );
         createdUser.carrierId = carrier._id;
       }

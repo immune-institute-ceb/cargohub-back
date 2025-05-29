@@ -109,7 +109,7 @@ export class UsersController {
       ],
     },
   })
-  @ApiOperation({ summary: 'Delete user by Token' })
+  @ApiOperation({ summary: 'Delete user and its related data by Token' })
   @ApiBearerAuth()
   @Auth()
   deleteUser(@GetUser() user: UserWithRelations) {

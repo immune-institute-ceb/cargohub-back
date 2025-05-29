@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -11,8 +10,6 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Truck } from './entities/truck.entity';
 import { Model } from 'mongoose';
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
-import { TruckStatus } from './interfaces/truck-status.interface';
-import { Carrier } from '@modules/carriers/entities/carrier.entity';
 import { CarriersService } from '@modules/carriers/carriers.service';
 
 @Injectable()
@@ -72,44 +69,17 @@ export class TrucksService {
     }
   }
 
-  async assignCarrier(truckId: string, carrier: Carrier) {
+  async updateTruckStatus(id: string, status: string) {
     try {
-      const truck = await this.truckModel.findById(truckId);
-      if (!truck) throw new NotFoundException('Truck not found');
-
-      if (truck.status !== TruckStatus.available) {
-        throw new BadRequestException('Truck is not available for assignment');
-      }
-
-      truck.carrier = carrier._id;
-      truck.status = TruckStatus.assigned;
-
-      const updatedTruck = await truck.save();
+      const truckUpdated = await this.truckModel.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true },
+      );
+      if (!truckUpdated) throw new NotFoundException('Truck not found');
       return {
-        message: 'Truck assigned to carrier successfully',
-        truck: updatedTruck,
-      };
-    } catch (error) {
-      this.exceptionsService.handleDBExceptions(error);
-    }
-  }
-
-  async unassignCarrier(truckId: string) {
-    try {
-      const truck = await this.truckModel.findById(truckId);
-      if (!truck) throw new NotFoundException('Truck not found');
-
-      if (!truck.carrier) {
-        throw new BadRequestException('Truck is not assigned to any carrier');
-      }
-
-      truck.carrier = null;
-      truck.status = TruckStatus.available;
-
-      const updatedTruck = await truck.save();
-      return {
-        message: 'Truck unassigned from carrier successfully',
-        truck: updatedTruck,
+        message: 'Truck status updated successfully',
+        truck: truckUpdated,
       };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

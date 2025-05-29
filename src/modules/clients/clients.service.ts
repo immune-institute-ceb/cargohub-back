@@ -5,7 +5,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 // * External modules
-import { Model, ObjectId } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 // * DTOs
 import { CreateClientDto } from './dto/create-client.dto';
@@ -16,7 +16,7 @@ import { Client } from './entities/client.entity';
 
 // * Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
-import { Request } from '@modules/requests/entities/request.entity';
+import { Requests } from '@modules/requests/entities/request.entity';
 
 @Injectable()
 export class ClientsService {
@@ -25,7 +25,7 @@ export class ClientsService {
     private readonly clientModel: Model<Client>,
     private readonly exceptionsService: ExceptionsService,
   ) {}
-  async create(createClientDto: CreateClientDto, userId: ObjectId) {
+  async create(createClientDto: CreateClientDto, userId: Types.ObjectId) {
     try {
       // If userId is provided, set it in the DTO
 
@@ -113,7 +113,7 @@ export class ClientsService {
     }
   }
 
-  async addRequestToClient(clientId: string, request: Request) {
+  async addRequestToClient(clientId: string, request: Requests) {
     try {
       const clientWithRequest = await this.clientModel
         .findByIdAndUpdate(
