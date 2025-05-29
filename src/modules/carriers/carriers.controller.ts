@@ -59,6 +59,12 @@ export class CarriersController {
     return this.carriersService.findOne(id);
   }
 
+  @Get('carrierRoutes/:carrierId')
+  @ApiOperation({ summary: 'Get routes assigned to a carrier' })
+  getCarrierRoutes(@Param('carrierId', ParseMongoIdPipe) carrierId: string) {
+    return this.carriersService.getCarrierRoutes(carrierId);
+  }
+
   @Post(':carrierId/assign-truck/:truckId')
   @ApiOperation({ summary: 'Assign a truck to a carrier' })
   assignTruck(

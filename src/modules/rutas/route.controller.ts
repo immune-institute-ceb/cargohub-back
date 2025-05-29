@@ -1,15 +1,7 @@
 // Objective: Implement the controller for the routes module
 
 //* NestJS modules
-import {
-  Controller,
-  Body,
-  Patch,
-  Delete,
-  Post,
-  Get,
-  Param,
-} from '@nestjs/common';
+import { Controller, Patch, Post, Get, Param, Query } from '@nestjs/common';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -18,20 +10,20 @@ import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
   ApiOperation,
+  ApiQuery,
 } from '@nestjs/swagger';
 
 //* Pipes
 import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
 //* DTOs
-import { RegisterRouteDto } from './dto/register-route.dto';
-import { UpdateRouteDto } from './dto/update-route.dto';
 
 //* Entities
 import { Route } from '@modules/rutas/entities/route.entity';
 
 //* Services
 import { RoutesService } from './route.service';
+import { RouteStatus } from './interfaces/route-status.interface';
 
 @ApiTags('Rutas')
 @ApiBearerAuth()
@@ -42,30 +34,20 @@ import { RoutesService } from './route.service';
 export class RoutesController {
   constructor(private readonly routesService: RoutesService) {}
 
-  @Post()
-  @ApiCreatedResponse({ description: 'Route created', type: Route })
-  @ApiOperation({ summary: 'Create a new route' })
-  create(@Body() registerRouteDto: RegisterRouteDto) {
-    return this.routesService.create(registerRouteDto);
-  }
-
-  @Patch(':id')
-  @ApiCreatedResponse({ description: 'Route updated', type: Route })
-  @ApiOperation({ summary: 'Update an existing route' })
-  async update(
+  @Patch('status/:id')
+  @ApiCreatedResponse({ description: 'Route status updated', type: Route })
+  @ApiOperation({ summary: 'Update the status of a route' })
+  @ApiQuery({
+    name: 'status',
+    required: true,
+    description: 'New status for the route',
+    enum: RouteStatus,
+  })
+  updateStatus(
     @Param('id', ParseMongoIdPipe) id: string,
-    @Body() updateRouteDto: UpdateRouteDto,
+    @Query('status') status: RouteStatus,
   ) {
-    const route = await this.routesService.findRouteById(id);
-    return this.routesService.update(route, updateRouteDto);
-  }
-
-  @Delete('delete-route/:id')
-  @ApiCreatedResponse({ description: 'Route deleted' })
-  @ApiOperation({ summary: 'Delete a route by Id' })
-  async delete(@Param('id', ParseMongoIdPipe) id: string) {
-    const route = await this.routesService.findRouteById(id);
-    return this.routesService.deleteRoute(route);
+    return this.routesService.updateRouteStatus(id, status);
   }
 
   @Get()
@@ -82,11 +64,42 @@ export class RoutesController {
     return this.routesService.findRouteById(id);
   }
 
-  @Get('type/:type')
-  @ApiCreatedResponse({ description: 'Routes by type', type: [Route] })
-  @ApiOperation({ summary: 'Get routes by type' })
-  @ApiNotFoundResponse({ description: 'No routes found for type :type' })
-  findByType(@Param('type') type: string) {
-    return this.routesService.findRoutesByType(type.toLowerCase().trim());
+  @Get('status/:status')
+  @ApiCreatedResponse({ description: 'Routes by status', type: [Route] })
+  @ApiOperation({ summary: 'Get routes by status' })
+  findRoutesByStatus(@Param('status') status: RouteStatus) {
+    return this.routesService.findRoutesByStatus(status);
+  }
+
+  @Get('carrier/:carrierId')
+  @ApiCreatedResponse({ description: 'Routes for carrier', type: [Route] })
+  @ApiOperation({ summary: 'Get routes for a specific carrier' })
+  findRoutesByCarrier(@Param('carrierId', ParseMongoIdPipe) carrierId: string) {
+    return this.routesService.findRoutesByCarrier(carrierId);
+  }
+
+  @Post('assign-carrier/:routeId/:carrierId')
+  @ApiCreatedResponse({
+    description: 'Route assigned to carrier',
+    type: Route,
+  })
+  @ApiOperation({ summary: 'Assign a carrier to route' })
+  assignCarrierToRoute(
+    @Param('routeId', ParseMongoIdPipe) routeId: string,
+    @Param('carrierId', ParseMongoIdPipe) carrierId: string,
+  ) {
+    return this.routesService.assignCarrierToRoute(routeId, carrierId);
+  }
+
+  @Post('unassign-carrier/:routeId')
+  @ApiCreatedResponse({
+    description: 'Route unassigned from carrier',
+    type: Route,
+  })
+  @ApiOperation({ summary: 'Unassign a route from a carrier' })
+  unassignRouteFromCarrier(
+    @Param('routeId', ParseMongoIdPipe) routeId: string,
+  ) {
+    return this.routesService.unassignRouteFromCarrier(routeId);
   }
 }

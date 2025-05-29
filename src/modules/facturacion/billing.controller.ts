@@ -1,15 +1,7 @@
 // Objective: Implement the controller for the routes module
 
 //* NestJS modules
-import {
-  Controller,
-  Body,
-  Patch,
-  Delete,
-  Post,
-  Get,
-  Param,
-} from '@nestjs/common';
+import { Controller, Delete, Get, Param } from '@nestjs/common';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -25,8 +17,6 @@ import {
 import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
 //* DTOs
-import { RegisterBillingDto } from './dto/register-billing.dto';
-import { UpdateBillingDto } from './dto/update-billing.dto';
 
 //* Entities
 import { Billing } from './entities/billing.entity';
@@ -42,31 +32,6 @@ import { BillingService } from './billing.service';
 @Controller('billing')
 export class BillingController {
   constructor(private readonly billingService: BillingService) {}
-
-  @Post()
-  @ApiCreatedResponse({
-    description: 'Billing created successfully',
-    type: Billing,
-  })
-  @ApiOperation({ summary: 'Create a new billing' })
-  create(@Body() registerBillingDto: RegisterBillingDto) {
-    return this.billingService.create(registerBillingDto);
-  }
-
-  @Patch('update-billing/:id')
-  @ApiResponse({
-    status: 200,
-    description: 'Billing updated',
-    type: Billing,
-  })
-  @ApiOperation({ summary: 'Update an existing billing by Id' })
-  async update(
-    @Param('id', ParseMongoIdPipe) id: string,
-    @Body() updateBillingDto: UpdateBillingDto,
-  ) {
-    const billing = await this.billingService.findBillingById(id);
-    return this.billingService.update(billing, updateBillingDto);
-  }
 
   @Delete('delete-billing/:id')
   @ApiCreatedResponse({ description: 'Billing deleted' })

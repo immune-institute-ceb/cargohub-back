@@ -18,7 +18,7 @@ import { RequestPriority } from '../interfaces/request-priority.interface';
  * @returns Request entity schema
  */
 @Schema({ timestamps: true })
-export class Request extends Document {
+export class Requests extends Document {
   @ApiProperty({
     description: 'Request id',
     example: '5f4e6d6f4f6d4f6d4f6d4f6d',
@@ -36,7 +36,7 @@ export class Request extends Document {
     type: Types.ObjectId,
     ref: 'Client',
   })
-  clientId: string;
+  clientId: Types.ObjectId;
 
   @ApiProperty({
     description: 'Shipment origin',
@@ -96,6 +96,18 @@ export class Request extends Document {
     default: RequestPriority.medium,
   })
   priority: RequestPriority;
+
+  @ApiProperty({
+    description: 'Route Id',
+    example: '5f4e6d6f4f6d4f6d4f6d4f6d',
+    type: 'string',
+  })
+  @Prop({
+    index: true,
+    type: Types.ObjectId,
+    ref: 'Route',
+  })
+  routeId: Types.ObjectId;
 }
 
 export const RequestSchema = SchemaFactory.createForClass(Request);

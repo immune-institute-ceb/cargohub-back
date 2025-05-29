@@ -1,21 +1,34 @@
 // Objective: Implement the service to manage the user entity.
 
 //* NestJS modules
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 //* External modules
 import { Model } from 'mongoose';
+import * as cities from 'all-the-cities';
+import { getDistance } from 'geolib';
 
 //* DTOs
 import { RegisterRouteDto } from './dto/register-route.dto';
-import { UpdateRouteDto } from './dto/update-route.dto';
 
 //* Entities
 import { Route } from './entities/route.entity';
 
 //* Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
+import { CarriersService } from '@modules/carriers/carriers.service';
+import { RouteStatus } from './interfaces/route-status.interface';
+import { CarrierStatus } from '@modules/carriers/interfaces/carrier-status.interface';
+import { RequestsService } from '@modules/requests/requests.service';
+import { Requests } from '@modules/requests/entities/request.entity';
 
 @Injectable()
 export class RoutesService {
@@ -23,44 +36,69 @@ export class RoutesService {
     @InjectModel(Route.name)
     private readonly routeModel: Model<Route>,
     private readonly exceptionsService: ExceptionsService,
+    @Inject(forwardRef(() => CarriersService))
+    private readonly carriersService: CarriersService,
+    @Inject(forwardRef(() => RequestsService))
+    private readonly requestsService: RequestsService,
   ) {}
 
-  async create(registerRouteDto: RegisterRouteDto) {
+  async create(registerRouteDto: RegisterRouteDto, request: Requests) {
     try {
       const routeCreated = await this.routeModel.create(registerRouteDto);
+      if (!routeCreated)
+        throw new InternalServerErrorException('Route creation failed');
+      const distance = this.calcDistance(routeCreated);
+      if (distance !== null && distance !== undefined) {
+        routeCreated.distance = distance;
+        routeCreated.estimatedTime = distance / 80; // Assuming an average speed of 80 km/h
+        await routeCreated.save();
+      }
+
+      routeCreated.request = request._id;
       return routeCreated;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
   }
 
-  async update(route: Route, updateRouteDto: UpdateRouteDto) {
+  async updateRouteStatus(id: string, status: RouteStatus) {
     try {
-      const { ...update } = updateRouteDto;
-
-      const routeUpdated = await this.routeModel.findOneAndUpdate(
-        { _id: route._id },
-        update,
-        {
-          new: true,
-        },
+      // const validStatuses = Object.values(RouteStatus);
+      // if (!validStatuses.includes(status as RouteStatus)) {
+      //   throw new NotFoundException(
+      //     `Invalid status. Valid statuses are: ${validStatuses.join(', ')}`,
+      //   );
+      // }
+      const route = await this.routeModel.findById(id);
+      if (!route) throw new NotFoundException('Route not found');
+      if (route.status === status) {
+        throw new BadRequestException(`Route is already in ${status} status`);
+      }
+      if (
+        (status === RouteStatus.inProgress || status === RouteStatus.done) &&
+        !route.carrier
+      ) {
+        throw new BadRequestException(
+          'Route cannot be in progress or done without an assigned carrier',
+        );
+      }
+      const routeUpdated = await this.routeModel.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true },
       );
-
       if (!routeUpdated) throw new NotFoundException('Route not found');
-
+      if (status === RouteStatus.done) {
+        const requestId = routeUpdated.request?._id?.toString();
+        if (!requestId) {
+          throw new NotFoundException('Request ID not found for this route');
+        }
+        await this.requestsService.updateStatus(requestId, status as any);
+      }
       return {
-        message: 'Route updated',
+        message: `Route status updated to ${status}`,
         routeUpdated,
       };
-    } catch (error) {
-      this.exceptionsService.handleDBExceptions(error);
-    }
-  }
-
-  async deleteRoute(route: Route) {
-    try {
-      await this.routeModel.findOneAndDelete({ _id: route._id });
-      return { message: 'Route deleted' };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -69,8 +107,23 @@ export class RoutesService {
   async findAllRoutes() {
     try {
       const routes = await this.routeModel.find();
-      if (!routes) throw new NotFoundException('Routes not found');
+      if (!routes || routes.length === 0) {
+        throw new NotFoundException('No routes found');
+      }
       return routes;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async findOne(id: string) {
+    try {
+      const route = await this.routeModel
+        .findById(id)
+        .populate('carrier', 'name lastName1 lastName2 phone email')
+        .populate('truck', 'licensePlate carModel capacity status fuelType');
+      if (!route) throw new NotFoundException('Route not found');
+      return route;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -88,14 +141,131 @@ export class RoutesService {
     }
   }
 
-  async findRoutesByType(type: string) {
+  async findRoutesByStatus(status: string) {
     try {
-      const routes = await this.routeModel.find({ type });
-      if (!routes)
-        throw new NotFoundException(`No routes found for type: ${type}`);
+      const routes = await this.routeModel.find({ status });
+
+      if (!routes || routes.length === 0) {
+        throw new NotFoundException('No routes found with this status');
+      }
+
       return routes;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async findRoutesByCarrier(carrierId: string) {
+    try {
+      const routes = await this.routeModel.find({ carrier: carrierId });
+
+      if (!routes || routes.length === 0) {
+        throw new NotFoundException('No routes found for this carrier');
+      }
+
+      return routes;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async deleteRoute(id: string) {
+    try {
+      const route = await this.routeModel.findByIdAndDelete(id);
+      if (!route) throw new NotFoundException('Route not found');
+      return {
+        message: 'Route deleted successfully',
+        route,
+      };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async assignCarrierToRoute(routeId: string, carrierId: string) {
+    try {
+      const route = await this.routeModel.findById(routeId);
+      if (!route) throw new NotFoundException('Route not found');
+
+      const carrier = await this.carriersService.findOne(carrierId);
+      if (!carrier) throw new NotFoundException('Carrier not found');
+
+      if (!carrier.truck) {
+        throw new NotFoundException('Carrier does not have a truck assigned');
+      }
+      if (carrier.status !== CarrierStatus.resting) {
+        throw new NotFoundException('Carrier is not available');
+      }
+      if (route.carrier?._id.toString() === carrier._id.toString()) {
+        throw new NotFoundException(
+          'Route is already assigned to this carrier',
+        );
+      }
+
+      route.carrier = carrier._id;
+      await route.save();
+
+      return {
+        message: 'Route assigned to carrier',
+        route,
+      };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async unassignRouteFromCarrier(routeId: string) {
+    try {
+      const route = await this.routeModel.findById(routeId);
+      if (!route) throw new NotFoundException('Route not found');
+
+      route.carrier = null;
+      route.status = RouteStatus.pending;
+      await route.save();
+
+      return {
+        message: 'Route unassigned from carrier',
+        route,
+      };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  calcDistance(route: Route): number | null {
+    try {
+      // Simulate distance calculation
+      const originCity = cities.filter(
+        (city) =>
+          city.name.toLowerCase() === route.origin.toLowerCase() &&
+          city.population > 500000,
+      );
+      const destinationCity = cities.filter(
+        (city) =>
+          city.name.toLowerCase() === route.destination.toLowerCase() &&
+          city.population > 500000,
+      );
+      if (!originCity.length || !destinationCity.length) {
+        throw new NotFoundException('Origin or destination city not found');
+      }
+      console.log('latitudeOrigin', originCity[0].loc.coordinates[1]);
+      console.log('longitudeOrigin', originCity[0].loc.coordinates[0]);
+      console.log('latitudeDestini', destinationCity[0].loc.coordinates[1]);
+      console.log('longitudeDestini', destinationCity[0].loc.coordinates[0]);
+      const distance = getDistance(
+        {
+          latitude: originCity[0].loc.coordinates[1],
+          longitude: originCity[0].loc.coordinates[0],
+        },
+        {
+          latitude: destinationCity[0].loc.coordinates[1],
+          longitude: destinationCity[0].loc.coordinates[0],
+        },
+      );
+      return distance / 1000; // Convert to kilometers
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+      return null;
     }
   }
 }

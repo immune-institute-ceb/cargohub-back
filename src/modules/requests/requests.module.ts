@@ -1,7 +1,7 @@
 // Objective: Implement the Requests module for handling requests in the application.
 
 //* NestJS modules
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 //* Services
@@ -11,11 +11,13 @@ import { RequestsService } from './requests.service';
 import { RequestsController } from './requests.controller';
 
 //* Entities
-import { Request, RequestSchema } from './entities/request.entity';
+import { Requests, RequestSchema } from './entities/request.entity';
 
 // * Modules
 import { CommonModule } from '@common/common.module';
 import { ClientsModule } from '@modules/clients/clients.module';
+import { RoutesModule } from '@modules/rutas/route.module';
+import { BillingModule } from '@modules/facturacion/billing.module';
 
 @Module({
   controllers: [RequestsController],
@@ -23,12 +25,15 @@ import { ClientsModule } from '@modules/clients/clients.module';
   imports: [
     CommonModule,
     ClientsModule,
+    forwardRef(() => RoutesModule),
+    BillingModule,
     MongooseModule.forFeature([
       {
-        name: Request.name,
+        name: Requests.name,
         schema: RequestSchema,
       },
     ]),
   ],
+  exports: [RequestsService],
 })
 export class RequestsModule {}

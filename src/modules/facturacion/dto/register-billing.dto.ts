@@ -1,17 +1,17 @@
 // Objective: RegisterFacturacionDto class definition
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsArray,
-  ArrayNotEmpty,
   IsDate,
   IsNumber,
   IsString,
-  Matches,
-  MaxLength,
   Min,
+  IsMongoId,
+  IsEnum,
 } from 'class-validator';
 
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
+import { BillingStatus } from '../interfaces/billing-status.interface';
+import { Types } from 'mongoose';
 
 /**
  * Data transfer object for register facturacion
@@ -28,25 +28,28 @@ import { Transform, Type } from 'class-transformer';
  * }
  */
 export class RegisterBillingDto {
-  @ApiProperty({ description: 'Client Name', example: 'Juan Perez' })
-  @IsString()
-  @Matches(/^[a-zA-Z\sáéíóúüñÁÉÍÓÚÜÑ]+$/, {
-    message: 'clientName must contain only letters and spaces',
+  @ApiProperty({
+    description: 'Client Id',
+    example: '60d5ec49f1c2b8b1f8c8b8b8',
+    type: 'string',
   })
-  @MaxLength(100)
-  @Transform(({ value }) => value.toLowerCase().trim())
-  clientName: string;
+  @IsString()
+  @IsMongoId()
+  clientId: Types.ObjectId;
+
+  @ApiProperty({
+    description: 'Request Id',
+    example: '60d5ec49f1c2b8b1f8c8b8b8',
+    type: 'string',
+  })
+  @IsString()
+  @IsMongoId()
+  requestId: Types.ObjectId;
 
   @ApiProperty({ description: 'Billing Amount', example: 100 })
   @IsNumber()
   @Min(0)
   billingAmount: number;
-
-  @ApiProperty({ description: 'Array of service IDs' })
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsString({ each: true })
-  idServices: string[];
 
   @ApiProperty({
     description: 'Invoice issue date',
@@ -69,8 +72,9 @@ export class RegisterBillingDto {
     example: 'pending',
   })
   @IsString()
-  @Matches(/^(pending|paid|canceled)$/, {
-    message: 'status must be pending, paid or canceled',
+  @IsEnum(BillingStatus, {
+    each: true,
+    message: 'Status must be one of the following: pending, paid, canceled',
   })
-  status: string;
+  status: BillingStatus;
 }

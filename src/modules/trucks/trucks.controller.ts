@@ -52,6 +52,15 @@ export class TrucksController {
     return this.trucksService.update(id, updateTruckDto);
   }
 
+  @Patch('status/:id')
+  @ApiOperation({ summary: 'Update truck status' })
+  updateStatus(
+    @Param('id', ParseMongoIdPipe) id: string,
+    @Body('status') status: string,
+  ) {
+    return this.trucksService.updateTruckStatus(id, status);
+  }
+
   @Delete(':id')
   remove(@Param('id', ParseMongoIdPipe) id: string) {
     return this.trucksService.remove(id);

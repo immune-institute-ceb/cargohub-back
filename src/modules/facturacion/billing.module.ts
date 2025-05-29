@@ -1,7 +1,7 @@
 // Objective: Implement the module for the facturacion entity.
 
 //* NestJS modules
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
@@ -17,6 +17,7 @@ import { Billing, BillingSchema } from './entities/billing.entity';
 
 //* Modules
 import { CommonModule } from '@common/common.module';
+import { RoutesModule } from '@modules/rutas/route.module';
 
 @Module({
   controllers: [BillingController],
@@ -25,6 +26,7 @@ import { CommonModule } from '@common/common.module';
   imports: [
     CommonModule,
     ConfigModule,
+    forwardRef(() => RoutesModule),
     PassportModule.register({
       defaultStrategy: 'jwt',
     }),

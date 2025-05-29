@@ -1,7 +1,8 @@
 // Objective: Define the Ruta entity schema and model for the database
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
+import { RouteStatus } from '../interfaces/route-status.interface';
 
 /**
  * Route entity schema
@@ -26,15 +27,6 @@ export class Route extends Document {
   _id: Types.ObjectId;
 
   @ApiProperty({
-    description: 'Route type',
-    example: 'National',
-  })
-  @Prop({
-    index: true,
-  })
-  type: string;
-
-  @ApiProperty({
     description: 'Route origin',
     example: 'Madrid',
   })
@@ -53,7 +45,7 @@ export class Route extends Document {
   destination: string;
 
   @ApiProperty({
-    description: 'Route distance',
+    description: 'Route distance in km',
     example: 523,
   })
   @Prop({
@@ -72,31 +64,47 @@ export class Route extends Document {
 
   @ApiProperty({
     description: 'Route state',
-    example: 'available',
+    example: RouteStatus.pending,
   })
   @Prop({
     index: true,
+    enum: RouteStatus,
+    default: RouteStatus.pending,
   })
-  status: string;
+  status: RouteStatus;
 
   @ApiProperty({
-    description: 'Route deletedAt',
-    example: '2021-01-01',
+    description: 'Carrier assigned to the route',
+    example: {
+      _id: '5f4e6d6f4f6d4f6d4f6d4f6d',
+      dni: '123456789A',
+      licenseNumber: '123456789',
+      status: 'available',
+    },
   })
   @Prop({
-    index: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Carrier',
+    default: null,
   })
-  deletedAt: Date;
+  carrier?: Types.ObjectId | null;
 
   @ApiProperty({
-    description: 'Tells if the route is deleted',
-    example: 'true',
+    description: 'Request associated with the route',
+    example: {
+      _id: '5f4e6d6f4f6d4f6d4f6d4f6d',
+      clientId: '5f4e6d6f4f6d4f6d4f6d4f6d',
+      origin: 'Madrid',
+      destination: 'Málaga',
+      status: 'pending',
+    },
   })
   @Prop({
-    index: true,
-    default: false,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Request',
+    default: null,
   })
-  isDeleted: boolean;
+  request?: Types.ObjectId | null;
 }
 
 export const RouteSchema = SchemaFactory.createForClass(Route);
