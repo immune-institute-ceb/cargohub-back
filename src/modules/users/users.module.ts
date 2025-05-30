@@ -19,6 +19,7 @@ import { User, UserSchema } from './entities/user.entity';
 import { CommonModule } from '@common/common.module';
 import { ClientsModule } from '@modules/clients/clients.module';
 import { CarriersModule } from '@modules/carriers/carriers.module';
+import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
 
 @Module({
   controllers: [UsersController],
@@ -29,6 +30,7 @@ import { CarriersModule } from '@modules/carriers/carriers.module';
     ConfigModule,
     ClientsModule,
     CarriersModule,
+    AuditLogsModule,
     PassportModule.register({
       defaultStrategy: 'jwt',
     }),

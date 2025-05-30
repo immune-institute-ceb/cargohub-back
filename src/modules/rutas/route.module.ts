@@ -17,12 +17,14 @@ import { Route, RouteSchema } from './entities/route.entity';
 import { CommonModule } from '@common/common.module';
 import { CarriersModule } from '@modules/carriers/carriers.module';
 import { RequestsModule } from '@modules/requests/requests.module';
+import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
 
 @Module({
   controllers: [RoutesController],
   providers: [RoutesService],
   imports: [
     CommonModule,
+    AuditLogsModule,
     forwardRef(() => CarriersModule),
     forwardRef(() => RequestsModule),
     MongooseModule.forFeature([

@@ -24,6 +24,7 @@ import { TrucksService } from '@modules/trucks/trucks.service';
 import { RoutesService } from '@modules/rutas/route.service';
 import { TruckStatus } from '@modules/trucks/interfaces/truck-status.interface';
 import { CarrierStatus } from './interfaces/carrier-status.interface';
+import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 
 @Injectable()
 export class CarriersService {
@@ -35,6 +36,7 @@ export class CarriersService {
     private readonly trucksService: TrucksService,
     @Inject(forwardRef(() => RoutesService))
     private readonly routesService: RoutesService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
   async create(createCarrierDto: CreateCarrierDto, userId: Types.ObjectId) {
     try {

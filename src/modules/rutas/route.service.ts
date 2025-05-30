@@ -30,6 +30,7 @@ import { CarrierStatus } from '@modules/carriers/interfaces/carrier-status.inter
 import { RequestsService } from '@modules/requests/requests.service';
 import { Requests } from '@modules/requests/entities/request.entity';
 import { RequestStatus } from '@modules/requests/interfaces/request-status.interface';
+import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 
 @Injectable()
 export class RoutesService {
@@ -41,6 +42,7 @@ export class RoutesService {
     private readonly carriersService: CarriersService,
     @Inject(forwardRef(() => RequestsService))
     private readonly requestsService: RequestsService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   async create(registerRouteDto: RegisterRouteDto, request: Requests) {

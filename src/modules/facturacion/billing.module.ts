@@ -19,6 +19,7 @@ import { Billing, BillingSchema } from './entities/billing.entity';
 import { CommonModule } from '@common/common.module';
 import { RoutesModule } from '@modules/rutas/route.module';
 import { RequestsModule } from '@modules/requests/requests.module';
+import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
 
 @Module({
   controllers: [BillingController],
@@ -27,6 +28,7 @@ import { RequestsModule } from '@modules/requests/requests.module';
   imports: [
     CommonModule,
     ConfigModule,
+    AuditLogsModule,
     forwardRef(() => RoutesModule),
     forwardRef(() => RequestsModule),
     PassportModule.register({

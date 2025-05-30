@@ -17,6 +17,7 @@ import { Carrier, CarrierSchema } from './entities/carrier.entity';
 import { CommonModule } from '@common/common.module';
 import { TrucksModule } from '@modules/trucks/trucks.module';
 import { RoutesModule } from '@modules/rutas/route.module';
+import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
 
 @Module({
   controllers: [CarriersController],
@@ -24,6 +25,7 @@ import { RoutesModule } from '@modules/rutas/route.module';
   exports: [CarriersService],
   imports: [
     CommonModule,
+    AuditLogsModule,
     forwardRef(() => TrucksModule),
     forwardRef(() => RoutesModule),
     MongooseModule.forFeature([
