@@ -101,7 +101,7 @@ export class Route extends Document {
   })
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Request',
+    ref: 'Requests',
     default: null,
   })
   request?: Types.ObjectId | null;

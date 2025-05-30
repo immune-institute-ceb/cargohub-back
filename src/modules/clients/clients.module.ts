@@ -1,7 +1,7 @@
 // Objective: Implement the module to manage clients in the application.
 
 //* NestJS modules
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 // * Services
@@ -15,6 +15,7 @@ import { Client, ClientSchema } from './entities/client.entity';
 
 // * Modules
 import { CommonModule } from '@common/common.module';
+import { RequestsModule } from '@modules/requests/requests.module';
 
 @Module({
   controllers: [ClientsController],
@@ -22,6 +23,7 @@ import { CommonModule } from '@common/common.module';
   exports: [ClientsService],
   imports: [
     CommonModule,
+    forwardRef(() => RequestsModule),
     MongooseModule.forFeature([
       {
         name: Client.name,

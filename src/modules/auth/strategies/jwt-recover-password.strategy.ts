@@ -24,11 +24,14 @@ export class JwtRecoverPasswordStrategy extends PassportStrategy(
     });
   }
 
-  validate(req: Request, payload: JwtPayload): string {
+  validate(req: Request, payload: JwtPayload) {
     const { _id, message } = payload;
     if (message !== 'recoverPassword' && message !== 'confirmEmail')
       throw new UnauthorizedException('Not valid recovery token');
 
-    return _id;
+    return {
+      _id,
+      message,
+    };
   }
 }

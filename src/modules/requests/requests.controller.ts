@@ -82,7 +82,6 @@ export class RequestsController {
     type: Request,
   })
   findOne(@Param('requestId', ParseMongoIdPipe) id: string) {
-    console.log(id);
     return this.requestsService.findOne(id);
   }
 

@@ -110,4 +110,4 @@ export class Requests extends Document {
   routeId: Types.ObjectId;
 }
 
-export const RequestSchema = SchemaFactory.createForClass(Request);
+export const RequestSchema = SchemaFactory.createForClass(Requests);

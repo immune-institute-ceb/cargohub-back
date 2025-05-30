@@ -24,7 +24,7 @@ import { BillingModule } from '@modules/facturacion/billing.module';
   providers: [RequestsService],
   imports: [
     CommonModule,
-    ClientsModule,
+    forwardRef(() => ClientsModule),
     forwardRef(() => RoutesModule),
     BillingModule,
     MongooseModule.forFeature([

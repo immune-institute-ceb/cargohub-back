@@ -23,6 +23,7 @@ import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { TrucksService } from '@modules/trucks/trucks.service';
 import { RoutesService } from '@modules/rutas/route.service';
 import { TruckStatus } from '@modules/trucks/interfaces/truck-status.interface';
+import { CarrierStatus } from './interfaces/carrier-status.interface';
 
 @Injectable()
 export class CarriersService {
@@ -53,8 +54,7 @@ export class CarriersService {
       const carriers = await this.carrierModel
         .find()
         .populate('user', 'name lastName1 lastName2 phone email')
-        .populate('truck', 'licensePlate carModel capacity status fuelType')
-        .populate('route', 'origin destination distance estimatedTime status');
+        .populate('truck', 'licensePlate carModel capacity status fuelType');
       if (!carriers || carriers.length === 0) {
         throw new NotFoundException('No carriers found');
       }
@@ -68,6 +68,18 @@ export class CarriersService {
     try {
       const carrier = await this.findCarrierWithPopulatedData(id);
       if (!carrier) throw new NotFoundException('Carrier not found');
+      return carrier;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async finByDni(dni: string) {
+    try {
+      const carrier = await this.carrierModel
+        .findOne({ dni })
+        .populate('user', 'name lastName1 lastName2 phone email')
+        .populate('truck', 'licensePlate carModel capacity status fuelType');
       return carrier;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -95,6 +107,21 @@ export class CarriersService {
     }
   }
 
+  async updateStatus(id: string, status: CarrierStatus) {
+    try {
+      const carrierUpdated = await this.carrierModel.findOneAndUpdate(
+        { _id: id },
+        { status },
+        {
+          new: true,
+        },
+      );
+      if (!carrierUpdated) throw new NotFoundException('Carrier not found');
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
   async remove(id: string) {
     try {
       const carrierDeleted = await this.carrierModel.findByIdAndDelete(id);
@@ -106,7 +133,7 @@ export class CarriersService {
           TruckStatus.available,
         );
       }
-      await this.routesService.unassignRouteFromCarrier(id);
+      await this.routesService.unassignRouteFromCarrierRemoved(id);
       return {
         message: 'Carrier deleted',
         carrierDeleted,
@@ -125,6 +152,12 @@ export class CarriersService {
       if (!truckExists) throw new NotFoundException('Truck not found');
       if (truckExists.status === TruckStatus.assigned) {
         throw new NotFoundException('Truck is not available');
+      }
+      if (
+        carrier.status === CarrierStatus.onRoute ||
+        carrier.status === CarrierStatus.assigned
+      ) {
+        throw new NotFoundException('Carrier is not available');
       }
       await this.trucksService.updateTruckStatus(truckId, TruckStatus.assigned);
 
@@ -149,6 +182,9 @@ export class CarriersService {
       if (!carrier.truck) {
         throw new NotFoundException('Carrier does not have a truck assigned');
       }
+      if (carrier.status === CarrierStatus.onRoute) {
+        throw new NotFoundException('Carrier is currently on a route');
+      }
       await this.trucksService.updateTruckStatus(
         carrier.truck._id.toString(),
         TruckStatus.available,
@@ -171,8 +207,7 @@ export class CarriersService {
       const carrier = await this.carrierModel
         .findOne({ truck: truckId })
         .populate('user', 'name lastName1 lastName2 phone email')
-        .populate('truck', 'licensePlate carModel capacity status fuelType')
-        .populate('route', 'origin destination distance estimatedTime status');
+        .populate('truck', 'licensePlate carModel capacity status fuelType');
       if (!carrier) return;
 
       carrier.truck = null;
@@ -202,8 +237,7 @@ export class CarriersService {
       const carrier = await this.carrierModel
         .findById(carrierId)
         .populate('user', 'name lastName1 lastName2 phone email')
-        .populate('truck', 'licensePlate carModel capacity status fuelType')
-        .populate('route', 'origin destination distance estimatedTime status');
+        .populate('truck', 'licensePlate carModel capacity status fuelType');
       if (!carrier) throw new NotFoundException('Carrier not found');
       return carrier;
     } catch (error) {

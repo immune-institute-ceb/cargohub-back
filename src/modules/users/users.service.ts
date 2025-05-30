@@ -49,6 +49,28 @@ export class UsersService {
       });
       if (userExists)
         throw new BadRequestException('User already exists in the database');
+      // Validar que no se cra un cliente o un carrier que ya existe
+      if (
+        (roles.includes(ValidRoles.client) && clientData) ||
+        (roles.includes(ValidRoles.carrier) && carrierData)
+      ) {
+        const existingClient = clientData?.companyCIF
+          ? await this.clientsService.findDuplicateClient(
+              clientData.companyCIF,
+              clientData.companyName,
+              clientData.companyAddress,
+            )
+          : undefined;
+        const existingCarrier = carrierData?.dni
+          ? await this.carriersService.finByDni(carrierData.dni)
+          : undefined;
+
+        if (existingClient || existingCarrier) {
+          throw new BadRequestException(
+            'Duplicate client or carrier data found',
+          );
+        }
+      }
       // 1. Crear usuario base
       const createdUser = await this.userModel.create(userData);
       // 2. Según rol, crear entidad relacionada
@@ -103,7 +125,6 @@ export class UsersService {
         .exec();
 
       if (!userUpdated) throw new NotFoundException('User not found');
-      console.log(userUpdated, update);
       if (userUpdated.roles.includes(ValidRoles.client)) {
         if (!userUpdated.clientId) {
           throw new NotFoundException('Client ID not found for user');

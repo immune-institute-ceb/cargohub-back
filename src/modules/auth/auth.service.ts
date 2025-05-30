@@ -161,11 +161,16 @@ class AuthService {
 
   async resetPassword(token: string, changePasswordDto: ChangePasswordDto) {
     try {
-      const { _id } = this.jwtService.verify<{ _id: string }>(token);
-
+      const { _id, message } = this.jwtService.verify<{
+        _id: string;
+        message: string;
+      }>(token);
+      const user = await this.usersService.findUserById(_id);
+      if (!user) throw new NotFoundException('User not found');
       if (changePasswordDto.password !== changePasswordDto.passwordConfirmed)
         throw new BadRequestException('Passwords do not match');
-
+      if (message === 'confirmEmail' && user.emailVerified)
+        throw new BadRequestException('Email already confirmed');
       const passwordHash = bcrypt.hashSync(
         String(changePasswordDto.password),
         10,
