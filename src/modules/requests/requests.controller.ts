@@ -10,6 +10,8 @@ import {
   Delete,
   Patch,
   Query,
+  ParseEnumPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -37,6 +39,7 @@ import { RequestsService } from './requests.service';
 import { ValidRoles } from '@modules/auth/interfaces';
 import { User } from '@modules/users/entities/user.entity';
 import { RequestStatus } from './interfaces/request-status.interface';
+import { FinalClientStatus } from './dto/update-status.dto';
 
 @ApiTags('Requests')
 @ApiNotFoundResponse({ description: 'Request not found' })
@@ -97,11 +100,18 @@ export class RequestsController {
     name: 'status',
     required: true,
     description: 'New status for the request',
-    enum: RequestStatus,
+    enum: [RequestStatus.done],
   })
   updateStatus(
     @Param('requestId', ParseMongoIdPipe) id: string,
-    @Query('status') status: RequestStatus,
+    @Query(
+      'status',
+      new ParseEnumPipe([RequestStatus.done], {
+        errorHttpStatusCode: 400,
+        exceptionFactory: () => new BadRequestException('Status must be done'),
+      }),
+    )
+    status: FinalClientStatus,
   ) {
     return this.requestsService.updateStatus(id, status);
   }

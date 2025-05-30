@@ -117,7 +117,6 @@ export class ClientsService {
 
   async remove(id: string) {
     try {
-      console.log(id);
       const client = await this.clientModel.findById(id);
       if (!client) throw new NotFoundException('Client not found');
       // remove requests associated with the client
@@ -170,16 +169,11 @@ export class ClientsService {
 
   async removeRequestFromClient(clientId: string, requestId: string) {
     try {
-      const client = await this.clientModel.findByIdAndUpdate(
+      await this.clientModel.findByIdAndUpdate(
         clientId,
         { $pull: { requests: requestId } },
         { new: true },
       );
-      if (!client) throw new NotFoundException('Client not found');
-      return {
-        message: 'Request removed from client successfully',
-        client,
-      };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }

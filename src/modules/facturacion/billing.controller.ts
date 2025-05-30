@@ -1,7 +1,7 @@
 // Objective: Implement the controller for the routes module
 
 //* NestJS modules
-import { Controller, Delete, Get, Param } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -11,6 +11,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiResponse,
   ApiOperation,
+  ApiQuery,
 } from '@nestjs/swagger';
 
 //* Pipes
@@ -23,6 +24,7 @@ import { Billing } from './entities/billing.entity';
 
 //* Services
 import { BillingService } from './billing.service';
+import { BillingStatus } from './interfaces/billing-status.interface';
 
 @ApiTags('Billing')
 @ApiBearerAuth()
@@ -37,8 +39,7 @@ export class BillingController {
   @ApiCreatedResponse({ description: 'Billing deleted' })
   @ApiOperation({ summary: 'Delete a billing by Id' })
   async delete(@Param('id', ParseMongoIdPipe) id: string) {
-    const billing = await this.billingService.findBillingById(id);
-    return this.billingService.deleteBilling(billing);
+    return this.billingService.deleteBilling(id);
   }
 
   @Get()
@@ -70,8 +71,54 @@ export class BillingController {
     type: [Billing],
   })
   @ApiOperation({ summary: 'Get billings by status' })
+  @ApiQuery({
+    name: 'status',
+    required: true,
+    description: 'Status of the billings to filter by',
+    enum: BillingStatus,
+  })
   @ApiNotFoundResponse({ description: 'No billings found with status :status' })
-  findByStatus(@Param('status') status: string) {
+  findByStatus(@Query('status') status: string) {
     return this.billingService.findBillingsByStatus(status);
+  }
+
+  @Get('client/:clientId')
+  @ApiResponse({
+    status: 200,
+    description: 'Billings by client ID',
+    type: [Billing],
+  })
+  @ApiOperation({ summary: 'Get billings by client ID' })
+  @ApiQuery({
+    name: 'clientId',
+    required: true,
+    description: 'Client ID to filter billings by',
+    type: String,
+  })
+  @ApiNotFoundResponse({
+    description: 'No billings found for the provided client ID',
+  })
+  findByClientId(@Query('clientId', ParseMongoIdPipe) clientId: string) {
+    return this.billingService.findBillingsByClientId(clientId);
+  }
+
+  @Patch('status/:id')
+  @ApiResponse({
+    status: 200,
+    description: 'Billing status updated',
+    type: Billing,
+  })
+  @ApiOperation({ summary: 'Update billing status' })
+  @ApiQuery({
+    name: 'status',
+    required: true,
+    description: 'New status for the billing',
+    enum: BillingStatus,
+  })
+  async updateStatus(
+    @Param('id', ParseMongoIdPipe) id: string,
+    @Query('status') status: BillingStatus,
+  ) {
+    return this.billingService.updateBillingStatus(id, status);
   }
 }

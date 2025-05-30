@@ -26,7 +26,7 @@ import { BillingModule } from '@modules/facturacion/billing.module';
     CommonModule,
     forwardRef(() => ClientsModule),
     forwardRef(() => RoutesModule),
-    BillingModule,
+    forwardRef(() => BillingModule),
     MongooseModule.forFeature([
       {
         name: Requests.name,
