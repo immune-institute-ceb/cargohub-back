@@ -1,7 +1,12 @@
 // Objective: Implement the service of the clients module to manage client entities.
 
 //* NestJS modules
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 // * External modules
@@ -17,6 +22,7 @@ import { Client } from './entities/client.entity';
 // * Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { Requests } from '@modules/requests/entities/request.entity';
+import { RequestsService } from '@modules/requests/requests.service';
 
 @Injectable()
 export class ClientsService {
@@ -24,6 +30,8 @@ export class ClientsService {
     @InjectModel(Client.name)
     private readonly clientModel: Model<Client>,
     private readonly exceptionsService: ExceptionsService,
+    @Inject(forwardRef(() => RequestsService))
+    private readonly requestsService: RequestsService,
   ) {}
   async create(createClientDto: CreateClientDto, userId: Types.ObjectId) {
     try {
@@ -33,6 +41,9 @@ export class ClientsService {
         ...createClientDto,
         user: userId,
       });
+      if (!clientCreated) {
+        throw new NotFoundException('Client could not be created');
+      }
       return clientCreated;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -67,6 +78,23 @@ export class ClientsService {
     }
   }
 
+  async findDuplicateClient(
+    companyCIF: string,
+    companyName: string,
+    companyAddress: string,
+  ) {
+    try {
+      const client = await this.clientModel.findOne({
+        companyCIF,
+        companyName,
+        companyAddress,
+      });
+      return client;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
   async update(id: string, updateClientDto: UpdateClientDto) {
     try {
       const { ...update } = updateClientDto;
@@ -89,11 +117,19 @@ export class ClientsService {
 
   async remove(id: string) {
     try {
-      const clientDeleted = await this.clientModel.findByIdAndDelete(id);
-      if (!clientDeleted) throw new NotFoundException('Client not found');
+      console.log(id);
+      const client = await this.clientModel.findById(id);
+      if (!client) throw new NotFoundException('Client not found');
+      // remove requests associated with the client
+      await this.requestsService.removeRequestsByClientId(id);
+      // remove the client
+      const deletedClient = await this.clientModel.findByIdAndDelete(id);
+      if (!deletedClient)
+        throw new NotFoundException('Client could not be deleted');
+
       return {
         message: 'Client deleted',
-        clientDeleted,
+        deletedClient,
       };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -134,13 +170,11 @@ export class ClientsService {
 
   async removeRequestFromClient(clientId: string, requestId: string) {
     try {
-      const client = await this.clientModel
-        .findByIdAndUpdate(
-          clientId,
-          { $pull: { requests: requestId } },
-          { new: true },
-        )
-        .populate('user', 'name lastName1 lastName2 phone email');
+      const client = await this.clientModel.findByIdAndUpdate(
+        clientId,
+        { $pull: { requests: requestId } },
+        { new: true },
+      );
       if (!client) throw new NotFoundException('Client not found');
       return {
         message: 'Request removed from client successfully',

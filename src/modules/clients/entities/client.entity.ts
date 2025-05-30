@@ -83,7 +83,6 @@ export class Client extends Document {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null,
-    select: false,
   })
   user?: Types.ObjectId;
 
@@ -103,7 +102,7 @@ export class Client extends Document {
     type: 'array',
   })
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Request' }],
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Requests' }],
     default: [],
   })
   requests?: Types.ObjectId[];

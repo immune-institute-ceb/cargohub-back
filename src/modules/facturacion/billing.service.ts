@@ -112,7 +112,7 @@ export class BillingService {
 
   async calcAmount(routeId: string) {
     try {
-      const route = await this.routesService.findOne(routeId);
+      const route = await this.routesService.findRouteById(routeId);
       if (!route) throw new NotFoundException('Route not found');
       const distance = route.distance;
       const ratePerKm = 10;

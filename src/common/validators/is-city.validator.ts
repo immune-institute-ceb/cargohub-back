@@ -21,7 +21,6 @@ export class IsCityConstraint implements ValidatorConstraintInterface {
         city.name.toLowerCase().includes(normalized) &&
         city.population > 100000, // Example threshold for "most populated"
     );
-    console.log(matches[0]);
 
     return matches.length > 0;
   }

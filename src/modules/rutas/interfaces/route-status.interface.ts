@@ -1,6 +1,6 @@
 export enum RouteStatus {
   issued = 'issued',
-  inProgress = 'inProgress',
+  inTransit = 'inTransit',
   pending = 'pending',
   done = 'done',
 }

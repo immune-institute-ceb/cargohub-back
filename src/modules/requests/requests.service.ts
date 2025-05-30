@@ -126,25 +126,34 @@ export class RequestsService {
     try {
       const request = await this.requestModel.findById(id);
       if (!request) throw new NotFoundException('Request not found');
+
       if (request.status === status) {
         throw new BadRequestException('Request already has this status');
       }
-      const route = await this.routesService.findOne(
+
+      const route = await this.routesService.findRouteById(
         request.routeId.toString(),
       );
-      if (!route)
+      if (!route) {
         throw new BadRequestException('Route not found for this request');
+      }
+
       if (status === RequestStatus.done && route.status !== RouteStatus.done) {
         throw new BadRequestException(
           'Route must be done before request can be marked as done',
         );
       }
+
       const updatedRequest = await this.requestModel.findByIdAndUpdate(
         id,
         { status },
         { new: true },
       );
-      if (!updatedRequest) throw new NotFoundException('Request not found');
+
+      if (!updatedRequest) {
+        throw new NotFoundException('Request not found after update');
+      }
+
       if (status === RequestStatus.done) {
         const billing =
           await this.billingService.createBillingFromRequest(updatedRequest);
@@ -152,6 +161,7 @@ export class RequestsService {
           throw new NotFoundException('Billing could not be created');
         }
       }
+
       return {
         message: 'Request status updated successfully',
         updatedRequest,
@@ -184,6 +194,40 @@ export class RequestsService {
       }
       return {
         message: 'Request deleted successfully',
+      };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async removeRequestsByClientId(clientId: string) {
+    try {
+      const client = await this.clientsService.findOne(clientId);
+      if (!client) {
+        throw new NotFoundException('Client not found');
+      }
+      const requests = await this.requestModel.find({
+        clientId: client._id,
+      });
+      if (!requests || requests.length === 0) {
+        throw new NotFoundException('No requests found for this client');
+      }
+      for (const request of requests) {
+        const routeDeleted = await this.routesService.deleteRoute(
+          request.routeId.toString(),
+        );
+        if (!routeDeleted) {
+          throw new NotFoundException('Route could not be deleted');
+        }
+        const requestDeleted = await this.requestModel.findByIdAndDelete(
+          request._id,
+        );
+        if (!requestDeleted) {
+          throw new NotFoundException('Request could not be deleted');
+        }
+      }
+      return {
+        message: 'All requests for the client have been deleted',
       };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
