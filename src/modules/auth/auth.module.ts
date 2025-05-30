@@ -18,6 +18,7 @@ import { AuthController } from './auth.controller';
 //* Modules
 import { CommonModule } from '@common/common.module';
 import { UsersModule } from '@modules/users/users.module';
+import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
 
 @Module({
   controllers: [AuthController],
@@ -25,7 +26,7 @@ import { UsersModule } from '@modules/users/users.module';
   imports: [
     UsersModule,
     CommonModule,
-
+    AuditLogsModule,
     // Passport module to manage authentication
     PassportModule.register({
       defaultStrategy: 'jwt',
