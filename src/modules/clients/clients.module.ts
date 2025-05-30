@@ -16,6 +16,7 @@ import { Client, ClientSchema } from './entities/client.entity';
 // * Modules
 import { CommonModule } from '@common/common.module';
 import { RequestsModule } from '@modules/requests/requests.module';
+import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
 
 @Module({
   controllers: [ClientsController],
@@ -23,6 +24,7 @@ import { RequestsModule } from '@modules/requests/requests.module';
   exports: [ClientsService],
   imports: [
     CommonModule,
+    AuditLogsModule,
     forwardRef(() => RequestsModule),
     MongooseModule.forFeature([
       {

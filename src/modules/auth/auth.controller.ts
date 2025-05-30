@@ -1,7 +1,15 @@
 // Objective: Implement the controller of the authentication module, with the endpoints for the user to register,
 //  login, reset password, recover password, refresh token, contact, generate 2fa code, verify 2fa code and disable 2fa code.
 //* Nest Modules
-import { Controller, Get, Post, Body, UseGuards, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Patch,
+  Req,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -104,8 +112,8 @@ export class AuthController {
     },
   })
   @ApiOperation({ summary: 'Login a user' })
-  loginUser(@Body() loginUserDto: LoginUserDto) {
-    return this.authService.login(loginUserDto);
+  loginUser(@Body() loginUserDto: LoginUserDto, @Req() req: Request) {
+    return this.authService.login(loginUserDto, req);
   }
 
   @Post('reset-password')

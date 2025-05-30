@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Truck, TruckSchema } from './entities/truck.entity';
 import { CommonModule } from '@common/common.module';
 import { CarriersModule } from '@modules/carriers/carriers.module';
+import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
 
 @Module({
   controllers: [TrucksController],
@@ -12,6 +13,7 @@ import { CarriersModule } from '@modules/carriers/carriers.module';
   exports: [TrucksService],
   imports: [
     CommonModule,
+    AuditLogsModule,
     forwardRef(() => CarriersModule),
     MongooseModule.forFeature([
       {

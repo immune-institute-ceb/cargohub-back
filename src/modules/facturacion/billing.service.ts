@@ -25,6 +25,7 @@ import { BillingStatus } from './interfaces/billing-status.interface';
 import { RoutesService } from '@modules/rutas/route.service';
 import { RequestsService } from '@modules/requests/requests.service';
 import { RequestStatus } from '@modules/requests/interfaces/request-status.interface';
+import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 
 @Injectable()
 export class BillingService {
@@ -36,6 +37,7 @@ export class BillingService {
     private readonly routesService: RoutesService,
     @Inject(forwardRef(() => RequestsService))
     private readonly requestsService: RequestsService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   async createBillingFromRequest(request: Requests) {

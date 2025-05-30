@@ -24,6 +24,7 @@ import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { CarriersService } from '@modules/carriers/carriers.service';
 import { ClientsService } from '@modules/clients/clients.service';
 import { ValidRoles } from '@modules/auth/interfaces';
+import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 
 @Injectable()
 export class UsersService {
@@ -33,6 +34,7 @@ export class UsersService {
     private readonly exceptionsService: ExceptionsService,
     private readonly clientsService: ClientsService,
     private readonly carriersService: CarriersService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
 
   async create(registerUserDto: RegisterUserDto) {

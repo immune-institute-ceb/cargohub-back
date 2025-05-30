@@ -18,12 +18,14 @@ import { CommonModule } from '@common/common.module';
 import { ClientsModule } from '@modules/clients/clients.module';
 import { RoutesModule } from '@modules/rutas/route.module';
 import { BillingModule } from '@modules/facturacion/billing.module';
+import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
 
 @Module({
   controllers: [RequestsController],
   providers: [RequestsService],
   imports: [
     CommonModule,
+    AuditLogsModule,
     forwardRef(() => ClientsModule),
     forwardRef(() => RoutesModule),
     forwardRef(() => BillingModule),

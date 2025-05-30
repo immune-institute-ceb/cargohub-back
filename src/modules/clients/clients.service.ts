@@ -23,6 +23,7 @@ import { Client } from './entities/client.entity';
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { Requests } from '@modules/requests/entities/request.entity';
 import { RequestsService } from '@modules/requests/requests.service';
+import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 
 @Injectable()
 export class ClientsService {
@@ -32,6 +33,7 @@ export class ClientsService {
     private readonly exceptionsService: ExceptionsService,
     @Inject(forwardRef(() => RequestsService))
     private readonly requestsService: RequestsService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
   async create(createClientDto: CreateClientDto, userId: Types.ObjectId) {
     try {

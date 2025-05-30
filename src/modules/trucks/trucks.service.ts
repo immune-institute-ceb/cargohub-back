@@ -11,6 +11,7 @@ import { Truck } from './entities/truck.entity';
 import { Model } from 'mongoose';
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { CarriersService } from '@modules/carriers/carriers.service';
+import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 
 @Injectable()
 export class TrucksService {
@@ -20,6 +21,7 @@ export class TrucksService {
     private readonly exceptionsService: ExceptionsService,
     @Inject(forwardRef(() => CarriersService))
     private readonly carriersService: CarriersService,
+    private readonly auditLogsService: AuditLogsService,
   ) {}
   async create(createTruckDto: CreateTruckDto) {
     try {

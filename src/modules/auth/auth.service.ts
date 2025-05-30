@@ -15,6 +15,7 @@ import * as bcrypt from 'bcrypt';
 import * as nodemailer from 'nodemailer';
 import * as speakeasy from 'speakeasy';
 import * as QRCode from 'qrcode';
+import * as requestIp from 'request-ip';
 
 //* DTOs
 import {
@@ -32,11 +33,14 @@ import { JwtPayload, JwtPayloadRecoverPassword } from './interfaces';
 
 //* Services
 import { UsersService } from '@modules/users/users.service';
+import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 
 //* Entities
 import { User } from '@modules/users/entities/user.entity';
 import { envs } from '@config/envs';
+import { LogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
+import { ContextLogs } from '@modules/audit-logs/interfaces/context-log.interface';
 
 @Injectable()
 class AuthService {
@@ -45,6 +49,7 @@ class AuthService {
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
     private readonly exceptionsService: ExceptionsService,
+    private readonly auditLogsService: AuditLogsService,
   ) {
     // * Initialize the transporter
     const oauth2Client = new google.auth.OAuth2(
@@ -101,7 +106,7 @@ class AuthService {
     }
   }
 
-  async login(loginUserDto: LoginUserDto) {
+  async login(loginUserDto: LoginUserDto, request: Request) {
     try {
       const { email, password } = loginUserDto;
 
@@ -123,7 +128,17 @@ class AuthService {
           message: '2FA code is required',
         };
       }
-
+      await this.auditLogsService.create({
+        level: LogLevel.info,
+        message: `User ${user.email} logged in`,
+        context: ContextLogs.authService,
+        meta: {
+          userId: user._id.toString(),
+          ip: requestIp.getClientIp(request),
+          userAgent: request.headers['user-agent'],
+          timestamp: new Date().toISOString(),
+        },
+      });
       return this.refreshToken(user);
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
