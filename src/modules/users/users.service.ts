@@ -215,6 +215,19 @@ export class UsersService {
     }
   }
 
+  async deleteUserByAdmin(_id: string) {
+    try {
+      const user = await this.findUserById(_id);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      await this.deleteUser(user);
+      return { message: 'User deleted by admin' };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
   async findUserByEmail(email: string) {
     return await this.userModel
       .findOne({ email })

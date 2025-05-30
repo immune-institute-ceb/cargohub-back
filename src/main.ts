@@ -5,6 +5,11 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+//* External modules
+import * as cookieParser from 'cookie-parser';
+import * as csurf from 'csurf';
+import helmet from 'helmet';
+
 //* Config
 import { envs } from './config/envs';
 
@@ -15,6 +20,40 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.setGlobalPrefix('api/v1');
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      const allowedOrigins = [envs.frontendUrl];
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+  });
+
+  // Usa Helmet para configurar headers de seguridad
+  app.use(helmet());
+
+  // app.use(cookieParser());
+
+  // // Configurar csurf con cookies
+  // app.use(
+  //   csurf({
+  //     cookie: {
+  //       httpOnly: true,
+  //       secure: process.env.NODE_ENV === 'production',
+  //       sameSite: 'strict',
+  //     },
+  //   }),
+  // );
+
+  // // Manejar el token CSRF para frontend (por ejemplo enviarlo en una cookie o endpoint)
+  // app.use((req, res, next) => {
+  //   res.cookie('XSRF-TOKEN', req.csrfToken());
+  //   next();
+  // });
 
   app.useGlobalPipes(
     new ValidationPipe({

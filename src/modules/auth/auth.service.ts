@@ -41,6 +41,7 @@ import { User } from '@modules/users/entities/user.entity';
 import { envs } from '@config/envs';
 import { LogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
 import { ContextLogs } from '@modules/audit-logs/interfaces/context-log.interface';
+import { RegisterUserAdminManagerDto } from './dto/register-user-adminManager.dto';
 
 @Injectable()
 class AuthService {
@@ -86,6 +87,36 @@ class AuthService {
     try {
       const user = await this.usersService.create(registerUserDto);
       if (!user) throw new BadRequestException('User not created');
+      await this.sendConfirmationEmail(user);
+      return {
+        message: 'User created, check your email to confirm your account',
+      };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async registerUserAdminManager(
+    registerUserAdminManagerDto: RegisterUserAdminManagerDto,
+  ) {
+    try {
+      const { __rolesValidator__, ...rest } =
+        registerUserAdminManagerDto as any;
+      const user = await this.usersService.create({
+        ...rest,
+      });
+      if (!user) throw new BadRequestException('User not created');
+      await this.sendConfirmationEmail(user);
+      return {
+        message: 'User created, check your email to confirm your account',
+      };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  private async sendConfirmationEmail(user: User) {
+    try {
       await this.sendEmail(
         'Welcome to CargoHub',
         'confirm your Email',
@@ -98,9 +129,6 @@ class AuthService {
           '15m',
         ),
       );
-      return {
-        message: 'User created, check your email to confirm your account',
-      };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }

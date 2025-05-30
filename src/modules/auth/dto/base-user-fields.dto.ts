@@ -46,10 +46,10 @@ export class BaseUserFieldsDto {
 
   @ApiPropertyOptional({ description: 'User role', example: ['client'] })
   @IsArray()
-  @IsEnum(ValidRoles, {
+  @IsEnum([ValidRoles.client, ValidRoles.carrier], {
     each: true,
-    message: `roles must be one of: ${Object.values(ValidRoles).join(', ')}`,
+    message: 'Invalid role provided',
   })
   @IsOptional()
-  roles?: ValidRoles[];
+  roles?: ValidRoles;
 }
