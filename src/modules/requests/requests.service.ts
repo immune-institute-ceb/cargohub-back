@@ -38,6 +38,7 @@ export class RequestsService {
     private readonly clientsService: ClientsService,
     @Inject(forwardRef(() => RoutesService))
     private readonly routesService: RoutesService,
+    @Inject(forwardRef(() => BillingService))
     private readonly billingService: BillingService,
   ) {}
 
@@ -99,7 +100,6 @@ export class RequestsService {
       if (!client) {
         throw new NotFoundException('Client not found');
       }
-      console.log(client);
       const requests = await this.requestModel.find({
         clientId: client._id,
       });
@@ -138,9 +138,12 @@ export class RequestsService {
         throw new BadRequestException('Route not found for this request');
       }
 
-      if (status === RequestStatus.done && route.status !== RouteStatus.done) {
+      if (
+        (status === RequestStatus.done || status === RequestStatus.completed) &&
+        route.status !== RouteStatus.done
+      ) {
         throw new BadRequestException(
-          'Route must be done before request can be marked as done',
+          'Route must be done before request can be marked as done or completed',
         );
       }
 
@@ -175,19 +178,14 @@ export class RequestsService {
     try {
       const result = await this.requestModel.findById(id);
       if (!result) throw new NotFoundException('Request not found');
-      const { client } = await this.clientsService.removeRequestFromClient(
+      await this.clientsService.removeRequestFromClient(
         result.clientId.toString(),
         id,
       );
-      if (!client) {
-        throw new NotFoundException('Client not found after removing request');
-      }
-      const routeDeleted = await this.routesService.deleteRoute(
-        result.routeId.toString(),
-      );
-      if (!routeDeleted) {
-        throw new NotFoundException('Route could not be deleted');
-      }
+      await this.routesService.deleteRoute(result.routeId.toString());
+
+      await this.billingService.deleteBillingByRequestId(result._id);
+
       const requestDeleted = await this.requestModel.findByIdAndDelete(id);
       if (!requestDeleted) {
         throw new NotFoundException('Request could not be deleted');
@@ -213,12 +211,8 @@ export class RequestsService {
         throw new NotFoundException('No requests found for this client');
       }
       for (const request of requests) {
-        const routeDeleted = await this.routesService.deleteRoute(
-          request.routeId.toString(),
-        );
-        if (!routeDeleted) {
-          throw new NotFoundException('Route could not be deleted');
-        }
+        await this.routesService.deleteRoute(request.routeId.toString());
+        await this.billingService.deleteBillingByRequestId(request._id);
         const requestDeleted = await this.requestModel.findByIdAndDelete(
           request._id,
         );

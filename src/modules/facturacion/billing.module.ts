@@ -18,6 +18,7 @@ import { Billing, BillingSchema } from './entities/billing.entity';
 //* Modules
 import { CommonModule } from '@common/common.module';
 import { RoutesModule } from '@modules/rutas/route.module';
+import { RequestsModule } from '@modules/requests/requests.module';
 
 @Module({
   controllers: [BillingController],
@@ -27,6 +28,7 @@ import { RoutesModule } from '@modules/rutas/route.module';
     CommonModule,
     ConfigModule,
     forwardRef(() => RoutesModule),
+    forwardRef(() => RequestsModule),
     PassportModule.register({
       defaultStrategy: 'jwt',
     }),

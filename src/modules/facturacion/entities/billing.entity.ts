@@ -25,6 +25,18 @@ export class Billing extends Document {
   _id: Types.ObjectId;
 
   @ApiProperty({
+    description: 'Request Id',
+    example: '5f4e6d6f4f6d4f6d4f6d4f6d',
+    type: 'string',
+  })
+  @Prop({
+    index: true,
+    type: Types.ObjectId,
+    ref: 'Requests',
+  })
+  requestId: Types.ObjectId;
+
+  @ApiProperty({
     description: 'Client Id',
     example: '5f4e6d6f4f6d4f6d4f6d4f6d',
     type: 'string',
@@ -53,6 +65,13 @@ export class Billing extends Document {
   })
   @Prop({ required: true, index: true })
   dueDate: Date;
+
+  @ApiProperty({
+    description: 'Paid date of the invoice',
+    example: '2022-01-15',
+  })
+  @Prop({ index: true })
+  paidDate?: Date;
 
   @ApiProperty({
     description: 'Invoice status (pending, paid, canceled)',

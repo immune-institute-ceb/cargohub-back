@@ -159,6 +159,12 @@ export class CarriersService {
       ) {
         throw new NotFoundException('Carrier is not available');
       }
+      if (carrier.truck?._id && carrier.truck._id.toString() !== truckId) {
+        await this.trucksService.updateTruckStatus(
+          carrier.truck._id.toString(),
+          TruckStatus.available,
+        );
+      }
       await this.trucksService.updateTruckStatus(truckId, TruckStatus.assigned);
 
       carrier.truck = truckExists._id;

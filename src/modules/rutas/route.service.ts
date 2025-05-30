@@ -71,13 +71,21 @@ export class RoutesService {
       if (route.status === status) {
         throw new BadRequestException(`Route is already in ${status} status`);
       }
+      if (
+        status === RouteStatus.done &&
+        route.status !== RouteStatus.inTransit
+      ) {
+        throw new BadRequestException(
+          'Route must be in transit to mark as done',
+        );
+      }
 
       if (
         (status === RouteStatus.inTransit || status === RouteStatus.done) &&
         !route.carrier
       ) {
         throw new BadRequestException(
-          'Route cannot be in progress or done without an assigned carrier',
+          'Route cannot be in transit or done without an assigned carrier',
         );
       }
 
@@ -271,8 +279,8 @@ export class RoutesService {
       );
       if (!carrier) throw new NotFoundException('Carrier not found');
       if (
-        carrier.status !== CarrierStatus.assigned &&
-        route.carrier._id !== carrier._id
+        carrier.status === CarrierStatus.assigned &&
+        route.carrier._id.toString() !== carrier._id.toString()
       ) {
         throw new NotFoundException('Carrier is not assigned to this route');
       }
@@ -301,8 +309,11 @@ export class RoutesService {
       if (routes) {
         for (const route of routes) {
           route.carrier = null;
-          route.status = RouteStatus.pending;
           await route.save();
+          await this.updateRouteStatus(
+            route._id.toString(),
+            RouteStatus.pending,
+          );
         }
       }
 
