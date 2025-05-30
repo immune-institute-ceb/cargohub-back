@@ -209,17 +209,16 @@ export class RequestsService {
       const requests = await this.requestModel.find({
         clientId: client._id,
       });
-      if (!requests || requests.length === 0) {
-        throw new NotFoundException('No requests found for this client');
-      }
-      for (const request of requests) {
-        await this.routesService.deleteRoute(request.routeId.toString());
-        await this.billingService.deleteBillingByRequestId(request._id);
-        const requestDeleted = await this.requestModel.findByIdAndDelete(
-          request._id,
-        );
-        if (!requestDeleted) {
-          throw new NotFoundException('Request could not be deleted');
+      if (requests && requests.length > 0) {
+        for (const request of requests) {
+          await this.routesService.deleteRoute(request.routeId.toString());
+          await this.billingService.deleteBillingByRequestId(request._id);
+          const requestDeleted = await this.requestModel.findByIdAndDelete(
+            request._id,
+          );
+          if (!requestDeleted) {
+            throw new NotFoundException('Request could not be deleted');
+          }
         }
       }
       return {

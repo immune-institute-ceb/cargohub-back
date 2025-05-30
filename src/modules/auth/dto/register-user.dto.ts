@@ -24,8 +24,12 @@ export class RegisterUserDto extends BaseUserFieldsDto {
   @ApiPropertyOptional({ description: 'User lastName2', example: 'Api' })
   lastName2?: string;
 
-  @ApiProperty({ description: 'User roles', example: ['client'] })
-  roles: ValidRoles[];
+  @ApiProperty({
+    description: 'User roles',
+    example: ['client'],
+    enum: ValidRoles,
+  })
+  roles: ValidRoles;
 
   @IsRequiredIfRole(ValidRoles.client)
   @ValidateNested()

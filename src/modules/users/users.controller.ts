@@ -1,7 +1,7 @@
 // Objective: Implement the controller for the users module
 
 //* NestJS modules
-import { Controller, Body, Patch, Delete, Get } from '@nestjs/common';
+import { Controller, Body, Patch, Delete, Get, Param } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -114,5 +114,25 @@ export class UsersController {
   @Auth()
   deleteUser(@GetUser() user: UserWithRelations) {
     return this.usersService.deleteUser(user);
+  }
+
+  @Delete('delete-user/admin/:id')
+  @ApiCreatedResponse({
+    description: 'User deleted by admin',
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+    schema: {
+      oneOf: [
+        { example: { message: 'Client ID not found for user' } },
+        { example: { message: 'Carrier ID not found for user' } },
+      ],
+    },
+  })
+  @ApiOperation({ summary: 'Delete user by admin' })
+  @ApiBearerAuth()
+  @Auth()
+  deleteUserByAdmin(@Param('id') id: string) {
+    return this.usersService.deleteUserByAdmin(id);
   }
 }

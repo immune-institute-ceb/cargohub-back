@@ -44,6 +44,8 @@ import { User } from '../users/entities/user.entity';
 //* Services
 import AuthService from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
+import { ValidRoles } from './interfaces';
+import { RegisterUserAdminManagerDto } from './dto/register-user-adminManager.dto';
 
 @ApiTags('Auth')
 @ApiNotFoundResponse({
@@ -91,6 +93,21 @@ export class AuthController {
   @ApiOperation({ summary: 'Register a new user' })
   registerUser(@Body() registerUserDto: RegisterUserDto) {
     return this.authService.registerUser(registerUserDto);
+  }
+
+  @Post('register/adminManager')
+  @ApiCreatedResponse({
+    description: 'User Registered',
+    type: LoginResponseDto,
+  })
+  // @Auth(ValidRoles.admin)
+  @ApiOperation({ summary: 'Register a new user with adminManager role' })
+  registerUserAdminManager(
+    @Body() registerUserAdminManagerDto: RegisterUserAdminManagerDto,
+  ) {
+    return this.authService.registerUserAdminManager(
+      registerUserAdminManagerDto,
+    );
   }
 
   @Post('login')
