@@ -17,8 +17,12 @@ import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 //* Entities
 import { Client } from './entities/client.entity';
 
+// * Decorators
+import { Auth } from '@modules/auth/decorators/auth.decorator';
+
 // * Services
 import { ClientsService } from './clients.service';
+import { ValidRoles } from '@modules/auth/interfaces';
 
 @ApiTags('Clients')
 @ApiNotFoundResponse({
@@ -37,6 +41,7 @@ export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
 
   @Get()
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
     description: 'List of all clients',
@@ -48,6 +53,7 @@ export class ClientsController {
   }
 
   @Get(':id')
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
     description: 'Client found',

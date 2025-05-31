@@ -27,10 +27,14 @@ import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 // * Entities
 import { Carrier } from './entities/carrier.entity';
 
+// * Decorators
+import { Auth } from '@modules/auth/decorators/auth.decorator';
+
 //* Services
 import { CarriersService } from './carriers.service';
 import { CarrierStatus } from './interfaces/carrier-status.interface';
 import { FinalCarrierStatus } from '@modules/clients/dto/update-status.dto';
+import { ValidRoles } from '@modules/auth/interfaces';
 
 @ApiTags('Carriers')
 @ApiNotFoundResponse({
@@ -49,6 +53,7 @@ export class CarriersController {
   constructor(private readonly carriersService: CarriersService) {}
 
   @Get()
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
     description: 'List of all carriers',
@@ -60,6 +65,7 @@ export class CarriersController {
   }
 
   @Get(':id')
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
     description: 'Carrier found',
@@ -71,12 +77,14 @@ export class CarriersController {
   }
 
   @Get('carrierRoutes/:carrierId')
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiOperation({ summary: 'Get routes assigned to a carrier' })
   getCarrierRoutes(@Param('carrierId', ParseMongoIdPipe) carrierId: string) {
     return this.carriersService.getCarrierRoutes(carrierId);
   }
 
   @Post(':carrierId/assign-truck/:truckId')
+  @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Assign a truck to a carrier' })
   assignTruck(
     @Param('carrierId', ParseMongoIdPipe) carrierId: string,
@@ -86,12 +94,14 @@ export class CarriersController {
   }
 
   @Post(':carrierId/unassign-truck')
+  @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Unassign a truck from a carrier' })
   unassignTruck(@Param('carrierId', ParseMongoIdPipe) carrierId: string) {
     return this.carriersService.unassignTruck(carrierId);
   }
 
   @Patch(':carrierId/status')
+  @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Update carrier status' })
   updateCarrierStatus(
     @Param('carrierId', ParseMongoIdPipe) carrierId: string,

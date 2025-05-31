@@ -51,7 +51,7 @@ export class RequestsController {
 
   @Post()
   @ApiBearerAuth()
-  @Auth(ValidRoles.client)
+  @Auth(ValidRoles.admin, ValidRoles.client)
   @ApiOperation({ summary: 'Create a new request' })
   @ApiCreatedResponse({
     description: 'Request created successfully',
@@ -62,7 +62,7 @@ export class RequestsController {
 
   @Get('clientRequest/:clientId')
   @ApiBearerAuth()
-  @Auth()
+  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiOperation({ summary: 'Get all requests by Client Id (not userId)' })
   @ApiResponse({
     status: 200,
@@ -77,7 +77,7 @@ export class RequestsController {
 
   @Get(':requestId')
   @ApiBearerAuth()
-  @Auth()
+  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiOperation({ summary: 'Get a request by id' })
   @ApiResponse({
     status: 200,
@@ -90,7 +90,7 @@ export class RequestsController {
 
   @Patch('status/:requestId')
   @ApiBearerAuth()
-  @Auth()
+  @Auth(ValidRoles.admin, ValidRoles.client)
   @ApiOperation({ summary: 'Update request status' })
   @ApiResponse({
     status: 200,
@@ -118,7 +118,7 @@ export class RequestsController {
 
   @Delete(':requestId')
   @ApiBearerAuth()
-  @Auth()
+  @Auth(ValidRoles.admin, ValidRoles.client)
   @ApiOperation({ summary: 'Delete a request' })
   @ApiResponse({
     status: 200,

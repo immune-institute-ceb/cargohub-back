@@ -16,7 +16,8 @@ import {
 //* Pipes
 import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
-//* DTOs
+//* Decorators
+import { Auth } from '@modules/auth/decorators/auth.decorator';
 
 //* Entities
 import { Route } from '@modules/rutas/entities/route.entity';
@@ -24,6 +25,7 @@ import { Route } from '@modules/rutas/entities/route.entity';
 //* Services
 import { RoutesService } from './route.service';
 import { RouteStatus } from './interfaces/route-status.interface';
+import { ValidRoles } from '@modules/auth/interfaces';
 
 @ApiTags('Rutas')
 @ApiBearerAuth()
@@ -35,6 +37,7 @@ export class RoutesController {
   constructor(private readonly routesService: RoutesService) {}
 
   @Patch('status/:id')
+  @Auth(ValidRoles.carrier)
   @ApiCreatedResponse({ description: 'Route status updated', type: Route })
   @ApiOperation({ summary: 'Update the status of a route' })
   @ApiQuery({
@@ -51,6 +54,7 @@ export class RoutesController {
   }
 
   @Get()
+  @Auth(ValidRoles.carrier, ValidRoles.admin, ValidRoles.adminManager)
   @ApiCreatedResponse({ description: 'All routes', type: [Route] })
   @ApiOperation({ summary: 'Get all routes' })
   findAll() {
@@ -58,6 +62,7 @@ export class RoutesController {
   }
 
   @Get(':id')
+  @Auth(ValidRoles.carrier, ValidRoles.admin, ValidRoles.adminManager)
   @ApiCreatedResponse({ description: 'Route found', type: Route })
   @ApiOperation({ summary: 'Get route by ID' })
   findOne(@Param('id', ParseMongoIdPipe) id: string) {
@@ -65,6 +70,7 @@ export class RoutesController {
   }
 
   @Get('status/:status')
+  @Auth(ValidRoles.carrier, ValidRoles.admin, ValidRoles.adminManager)
   @ApiCreatedResponse({ description: 'Routes by status', type: [Route] })
   @ApiOperation({ summary: 'Get routes by status' })
   findRoutesByStatus(@Param('status') status: RouteStatus) {
@@ -72,6 +78,7 @@ export class RoutesController {
   }
 
   @Get('carrier/:carrierId')
+  @Auth(ValidRoles.carrier, ValidRoles.admin, ValidRoles.adminManager)
   @ApiCreatedResponse({ description: 'Routes for carrier', type: [Route] })
   @ApiOperation({ summary: 'Get routes for a specific carrier' })
   findRoutesByCarrier(@Param('carrierId', ParseMongoIdPipe) carrierId: string) {
@@ -79,6 +86,7 @@ export class RoutesController {
   }
 
   @Post('assign-carrier/:routeId/:carrierId')
+  @Auth(ValidRoles.carrier)
   @ApiCreatedResponse({
     description: 'Route assigned to carrier',
     type: Route,
@@ -92,6 +100,7 @@ export class RoutesController {
   }
 
   @Post('unassign-carrier/:routeId')
+  @Auth(ValidRoles.carrier)
   @ApiCreatedResponse({
     description: 'Route unassigned from carrier',
     type: Route,

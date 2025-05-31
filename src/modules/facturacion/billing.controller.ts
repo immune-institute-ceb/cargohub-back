@@ -17,7 +17,8 @@ import {
 //* Pipes
 import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
-//* DTOs
+//* Decorators
+import { Auth } from '@modules/auth/decorators/auth.decorator';
 
 //* Entities
 import { Billing } from './entities/billing.entity';
@@ -25,6 +26,7 @@ import { Billing } from './entities/billing.entity';
 //* Services
 import { BillingService } from './billing.service';
 import { BillingStatus } from './interfaces/billing-status.interface';
+import { ValidRoles } from '@modules/auth/interfaces';
 
 @ApiTags('Billing')
 @ApiBearerAuth()
@@ -36,6 +38,7 @@ export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
   @Delete('delete-billing/:id')
+  @Auth(ValidRoles.admin)
   @ApiCreatedResponse({ description: 'Billing deleted' })
   @ApiOperation({ summary: 'Delete a billing by Id' })
   async delete(@Param('id', ParseMongoIdPipe) id: string) {
@@ -43,6 +46,7 @@ export class BillingController {
   }
 
   @Get()
+  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiResponse({
     status: 200,
     description: 'All billings',
@@ -54,6 +58,7 @@ export class BillingController {
   }
 
   @Get(':id')
+  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiResponse({
     status: 200,
     description: 'Billing found',
@@ -65,6 +70,7 @@ export class BillingController {
   }
 
   @Get('status/:status')
+  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiResponse({
     status: 200,
     description: 'Billings by status',
@@ -83,6 +89,7 @@ export class BillingController {
   }
 
   @Get('client/:clientId')
+  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiResponse({
     status: 200,
     description: 'Billings by client ID',
@@ -103,6 +110,7 @@ export class BillingController {
   }
 
   @Patch('status/:id')
+  @Auth(ValidRoles.admin)
   @ApiResponse({
     status: 200,
     description: 'Billing status updated',
