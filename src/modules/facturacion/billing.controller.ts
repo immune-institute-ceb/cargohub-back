@@ -29,7 +29,6 @@ import { BillingStatus } from './interfaces/billing-status.interface';
 import { ValidRoles } from '@modules/auth/interfaces';
 
 @ApiTags('Billing')
-@ApiBearerAuth()
 @ApiNotFoundResponse({ description: 'Billing not found' })
 @ApiBadRequestResponse({ description: 'Bad Request' })
 @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
@@ -38,6 +37,7 @@ export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
   @Delete('delete-billing/:id')
+  @ApiBearerAuth()
   @Auth(ValidRoles.admin)
   @ApiCreatedResponse({ description: 'Billing deleted' })
   @ApiOperation({ summary: 'Delete a billing by Id' })
@@ -46,6 +46,7 @@ export class BillingController {
   }
 
   @Get()
+  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiResponse({
     status: 200,
@@ -58,6 +59,7 @@ export class BillingController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiResponse({
     status: 200,
@@ -70,6 +72,7 @@ export class BillingController {
   }
 
   @Get('status/:status')
+  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiResponse({
     status: 200,
@@ -89,6 +92,7 @@ export class BillingController {
   }
 
   @Get('client/:clientId')
+  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiResponse({
     status: 200,
@@ -110,6 +114,7 @@ export class BillingController {
   }
 
   @Patch('status/:id')
+  @ApiBearerAuth()
   @Auth(ValidRoles.admin)
   @ApiResponse({
     status: 200,

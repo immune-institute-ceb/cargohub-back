@@ -28,7 +28,6 @@ import { RouteStatus } from './interfaces/route-status.interface';
 import { ValidRoles } from '@modules/auth/interfaces';
 
 @ApiTags('Rutas')
-@ApiBearerAuth()
 @ApiNotFoundResponse({ description: 'Route not found' })
 @ApiBadRequestResponse({ description: 'Bad Request' })
 @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
@@ -37,6 +36,7 @@ export class RoutesController {
   constructor(private readonly routesService: RoutesService) {}
 
   @Patch('status/:id')
+  @ApiBearerAuth()
   @Auth(ValidRoles.carrier)
   @ApiCreatedResponse({ description: 'Route status updated', type: Route })
   @ApiOperation({ summary: 'Update the status of a route' })
@@ -54,6 +54,7 @@ export class RoutesController {
   }
 
   @Get()
+  @ApiBearerAuth()
   @Auth(ValidRoles.carrier, ValidRoles.admin, ValidRoles.adminManager)
   @ApiCreatedResponse({ description: 'All routes', type: [Route] })
   @ApiOperation({ summary: 'Get all routes' })
@@ -62,6 +63,7 @@ export class RoutesController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
   @Auth(ValidRoles.carrier, ValidRoles.admin, ValidRoles.adminManager)
   @ApiCreatedResponse({ description: 'Route found', type: Route })
   @ApiOperation({ summary: 'Get route by ID' })
@@ -70,6 +72,7 @@ export class RoutesController {
   }
 
   @Get('status/:status')
+  @ApiBearerAuth()
   @Auth(ValidRoles.carrier, ValidRoles.admin, ValidRoles.adminManager)
   @ApiCreatedResponse({ description: 'Routes by status', type: [Route] })
   @ApiOperation({ summary: 'Get routes by status' })
@@ -78,6 +81,7 @@ export class RoutesController {
   }
 
   @Get('carrier/:carrierId')
+  @ApiBearerAuth()
   @Auth(ValidRoles.carrier, ValidRoles.admin, ValidRoles.adminManager)
   @ApiCreatedResponse({ description: 'Routes for carrier', type: [Route] })
   @ApiOperation({ summary: 'Get routes for a specific carrier' })
@@ -86,6 +90,7 @@ export class RoutesController {
   }
 
   @Post('assign-carrier/:routeId/:carrierId')
+  @ApiBearerAuth()
   @Auth(ValidRoles.carrier)
   @ApiCreatedResponse({
     description: 'Route assigned to carrier',
@@ -100,6 +105,7 @@ export class RoutesController {
   }
 
   @Post('unassign-carrier/:routeId')
+  @ApiBearerAuth()
   @Auth(ValidRoles.carrier)
   @ApiCreatedResponse({
     description: 'Route unassigned from carrier',

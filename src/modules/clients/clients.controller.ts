@@ -3,6 +3,7 @@
 //* NestJS modules
 import { Controller, Get, Param } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
@@ -41,6 +42,7 @@ export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
 
   @Get()
+  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
@@ -53,6 +55,7 @@ export class ClientsController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
