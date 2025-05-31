@@ -3,5 +3,4 @@ export enum CarrierStatus {
   assigned = 'assigned',
   onRoute = 'on route',
   resting = 'resting',
-  inactive = 'inactive',
 }

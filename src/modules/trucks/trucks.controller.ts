@@ -6,6 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  BadRequestException,
+  ParseEnumPipe,
+  Query,
 } from '@nestjs/common';
 import { TrucksService } from './trucks.service';
 import { CreateTruckDto } from './dto/create-truck.dto';
@@ -15,8 +18,11 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiCreatedResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { Auth } from '@modules/auth/decorators';
+import { TruckStatus } from './interfaces/truck-status.interface';
+import { FinalTruckStatus } from './dto/update-status.dto';
 
 @Controller('trucks')
 export class TrucksController {
@@ -54,9 +60,23 @@ export class TrucksController {
 
   @Patch('status/:id')
   @ApiOperation({ summary: 'Update truck status' })
+  @ApiQuery({
+    name: 'status',
+    required: true,
+    description: 'New status for the request',
+    enum: [TruckStatus.maintenance],
+  })
   updateStatus(
     @Param('id', ParseMongoIdPipe) id: string,
-    @Body('status') status: string,
+    @Query(
+      'status',
+      new ParseEnumPipe([TruckStatus.maintenance], {
+        errorHttpStatusCode: 400,
+        exceptionFactory: () =>
+          new BadRequestException('Status must be maintenance'),
+      }),
+    )
+    status: FinalTruckStatus,
   ) {
     return this.trucksService.updateTruckStatus(id, status);
   }

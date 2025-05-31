@@ -69,7 +69,7 @@ export class Client extends Document {
     enum: ActiveClientsStatus,
     default: ActiveClientsStatus.active,
   })
-  status: string[];
+  status: ActiveClientsStatus;
 
   @ApiProperty({
     description: 'User id',

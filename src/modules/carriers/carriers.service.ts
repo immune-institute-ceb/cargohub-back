@@ -114,11 +114,33 @@ export class CarriersService {
       const carrierUpdated = await this.carrierModel.findOneAndUpdate(
         { _id: id },
         { status },
-        {
-          new: true,
-        },
+        { new: true },
       );
-      if (!carrierUpdated) throw new NotFoundException('Carrier not found');
+
+      if (!carrierUpdated) {
+        throw new NotFoundException('Carrier not found');
+      }
+      if (
+        status === CarrierStatus.resting &&
+        carrierUpdated.status !== CarrierStatus.available
+      ) {
+        throw new NotFoundException('Carrier must be available to rest');
+      }
+
+      const truckId = carrierUpdated.truck?._id?.toString();
+      if (!truckId) return;
+
+      const statusMap: Record<CarrierStatus, TruckStatus> = {
+        [CarrierStatus.assigned]: TruckStatus.onRoute,
+        [CarrierStatus.available]: TruckStatus.available,
+        [CarrierStatus.onRoute]: TruckStatus.onRoute,
+        [CarrierStatus.resting]: TruckStatus.available,
+      };
+
+      const newTruckStatus = statusMap[status];
+      if (newTruckStatus) {
+        await this.trucksService.updateTruckStatus(truckId, newTruckStatus);
+      }
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -152,7 +174,11 @@ export class CarriersService {
 
       const truckExists = await this.trucksService.findOne(truckId);
       if (!truckExists) throw new NotFoundException('Truck not found');
-      if (truckExists.status === TruckStatus.assigned) {
+      if (
+        truckExists.status === TruckStatus.assigned ||
+        truckExists.status === TruckStatus.onRoute ||
+        truckExists.status === TruckStatus.maintenance
+      ) {
         throw new NotFoundException('Truck is not available');
       }
       if (

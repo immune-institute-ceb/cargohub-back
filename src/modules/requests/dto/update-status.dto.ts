@@ -2,14 +2,14 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum } from 'class-validator';
 import { RequestStatus } from '../interfaces/request-status.interface';
 
-export type FinalClientStatus = Extract<RequestStatus, 'done' | 'completed'>;
+export type FinalClientStatus = Extract<RequestStatus, 'done'>;
 
 export class UpdateStatusDto {
   @ApiProperty({
     description: 'New status for the request',
-    enum: [RequestStatus.completed, RequestStatus.done],
+    enum: [RequestStatus.done],
     example: 'done',
   })
-  @IsEnum([RequestStatus.completed, RequestStatus.done])
+  @IsEnum([RequestStatus.done])
   status: FinalClientStatus;
 }

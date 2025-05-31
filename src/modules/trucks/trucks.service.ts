@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -12,6 +13,7 @@ import { Model } from 'mongoose';
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { CarriersService } from '@modules/carriers/carriers.service';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
+import { TruckStatus } from './interfaces/truck-status.interface';
 
 @Injectable()
 export class TrucksService {
@@ -73,12 +75,27 @@ export class TrucksService {
 
   async updateTruckStatus(id: string, status: string) {
     try {
+      const truck = await this.truckModel.findById(id);
+      if (!truck) {
+        throw new NotFoundException('Truck not found');
+      }
+
+      if (status === 'maintenance' && truck.status !== TruckStatus.available) {
+        throw new BadRequestException(
+          'Truck can only enter maintenance from available status',
+        );
+      }
+
       const truckUpdated = await this.truckModel.findByIdAndUpdate(
         id,
         { status },
         { new: true },
       );
-      if (!truckUpdated) throw new NotFoundException('Truck not found');
+
+      if (!truckUpdated) {
+        throw new NotFoundException('Truck not found after update');
+      }
+
       return {
         message: 'Truck status updated successfully',
         truck: truckUpdated,
