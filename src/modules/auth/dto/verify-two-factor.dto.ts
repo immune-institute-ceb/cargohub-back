@@ -1,3 +1,6 @@
+// Objective: Define a DTO for verifying two-factor authentication with validation rules
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
@@ -6,6 +9,7 @@ import {
   IsNotEmpty,
   IsEmail,
 } from 'class-validator';
+
 /**
  * Data transfer object for verifying two-factor authentication
  * @export

@@ -1,9 +1,29 @@
-// register-user.dto.ts
+// Objective: Define a DTO for registering an admin manager user with specific roles and validation rules
+
+//* NestJS modules
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BaseUserFieldsDto } from './base-user-fields.dto';
-import { ValidRoles } from '../interfaces';
 import { ArrayContains, ArrayMinSize, IsArray } from 'class-validator';
 
+// * DTOs
+import { BaseUserFieldsDto } from './base-user-fields.dto';
+
+// * Interfaces
+import { ValidRoles } from '../interfaces';
+
+/**
+ * Data transfer object for registering an admin manager user
+ * @export
+ * @class RegisterUserAdminManagerDto
+ * @example
+ * {
+ *  "email": "test@gmail.com",
+ * "phone": "123456789",
+ * "name": "Test",
+ * "lastName1": "Example",
+ * "lastName2": "Api",
+ * "roles": ["adminManager"]
+ * }
+ */
 export class RegisterUserAdminManagerDto extends BaseUserFieldsDto {
   @ApiProperty({ description: 'User email', example: 'test@gmail.com' })
   email: string;

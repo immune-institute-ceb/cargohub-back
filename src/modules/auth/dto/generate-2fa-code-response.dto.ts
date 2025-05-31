@@ -1,4 +1,6 @@
 // Objective: Define the response data transfer object for the generate 2fa code endpoint
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 
 /**

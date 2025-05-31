@@ -1,10 +1,22 @@
+// Objective: This service periodically cleans up unverified users and their associated clients and carriers from the database.
+
+//* NestJs Modules
+import { InjectModel } from '@nestjs/mongoose';
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { InjectModel } from '@nestjs/mongoose';
+
+//* External Modules
 import { Model } from 'mongoose';
+
+//* Entities
 import { User } from '@modules/users/entities/user.entity';
 import { Carrier } from '@modules/carriers/entities/carrier.entity';
 import { Client } from '@modules/clients/entities/client.entity';
+import { AuditLog } from '@modules/audit-logs/entities/audit-log.entity';
+
+// * Interfaces
+import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
+import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 
 @Injectable()
 export class UserCleanupService {
@@ -17,6 +29,8 @@ export class UserCleanupService {
     private readonly carrierModel: Model<Carrier>,
     @InjectModel(Client.name)
     private readonly clientModel: Model<Client>,
+    @InjectModel(AuditLog.name)
+    private readonly auditLogModel: Model<AuditLog>,
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
@@ -24,6 +38,7 @@ export class UserCleanupService {
     const expirationMinutes = 15;
     const expirationDate = new Date(Date.now() - expirationMinutes * 60 * 1000);
 
+    // Find unverified users created more than 15 minutes ago
     const unverifiedUsers = await this.userModel.find({
       emailVerified: false,
       createdAt: { $lt: expirationDate },
@@ -33,6 +48,7 @@ export class UserCleanupService {
     let deletedClients = 0;
     let deletedCarriers = 0;
 
+    // Iterate over unverified users and delete them along with their clients and carriers
     for (const user of unverifiedUsers) {
       if (user.clientId) {
         const result = await this.clientModel.deleteOne({ _id: user.clientId });
@@ -50,8 +66,17 @@ export class UserCleanupService {
       if (result.deletedCount) deletedUsers++;
     }
 
-    this.logger.log(
-      `Deleted ${deletedUsers} unverified users, ${deletedClients} clients, and ${deletedCarriers} carriers.`,
-    );
+    // Log the cleanup action
+    if (deletedUsers > 0 || deletedClients > 0 || deletedCarriers > 0) {
+      this.logger.log(
+        `Deleted ${deletedUsers} unverified users, ${deletedClients} clients, and ${deletedCarriers} carriers.`,
+      );
+
+      await this.auditLogModel.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.system,
+        message: `Cleaned up ${deletedUsers} unverified users, ${deletedClients} clients, and ${deletedCarriers} carriers.`,
+      });
+    }
   }
 }

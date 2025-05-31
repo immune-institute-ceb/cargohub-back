@@ -1,4 +1,6 @@
 // Objective: Contact data transfer object for contact controller
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 

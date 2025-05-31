@@ -35,6 +35,9 @@ import {
   VerifyTwoFactorDto,
 } from './dto';
 
+//* External modules
+import { Request } from 'express';
+
 //* Decorators
 import { Auth, GetTokenFromHeader, GetUser } from './decorators';
 
@@ -87,8 +90,7 @@ export class AuthController {
 
   @Post('register')
   @ApiCreatedResponse({
-    description: 'User Registered',
-    type: LoginResponseDto,
+    description: 'User created, check your email to confirm your account',
   })
   @ApiOperation({ summary: 'Register a new user' })
   registerUser(@Body() registerUserDto: RegisterUserDto) {
@@ -97,8 +99,7 @@ export class AuthController {
 
   @Post('register/adminManager')
   @ApiCreatedResponse({
-    description: 'User Registered',
-    type: LoginResponseDto,
+    description: 'User created, check your email to confirm your account',
   })
   @ApiBearerAuth()
   @Auth(ValidRoles.admin)
@@ -272,8 +273,11 @@ export class AuthController {
     type: LoginResponseDto,
   })
   @ApiOperation({ summary: 'Verify 2FA code' })
-  verify2faCode(@Body() verifyTwoFactorDto: VerifyTwoFactorDto) {
-    return this.authService.verify2faCode(verifyTwoFactorDto);
+  verify2faCode(
+    @Body() verifyTwoFactorDto: VerifyTwoFactorDto,
+    @Req() req: Request,
+  ) {
+    return this.authService.verify2faCode(verifyTwoFactorDto, req);
   }
 
   @Patch('2fa/disable')

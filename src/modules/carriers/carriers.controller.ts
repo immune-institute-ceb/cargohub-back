@@ -89,6 +89,20 @@ export class CarriersController {
   @Post(':carrierId/assign-truck/:truckId')
   @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Assign a truck to a carrier' })
+  @ApiResponse({
+    status: 200,
+    description: 'Truck assigned to carrier successfully',
+    type: Carrier,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    schema: {
+      oneOf: [
+        { example: { message: 'Truck is not available' } },
+        { example: { message: 'Carrier is not available' } },
+      ],
+    },
+  })
   assignTruck(
     @Param('carrierId', ParseMongoIdPipe) carrierId: string,
     @Param('truckId', ParseMongoIdPipe) truckId: string,
@@ -99,6 +113,20 @@ export class CarriersController {
   @Post(':carrierId/unassign-truck')
   @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Unassign a truck from a carrier' })
+  @ApiResponse({
+    status: 200,
+    description: 'Truck unassigned from carrier',
+    type: Carrier,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    schema: {
+      oneOf: [
+        { example: { message: 'Carrier does not have a truck assigned' } },
+        { example: { message: 'Carrier is currently on route' } },
+      ],
+    },
+  })
   unassignTruck(@Param('carrierId', ParseMongoIdPipe) carrierId: string) {
     return this.carriersService.unassignTruck(carrierId);
   }
@@ -106,6 +134,26 @@ export class CarriersController {
   @Patch(':carrierId/status')
   @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.carrier)
   @ApiOperation({ summary: 'Update carrier status' })
+  @ApiResponse({
+    status: 200,
+    description: 'Carrier status updated successfully',
+    type: Carrier,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    schema: {
+      oneOf: [
+        { example: { message: 'Carrier already has this status' } },
+        { example: { message: 'Carrier must be available to rest' } },
+        {
+          example: {
+            message:
+              'Carrier has assigned routes and cannot be set to available',
+          },
+        },
+      ],
+    },
+  })
   @ApiQuery({
     name: 'status',
     required: true,

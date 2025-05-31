@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 
 // * External modules
 import { google } from 'googleapis';
+import { Request } from 'express';
 import * as bcrypt from 'bcrypt';
 import * as nodemailer from 'nodemailer';
 import * as speakeasy from 'speakeasy';
@@ -39,8 +40,8 @@ import { ExceptionsService } from '@common/exceptions/exceptions.service';
 //* Entities
 import { User } from '@modules/users/entities/user.entity';
 import { envs } from '@config/envs';
-import { LogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
-import { ContextLogs } from '@modules/audit-logs/interfaces/context-log.interface';
+import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
+import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 import { RegisterUserAdminManagerDto } from './dto/register-user-adminManager.dto';
 
 @Injectable()
@@ -56,7 +57,7 @@ class AuthService {
     const oauth2Client = new google.auth.OAuth2(
       envs.emailClientId,
       envs.emailClientSecret,
-      'http://localhost',
+      envs.frontendUrl,
     );
 
     oauth2Client.setCredentials({
@@ -157,9 +158,9 @@ class AuthService {
         };
       }
       await this.auditLogsService.create({
-        level: LogLevel.info,
+        level: AuditLogLevel.info,
         message: `User ${user.email} logged in`,
-        context: ContextLogs.authService,
+        context: AuditLogContext.authService,
         meta: {
           userId: user._id.toString(),
           ip: requestIp.getClientIp(request),
@@ -345,7 +346,7 @@ class AuthService {
     }
   }
 
-  async verify2faCode(verifiyTwoFactorDto: VerifyTwoFactorDto) {
+  async verify2faCode(verifiyTwoFactorDto: VerifyTwoFactorDto, req: Request) {
     try {
       const user = (await this.usersService.findUserByEmail(
         verifiyTwoFactorDto.email,
@@ -360,6 +361,17 @@ class AuthService {
       });
 
       if (!isValid) throw new BadRequestException('Invalid 2FA code');
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        message: `User ${user.email} logged in with 2FA`,
+        context: AuditLogContext.authService,
+        meta: {
+          userId: user._id.toString(),
+          ip: requestIp.getClientIp(req),
+          userAgent: req.headers['user-agent'],
+          timestamp: new Date().toISOString(),
+        },
+      });
       return { message: '2FA code verified', user: this.refreshToken(user) };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

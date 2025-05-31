@@ -1,4 +1,6 @@
-// base-user-fields.dto.ts
+// Objective : Define a DTO for base user fields with validation rules
+
+//* NestJS modules
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEmail,
@@ -10,8 +12,24 @@ import {
   IsArray,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
+
+// * Interfaces
 import { ValidRoles } from '../interfaces';
 
+/**
+ * Base user fields data transfer object
+ * @export
+ * @class BaseUserFieldsDto
+ * @example
+ * {
+ *  "email": "test@gmail.com"
+ * "phone": "123456789",
+ * "name": "Test",
+ * "lastName1": "Example",
+ * "lastName2": "Api",
+ * "roles": ["client"]
+ * }
+ */
 export class BaseUserFieldsDto {
   @ApiPropertyOptional({ description: 'User email', example: 'test@gmail.com' })
   @Transform(({ value }) => value?.toLowerCase()?.trim())

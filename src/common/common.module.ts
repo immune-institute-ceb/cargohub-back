@@ -1,5 +1,8 @@
 // Common Module to export ExceptionsService.
+//* NestJs Modules
 import { Module } from '@nestjs/common';
+
+//* Services
 import { ExceptionsService } from './exceptions/exceptions.service';
 
 @Module({

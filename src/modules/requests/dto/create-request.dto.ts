@@ -1,5 +1,5 @@
-// Objective: Define a DTO for creating a Request with validation and transformation rules.
-import { IsCity } from '@common/validators/is-city.validator';
+// Objective: Define a DTO for creating a Request with validatio
+import { IsCity } from '@common/validators';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsString, IsNotEmpty } from 'class-validator';

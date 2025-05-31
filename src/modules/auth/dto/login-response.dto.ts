@@ -1,5 +1,9 @@
 // Purpose: DTO for login response.
+
+//* NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
+
+// * Entities
 import { User } from '../../users/entities/user.entity';
 
 /**

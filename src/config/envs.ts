@@ -2,6 +2,7 @@
 import 'dotenv/config';
 import * as joi from 'joi';
 
+// Interface to define the structure of environment variables
 interface EnvVars {
   PORT: number;
   JWT_SECRET: string;
@@ -14,6 +15,7 @@ interface EnvVars {
   FRONTEND_URL: string;
 }
 
+// Envs schema using Joi for validation
 const envsSchema = joi
   .object({
     PORT: joi.number().required().default(3000),
@@ -36,6 +38,7 @@ if (error) {
 
 const envVars: EnvVars = value;
 
+// Exporting the validated environment variables
 export const envs = {
   port: envVars.PORT,
   jwtSecret: envVars.JWT_SECRET,

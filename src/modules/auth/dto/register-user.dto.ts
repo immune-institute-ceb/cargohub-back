@@ -1,13 +1,39 @@
-// register-user.dto.ts
+// Objective: Define a DTO for registering a user with optional client or carrier data, ensuring role consistency and validation.
+
+//* NestJS modules
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
+
+// * DTOs
 import { BaseUserFieldsDto } from './base-user-fields.dto';
 import { CreateClientDto } from '@modules/clients/dto/create-client.dto';
 import { CreateCarrierDto } from '@modules/carriers/dto/create-carrier.dto';
-import { IsRequiredIfRole, RoleDataConsistency } from '@common/validators';
+
+//* Interfaces
 import { ValidRoles } from '../interfaces';
 
+// * Validators
+import { IsRequiredIfRole, RoleDataConsistency } from '@common/validators';
+
+/**
+ * Data transfer object for registering a user with optional client or carrier data
+ * @export
+ * @class RegisterUserDto
+ * @example
+ * {
+ *  "email": "test@gmail.com",
+ *  "phone": "123456789",
+ * "name": "Test",
+ * "lastName1": "Example",
+ * "lastName2": "Api",
+ * "roles": "client",
+ * "clientData": {
+ *    "clientField1": "value1",
+ *   "clientField2": "value2"
+ * },
+ * "carrierData": null
+ */
 export class RegisterUserDto extends BaseUserFieldsDto {
   @ApiProperty({ description: 'User email', example: 'test@gmail.com' })
   email: string;

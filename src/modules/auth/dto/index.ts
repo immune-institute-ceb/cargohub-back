@@ -8,3 +8,4 @@ export { UpdateUserDto } from './update-user.dto';
 export { Generate2faCodeResponseDto } from './generate-2fa-code-response.dto';
 export { TwoFactorDto } from './two-factor.dto';
 export { VerifyTwoFactorDto } from './verify-two-factor.dto';
+export { RegisterUserAdminManagerDto } from './register-user-adminManager.dto';

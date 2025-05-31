@@ -1,8 +1,19 @@
+// Objective: Implement the service for the audit logs module
+
+//* NestJS modules
 import { Injectable } from '@nestjs/common';
-import { CreateAuditLogDto } from './dto/create-audit-log.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { AuditLog } from './entities/audit-log.entity';
+
+//* External modules
 import { Model } from 'mongoose';
+
+//* DTOs
+import { CreateAuditLogDto } from './dto/create-audit-log.dto';
+
+// * Entities
+import { AuditLog } from './entities/audit-log.entity';
+
+// * Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 
 @Injectable()

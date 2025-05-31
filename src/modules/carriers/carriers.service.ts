@@ -1,6 +1,7 @@
 // Objective: Implement the service of the carriers module to manage carrier entities.
 //* NestJS modules
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -25,6 +26,8 @@ import { RoutesService } from '@modules/rutas/route.service';
 import { TruckStatus } from '@modules/trucks/interfaces/truck-status.interface';
 import { CarrierStatus } from './interfaces/carrier-status.interface';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
+import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
+import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 
 @Injectable()
 export class CarriersService {
@@ -123,13 +126,13 @@ export class CarriersService {
       const carrier = await this.carrierModel.findById(id);
       if (!carrier) throw new NotFoundException('Carrier not found');
       if (carrier.status === status) {
-        throw new NotFoundException(`Carrier already has status: ${status}`);
+        throw new BadRequestException(`Carrier already has status: ${status}`);
       }
       if (
         status === CarrierStatus.resting &&
         carrier.status !== CarrierStatus.available
       ) {
-        throw new NotFoundException('Carrier must be available to rest');
+        throw new BadRequestException('Carrier must be available to rest');
       }
       const carrierUpdated = await this.carrierModel.findByIdAndUpdate(
         id,
@@ -152,6 +155,16 @@ export class CarriersService {
       if (newTruckStatus) {
         await this.trucksService.updateTruckStatus(truckId, newTruckStatus);
       }
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.carriersService,
+        message: `Carrier status updated to ${status}`,
+        meta: {
+          carrierId: id,
+          userId: carrierUpdated.user?._id?.toString(),
+          truckId: truckId,
+        },
+      });
       return carrierUpdated;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -163,13 +176,13 @@ export class CarriersService {
       const carrier = await this.carrierModel.findById(carrierId);
       if (!carrier) throw new NotFoundException('Carrier not found');
       if (carrier.status === status) {
-        throw new NotFoundException(`Carrier already has status: ${status}`);
+        throw new BadRequestException(`Carrier already has status: ${status}`);
       }
       if (
         status === CarrierStatus.resting &&
         carrier.status !== CarrierStatus.available
       ) {
-        throw new NotFoundException('Carrier must be available to rest');
+        throw new BadRequestException('Carrier must be available to rest');
       }
       if (
         status === CarrierStatus.available &&
@@ -177,7 +190,7 @@ export class CarriersService {
       ) {
         const routes = await this.routesService.findRoutesByCarrier(carrierId);
         if (routes && routes.length > 0) {
-          throw new NotFoundException(
+          throw new BadRequestException(
             'Carrier has assigned routes and cannot be set to available',
           );
         }
@@ -221,14 +234,14 @@ export class CarriersService {
         truckExists.status === TruckStatus.onRoute ||
         truckExists.status === TruckStatus.maintenance
       ) {
-        throw new NotFoundException('Truck is not available');
+        throw new BadRequestException('Truck is not available');
       }
       if (
         carrier.status === CarrierStatus.onRoute ||
         carrier.status === CarrierStatus.assigned ||
         carrier.status === CarrierStatus.resting
       ) {
-        throw new NotFoundException('Carrier is not available');
+        throw new BadRequestException('Carrier is not available');
       }
       if (carrier.truck?._id && carrier.truck._id.toString() !== truckId) {
         await this.trucksService.updateTruckStatus(
@@ -257,10 +270,10 @@ export class CarriersService {
       if (!carrier) throw new NotFoundException('Carrier not found');
 
       if (!carrier.truck) {
-        throw new NotFoundException('Carrier does not have a truck assigned');
+        throw new BadRequestException('Carrier does not have a truck assigned');
       }
       if (carrier.status === CarrierStatus.onRoute) {
-        throw new NotFoundException('Carrier is currently on a route');
+        throw new BadRequestException('Carrier is currently on a route');
       }
       await this.trucksService.updateTruckStatus(
         carrier.truck._id.toString(),

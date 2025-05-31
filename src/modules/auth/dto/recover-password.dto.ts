@@ -1,4 +1,6 @@
 // Purpose: DTO for recover password.
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail } from 'class-validator';
 
