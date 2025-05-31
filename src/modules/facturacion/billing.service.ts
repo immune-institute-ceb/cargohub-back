@@ -183,6 +183,29 @@ export class BillingService {
       this.exceptionsService.handleDBExceptions(error);
     }
   }
+
+  async getMensualBilling() {
+    try {
+      const currentMonth = new Date().getMonth();
+      const billings = (await this.getBillingWithFullPopulate(
+        this.billingModel.find({
+          issueDate: {
+            $gte: new Date(new Date().setMonth(currentMonth, 1)),
+            $lt: new Date(new Date().setMonth(currentMonth + 1, 1)),
+          },
+        }),
+      )) as Billing[];
+      const totalAmount = billings.reduce(
+        (acc, billing) => acc + billing.billingAmount,
+        0,
+      );
+
+      return totalAmount;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
   async calcAmount(routeId: string) {
     try {
       const route = await this.routesService.findRouteById(routeId);

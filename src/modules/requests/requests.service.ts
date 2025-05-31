@@ -28,6 +28,7 @@ import { RequestStatus } from './interfaces/request-status.interface';
 import { RouteStatus } from '@modules/rutas/interfaces/route-status.interface';
 import { BillingService } from '@modules/facturacion/billing.service';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
+import { ClientsStatus } from '@modules/clients/interfaces/active-clients.interface';
 
 @Injectable()
 export class RequestsService {
@@ -58,6 +59,11 @@ export class RequestsService {
       });
       if (existingRequest) {
         throw new NotFoundException('Request already exists for this client');
+      }
+      if (client.status === ClientsStatus.inactive) {
+        throw new BadRequestException(
+          'Client is inactive and cannot create new requests',
+        );
       }
       const request = await this.requestModel.create(createRequestDto);
       if (!request) {
@@ -129,6 +135,25 @@ export class RequestsService {
       const request = await this.requestModel.findById(id).lean();
       if (!request) {
         throw new NotFoundException('Request not found');
+      }
+      const client = await this.clientsService.findOne(
+        request.clientId.toString(),
+      );
+      if (!client) {
+        throw new NotFoundException('Client not found for this request');
+      }
+      if (client.status === ClientsStatus.inactive) {
+        throw new BadRequestException(
+          'Client is inactive and cannot update request status',
+        );
+      }
+      if (
+        status === RequestStatus.cancelled &&
+        request.status !== RequestStatus.pending
+      ) {
+        throw new BadRequestException(
+          'Request can only be cancelled if it is pending',
+        );
       }
 
       if (request.status === status) {
