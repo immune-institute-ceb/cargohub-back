@@ -4,4 +4,5 @@ export enum RequestStatus {
   pending = 'pending',
   done = 'done',
   completed = 'completed',
+  cancelled = 'cancelled',
 }

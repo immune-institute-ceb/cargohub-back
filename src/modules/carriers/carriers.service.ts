@@ -111,21 +111,23 @@ export class CarriersService {
 
   async updateStatus(id: string, status: CarrierStatus) {
     try {
-      const carrierUpdated = await this.carrierModel.findOneAndUpdate(
-        { _id: id },
-        { status },
-        { new: true },
-      );
-
-      if (!carrierUpdated) {
-        throw new NotFoundException('Carrier not found');
+      const carrier = await this.carrierModel.findById(id);
+      if (!carrier) throw new NotFoundException('Carrier not found');
+      if (carrier.status === status) {
+        throw new NotFoundException(`Carrier already has status: ${status}`);
       }
       if (
         status === CarrierStatus.resting &&
-        carrierUpdated.status !== CarrierStatus.available
+        carrier.status !== CarrierStatus.available
       ) {
         throw new NotFoundException('Carrier must be available to rest');
       }
+      const carrierUpdated = await this.carrierModel.findByIdAndUpdate(
+        id,
+        { status },
+        { new: true },
+      );
+      if (!carrierUpdated) throw new NotFoundException('Carrier not found');
 
       const truckId = carrierUpdated.truck?._id?.toString();
       if (!truckId) return;
@@ -141,6 +143,37 @@ export class CarriersService {
       if (newTruckStatus) {
         await this.trucksService.updateTruckStatus(truckId, newTruckStatus);
       }
+      return carrierUpdated;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async updateCarrierStatus(carrierId: string, status: CarrierStatus) {
+    try {
+      const carrier = await this.carrierModel.findById(carrierId);
+      if (!carrier) throw new NotFoundException('Carrier not found');
+      if (carrier.status === status) {
+        throw new NotFoundException(`Carrier already has status: ${status}`);
+      }
+      if (
+        status === CarrierStatus.resting &&
+        carrier.status !== CarrierStatus.available
+      ) {
+        throw new NotFoundException('Carrier must be available to rest');
+      }
+      if (
+        status === CarrierStatus.available &&
+        carrier.status !== CarrierStatus.available
+      ) {
+        const routes = await this.routesService.findRoutesByCarrier(carrierId);
+        if (routes && routes.length > 0) {
+          throw new NotFoundException(
+            'Carrier has assigned routes and cannot be set to available',
+          );
+        }
+      }
+      await this.updateStatus(carrierId, status);
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -183,7 +216,8 @@ export class CarriersService {
       }
       if (
         carrier.status === CarrierStatus.onRoute ||
-        carrier.status === CarrierStatus.assigned
+        carrier.status === CarrierStatus.assigned ||
+        carrier.status === CarrierStatus.resting
       ) {
         throw new NotFoundException('Carrier is not available');
       }

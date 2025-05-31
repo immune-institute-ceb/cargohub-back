@@ -20,6 +20,7 @@ import { RequestsModule } from '@modules/requests/requests.module';
 import { TrucksModule } from './modules/trucks/trucks.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     RequestsModule,
     TrucksModule,
     AuditLogsModule,
+    DashboardModule,
   ],
 })
 export class AppModule {}
