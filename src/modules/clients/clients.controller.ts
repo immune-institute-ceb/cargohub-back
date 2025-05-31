@@ -3,6 +3,7 @@
 //* NestJS modules
 import { Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import {
+  ApiBearerAuth,
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
@@ -18,8 +19,12 @@ import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 //* Entities
 import { Client } from './entities/client.entity';
 
+// * Decorators
+import { Auth } from '@modules/auth/decorators/auth.decorator';
+
 // * Services
 import { ClientsService } from './clients.service';
+import { ValidRoles } from '@modules/auth/interfaces';
 import { ClientsStatus } from './interfaces/active-clients.interface';
 
 @ApiTags('Clients')
@@ -39,6 +44,8 @@ export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
 
   @Get()
+  @ApiBearerAuth()
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
     description: 'List of all clients',
@@ -50,6 +57,8 @@ export class ClientsController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
     description: 'Client found',

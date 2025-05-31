@@ -23,6 +23,7 @@ import {
 import { Auth } from '@modules/auth/decorators';
 import { TruckStatus } from './interfaces/truck-status.interface';
 import { FinalTruckStatus } from './dto/update-status.dto';
+import { ValidRoles } from '@modules/auth/interfaces';
 
 @Controller('trucks')
 export class TrucksController {
@@ -30,7 +31,7 @@ export class TrucksController {
 
   @Post()
   @ApiBearerAuth()
-  @Auth()
+  @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Create a new truck' })
   @ApiCreatedResponse({
     description: 'Truck created successfully',
@@ -41,16 +42,22 @@ export class TrucksController {
   }
 
   @Get()
+  @ApiBearerAuth()
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   findAll() {
     return this.trucksService.findAll();
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   findOne(@Param('id', ParseMongoIdPipe) id: string) {
     return this.trucksService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @Auth(ValidRoles.admin)
   update(
     @Param('id', ParseMongoIdPipe) id: string,
     @Body() updateTruckDto: UpdateTruckDto,
@@ -59,6 +66,8 @@ export class TrucksController {
   }
 
   @Patch('status/:id')
+  @ApiBearerAuth()
+  @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Update truck status' })
   @ApiQuery({
     name: 'status',
@@ -82,6 +91,8 @@ export class TrucksController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @Auth(ValidRoles.admin)
   remove(@Param('id', ParseMongoIdPipe) id: string) {
     return this.trucksService.remove(id);
   }
