@@ -2,6 +2,7 @@
 
 //* NestJS modules
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -62,22 +63,36 @@ export class BillingService {
 
   async updateBillingStatus(billingId: string, status: BillingStatus) {
     try {
-      const updatedBilling = await this.billingModel.findByIdAndUpdate(
-        billingId,
-        { status },
-        { new: true },
-      );
-      if (!updatedBilling) {
-        throw new NotFoundException('Billing not found');
+      const billing = await this.billingModel.findById(billingId);
+      if (!billing) throw new NotFoundException('Billing not found');
+      if (billing.status === status) {
+        throw new BadRequestException(`Billing already has status: ${status}`);
       }
+      // if (
+      //   billing.status === BillingStatus.paid ||
+      //   billing.status === BillingStatus.cancelled
+      // ) {
+      //   throw new BadRequestException(
+      //     `Billing with status ${billing.status} cannot be updated`,
+      //   );
+      // }
+
       if (status === BillingStatus.paid) {
-        await this.requestsService.updateStatus(
-          updatedBilling.requestId.toString(),
+        const updatedRequest = await this.requestsService.updateStatus(
+          billing.requestId.toString(),
           RequestStatus.completed,
         );
-        updatedBilling.paidDate = new Date();
+        console.log(updatedRequest);
+        if (updatedRequest) {
+          billing.paidDate = new Date();
+          billing.status = status;
+          const updatedBilling = await billing.save();
+          return updatedBilling;
+        }
       }
-      return updatedBilling;
+      billing.status = status;
+      await billing.save();
+      return billing;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -87,10 +102,11 @@ export class BillingService {
     try {
       const billing = await this.billingModel.findOneAndDelete({ _id: id });
       if (billing && billing.requestId) {
-        await this.requestsService.updateStatus(
+        const request = await this.requestsService.findOne(
           billing.requestId.toString(),
-          RequestStatus.inProgress,
         );
+        request.status = RequestStatus.inProgress;
+        await request.save();
       }
       return { message: 'Billing deleted' };
     } catch (error) {

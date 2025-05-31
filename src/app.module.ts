@@ -19,9 +19,11 @@ import { CarriersModule } from './modules/carriers/carriers.module';
 import { RequestsModule } from '@modules/requests/requests.module';
 import { TrucksModule } from './modules/trucks/trucks.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: 'src/config/env/.env',

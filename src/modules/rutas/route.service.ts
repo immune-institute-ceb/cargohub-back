@@ -81,6 +81,11 @@ export class RoutesService {
           'Route must be in transit to mark as done',
         );
       }
+      if (route.status === RouteStatus.done) {
+        throw new BadRequestException(
+          'Route is already marked as done and cannot be updated',
+        );
+      }
 
       if (
         (status === RouteStatus.inTransit || status === RouteStatus.done) &&
@@ -94,6 +99,16 @@ export class RoutesService {
       const requestId = route.request?._id?.toString();
       if (!requestId) {
         throw new NotFoundException('Request ID not found for this route');
+      }
+
+      const request = await this.requestsService.findOne(requestId);
+      if (
+        request.status === RequestStatus.done ||
+        request.status === RequestStatus.completed
+      ) {
+        throw new BadRequestException(
+          'Cannot update route status because the request is already done or completed',
+        );
       }
 
       switch (status) {
@@ -126,6 +141,13 @@ export class RoutesService {
             RequestStatus.pending,
           );
           break;
+        case RouteStatus.done:
+          if (route.carrier && route.carrier._id) {
+            await this.carriersService.updateStatus(
+              route.carrier._id.toString(),
+              CarrierStatus.available,
+            );
+          }
       }
 
       route.status = status;

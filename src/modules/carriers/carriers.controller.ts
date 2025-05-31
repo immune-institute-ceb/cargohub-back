@@ -2,7 +2,16 @@
 // Endpoints:
 
 //* NestJS Modules
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  ParseEnumPipe,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
@@ -20,6 +29,8 @@ import { Carrier } from './entities/carrier.entity';
 
 //* Services
 import { CarriersService } from './carriers.service';
+import { CarrierStatus } from './interfaces/carrier-status.interface';
+import { FinalCarrierStatus } from '@modules/clients/dto/update-status.dto';
 
 @ApiTags('Carriers')
 @ApiNotFoundResponse({
@@ -78,5 +89,21 @@ export class CarriersController {
   @ApiOperation({ summary: 'Unassign a truck from a carrier' })
   unassignTruck(@Param('carrierId', ParseMongoIdPipe) carrierId: string) {
     return this.carriersService.unassignTruck(carrierId);
+  }
+
+  @Patch(':carrierId/status')
+  @ApiOperation({ summary: 'Update carrier status' })
+  updateCarrierStatus(
+    @Param('carrierId', ParseMongoIdPipe) carrierId: string,
+    @Query(
+      'status',
+      new ParseEnumPipe([CarrierStatus.resting, CarrierStatus.available], {
+        errorHttpStatusCode: 400,
+        exceptionFactory: () => new BadRequestException('Status must be done'),
+      }),
+    )
+    status: FinalCarrierStatus,
+  ) {
+    return this.carriersService.updateStatus(carrierId, status);
   }
 }

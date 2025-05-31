@@ -29,6 +29,7 @@ import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
     forwardRef(() => ClientsModule),
     forwardRef(() => RoutesModule),
     forwardRef(() => BillingModule),
+
     MongooseModule.forFeature([
       {
         name: Requests.name,

@@ -126,33 +126,36 @@ export class RequestsService {
 
   async updateStatus(id: string, status: RequestStatus) {
     try {
-      const request = await this.requestModel.findById(id);
-      if (!request) throw new NotFoundException('Request not found');
+      const request = await this.requestModel.findById(id).lean();
+      if (!request) {
+        throw new NotFoundException('Request not found');
+      }
 
       if (request.status === status) {
         throw new BadRequestException('Request already has this status');
       }
 
-      const route = await this.routesService.findRouteById(
-        request.routeId.toString(),
-      );
-      if (!route) {
-        throw new BadRequestException('Route not found for this request');
+      if (request.status === RequestStatus.completed) {
+        throw new BadRequestException(
+          'Request is already marked as completed and cannot be updated',
+        );
       }
 
-      if (
-        (status === RequestStatus.done || status === RequestStatus.completed) &&
-        route.status !== RouteStatus.done
-      ) {
-        throw new BadRequestException(
-          'Route must be done before request can be marked as done or completed',
+      if (status === RequestStatus.done || status === RequestStatus.completed) {
+        const route = await this.routesService.findRouteById(
+          request.routeId.toString(),
         );
+        if (!route || route.status !== RouteStatus.done) {
+          throw new BadRequestException(
+            'Route must be done before request can be marked as done or completed',
+          );
+        }
       }
 
       const updatedRequest = await this.requestModel.findByIdAndUpdate(
         id,
         { status },
-        { new: true },
+        { new: true }, // returns updated document
       );
 
       if (!updatedRequest) {

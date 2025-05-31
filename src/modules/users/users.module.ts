@@ -20,10 +20,16 @@ import { CommonModule } from '@common/common.module';
 import { ClientsModule } from '@modules/clients/clients.module';
 import { CarriersModule } from '@modules/carriers/carriers.module';
 import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
+import { UserCleanupService } from '@common/cleanBBDD/userCleanUp.service';
+import {
+  Carrier,
+  CarrierSchema,
+} from '@modules/carriers/entities/carrier.entity';
+import { Client, ClientSchema } from '@modules/clients/entities/client.entity';
 
 @Module({
   controllers: [UsersController],
-  providers: [UsersService],
+  providers: [UsersService, UserCleanupService],
   exports: [UsersService],
   imports: [
     CommonModule,
@@ -38,6 +44,14 @@ import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
       {
         name: User.name,
         schema: UserSchema,
+      },
+      {
+        name: Carrier.name,
+        schema: CarrierSchema,
+      },
+      {
+        name: Client.name,
+        schema: ClientSchema,
       },
     ]),
   ],
