@@ -28,6 +28,8 @@ import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 
 // * Interfaces
 import { ClientsStatus } from './interfaces/active-clients.interface';
+import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
+import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 
 @Injectable()
 export class ClientsService {
@@ -139,6 +141,17 @@ export class ClientsService {
       }
       client.status = status;
       const updatedClient = await client.save();
+
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.clientsService,
+        message: `Client status updated to ${status}`,
+        meta: {
+          clientId: id,
+          userId: client.user?._id?.toString(),
+          status: updatedClient.status,
+        },
+      });
 
       return {
         message: 'Client status updated successfully',
