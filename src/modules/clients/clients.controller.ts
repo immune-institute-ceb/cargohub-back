@@ -38,13 +38,13 @@ import { ClientsStatus } from './interfaces/active-clients.interface';
   },
 })
 @ApiBadRequestResponse({ description: 'Bad Request' })
+@ApiBearerAuth()
 @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
 @Controller('clients')
 export class ClientsController {
   constructor(private readonly clientsService: ClientsService) {}
 
   @Get()
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
@@ -57,7 +57,6 @@ export class ClientsController {
   }
 
   @Get(':id')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
@@ -82,6 +81,7 @@ export class ClientsController {
     description: 'New status for the client',
     enum: ClientsStatus,
   })
+  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   updateStatus(
     @Param('id', ParseMongoIdPipe) id: string,
     @Query('status') status: ClientsStatus,

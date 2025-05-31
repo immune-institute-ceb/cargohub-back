@@ -49,13 +49,13 @@ import { ValidRoles } from '@modules/auth/interfaces';
   },
 })
 @ApiBadRequestResponse({ description: 'Bad Request' })
+@ApiBearerAuth()
 @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
 @Controller('carriers')
 export class CarriersController {
   constructor(private readonly carriersService: CarriersService) {}
 
   @Get()
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
@@ -68,7 +68,6 @@ export class CarriersController {
   }
 
   @Get(':id')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
@@ -81,7 +80,6 @@ export class CarriersController {
   }
 
   @Get('carrierRoutes/:carrierId')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiOperation({ summary: 'Get routes assigned to a carrier' })
   getCarrierRoutes(@Param('carrierId', ParseMongoIdPipe) carrierId: string) {
@@ -89,7 +87,6 @@ export class CarriersController {
   }
 
   @Post(':carrierId/assign-truck/:truckId')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Assign a truck to a carrier' })
   assignTruck(
@@ -100,7 +97,6 @@ export class CarriersController {
   }
 
   @Post(':carrierId/unassign-truck')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Unassign a truck from a carrier' })
   unassignTruck(@Param('carrierId', ParseMongoIdPipe) carrierId: string) {
@@ -108,8 +104,7 @@ export class CarriersController {
   }
 
   @Patch(':carrierId/status')
-  @ApiBearerAuth()
-  @Auth(ValidRoles.admin)
+  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.carrier)
   @ApiOperation({ summary: 'Update carrier status' })
   @ApiQuery({
     name: 'status',

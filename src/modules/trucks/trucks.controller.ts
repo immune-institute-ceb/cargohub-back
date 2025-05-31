@@ -26,11 +26,11 @@ import { FinalTruckStatus } from './dto/update-status.dto';
 import { ValidRoles } from '@modules/auth/interfaces';
 
 @Controller('trucks')
+@ApiBearerAuth()
 export class TrucksController {
   constructor(private readonly trucksService: TrucksService) {}
 
   @Post()
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Create a new truck' })
   @ApiCreatedResponse({
@@ -42,21 +42,18 @@ export class TrucksController {
   }
 
   @Get()
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager)
   findAll() {
     return this.trucksService.findAll();
   }
 
   @Get(':id')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager)
   findOne(@Param('id', ParseMongoIdPipe) id: string) {
     return this.trucksService.findOne(id);
   }
 
   @Patch(':id')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin)
   update(
     @Param('id', ParseMongoIdPipe) id: string,
@@ -66,7 +63,6 @@ export class TrucksController {
   }
 
   @Patch('status/:id')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Update truck status' })
   @ApiQuery({
@@ -91,7 +87,6 @@ export class TrucksController {
   }
 
   @Delete(':id')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin)
   remove(@Param('id', ParseMongoIdPipe) id: string) {
     return this.trucksService.remove(id);

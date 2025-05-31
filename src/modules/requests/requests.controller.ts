@@ -43,6 +43,7 @@ import { FinalClientStatus } from './dto/update-status.dto';
 
 @ApiTags('Requests')
 @ApiNotFoundResponse({ description: 'Request not found' })
+@ApiBearerAuth()
 @ApiBadRequestResponse({ description: 'Bad Request' })
 @ApiInternalServerErrorResponse({ description: 'Internal Server Error' })
 @Controller('requests')
@@ -50,7 +51,6 @@ export class RequestsController {
   constructor(private readonly requestsService: RequestsService) {}
 
   @Post()
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.client)
   @ApiOperation({ summary: 'Create a new request' })
   @ApiCreatedResponse({
@@ -61,7 +61,6 @@ export class RequestsController {
   }
 
   @Get('clientRequest/:clientId')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiOperation({ summary: 'Get all requests by Client Id (not userId)' })
   @ApiResponse({
@@ -76,7 +75,6 @@ export class RequestsController {
   }
 
   @Get(':requestId')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiOperation({ summary: 'Get a request by id' })
   @ApiResponse({
@@ -89,7 +87,6 @@ export class RequestsController {
   }
 
   @Patch('status/:requestId')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.client)
   @ApiOperation({ summary: 'Update request status' })
   @ApiResponse({
@@ -117,7 +114,6 @@ export class RequestsController {
   }
 
   @Delete(':requestId')
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin, ValidRoles.client)
   @ApiOperation({ summary: 'Delete a request' })
   @ApiResponse({

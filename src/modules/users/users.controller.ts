@@ -48,6 +48,7 @@ import { ValidRoles } from '@modules/auth/interfaces';
 @ApiInternalServerErrorResponse({
   description: 'Internal Server Error, check the logs',
 })
+@ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -58,7 +59,6 @@ export class UsersController {
     type: User,
   })
   @ApiOperation({ summary: 'Get user information by Token' })
-  @ApiBearerAuth()
   @Auth(ValidRoles.admin)
   getUser(@GetUser() user: UserWithRelations) {
     return this.usersService.getUser(user);
@@ -87,7 +87,6 @@ export class UsersController {
     },
   })
   @ApiOperation({ summary: 'Update user information' })
-  @ApiBearerAuth()
   @Auth()
   update(
     @Body() updateUserDto: UpdateUserDto,
@@ -110,7 +109,6 @@ export class UsersController {
     },
   })
   @ApiOperation({ summary: 'Delete user and its related data by Token' })
-  @ApiBearerAuth()
   @Auth()
   deleteUser(@GetUser() user: UserWithRelations) {
     return this.usersService.deleteUser(user);
@@ -130,8 +128,7 @@ export class UsersController {
     },
   })
   @ApiOperation({ summary: 'Delete user by admin' })
-  @ApiBearerAuth()
-  @Auth()
+  @Auth(ValidRoles.admin)
   deleteUserByAdmin(@Param('id') id: string) {
     return this.usersService.deleteUserByAdmin(id);
   }
