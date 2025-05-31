@@ -24,6 +24,7 @@ import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { Requests } from '@modules/requests/entities/request.entity';
 import { RequestsService } from '@modules/requests/requests.service';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
+import { ClientsStatus } from './interfaces/active-clients.interface';
 
 @Injectable()
 export class ClientsService {
@@ -80,6 +81,17 @@ export class ClientsService {
     }
   }
 
+  async getActiveClientsCount() {
+    try {
+      const activeClientsCount = await this.clientModel.countDocuments({
+        status: ClientsStatus.active,
+      });
+      return activeClientsCount;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
   async findDuplicateClient(
     companyCIF: string,
     companyName: string,
@@ -111,6 +123,25 @@ export class ClientsService {
       return {
         message: 'Client updated',
         clientUpdated,
+      };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async updateStatus(id: string, status: ClientsStatus) {
+    try {
+      const client = await this.clientModel.findById(id);
+      if (!client) throw new NotFoundException('Client not found');
+      if (client.status === status) {
+        throw new NotFoundException('Client already has this status');
+      }
+      client.status = status;
+      const updatedClient = await client.save();
+
+      return {
+        message: 'Client status updated successfully',
+        updatedClient,
       };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

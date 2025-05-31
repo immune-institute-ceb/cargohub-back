@@ -1,12 +1,13 @@
 // Objective: Implement the controller of the clients module to manage client entities.
 
 //* NestJS modules
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -23,6 +24,7 @@ import { Auth } from '@modules/auth/decorators/auth.decorator';
 // * Services
 import { ClientsService } from './clients.service';
 import { ValidRoles } from '@modules/auth/interfaces';
+import { ClientsStatus } from './interfaces/active-clients.interface';
 
 @ApiTags('Clients')
 @ApiNotFoundResponse({
@@ -62,5 +64,25 @@ export class ClientsController {
   @ApiOperation({ summary: 'Get client by ID' })
   findOne(@Param('id', ParseMongoIdPipe) id: string) {
     return this.clientsService.findOne(id);
+  }
+
+  @Patch(':id/status')
+  @ApiResponse({
+    status: 200,
+    description: 'Client status updated successfully',
+    type: Client,
+  })
+  @ApiOperation({ summary: 'Update client status' })
+  @ApiQuery({
+    name: 'status',
+    required: true,
+    description: 'New status for the client',
+    enum: ClientsStatus,
+  })
+  updateStatus(
+    @Param('id', ParseMongoIdPipe) id: string,
+    @Query('status') status: ClientsStatus,
+  ) {
+    return this.clientsService.updateStatus(id, status);
   }
 }

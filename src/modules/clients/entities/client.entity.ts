@@ -2,7 +2,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import mongoose, { Document, Types } from 'mongoose';
-import { ActiveClientsStatus } from '../interfaces/active-clients.interface';
+import { ClientsStatus } from '../interfaces/active-clients.interface';
 
 /**
  * Client entity schema
@@ -61,15 +61,15 @@ export class Client extends Document {
 
   @ApiProperty({
     description: 'Client status',
-    enum: ActiveClientsStatus,
-    example: ActiveClientsStatus.active,
+    enum: ClientsStatus,
+    example: ClientsStatus.active,
   })
   @Prop({
     index: true,
-    enum: ActiveClientsStatus,
-    default: ActiveClientsStatus.active,
+    enum: ClientsStatus,
+    default: ClientsStatus.active,
   })
-  status: ActiveClientsStatus;
+  status: ClientsStatus;
 
   @ApiProperty({
     description: 'User id',

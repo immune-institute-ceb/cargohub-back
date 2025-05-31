@@ -100,13 +100,13 @@ export class RequestsController {
     name: 'status',
     required: true,
     description: 'New status for the request',
-    enum: [RequestStatus.done],
+    enum: [RequestStatus.done, RequestStatus.cancelled],
   })
   updateStatus(
     @Param('requestId', ParseMongoIdPipe) id: string,
     @Query(
       'status',
-      new ParseEnumPipe([RequestStatus.done], {
+      new ParseEnumPipe([RequestStatus.done, RequestStatus.cancelled], {
         errorHttpStatusCode: 400,
         exceptionFactory: () => new BadRequestException('Status must be done'),
       }),
