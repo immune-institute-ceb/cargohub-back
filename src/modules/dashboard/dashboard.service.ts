@@ -20,16 +20,30 @@ export class DashboardService {
     try {
       const [clients, carriers, billing, routes] = await Promise.all([
         this.clientsService.getActiveClientsCount(),
-        this.carriersService.findAll(),
+        this.carriersService.getCarriersCount(),
         this.billingService.getMensualBilling(),
         this.routesService.getInTransitRoutesCount(),
       ]);
 
+      const yearRequestsPendingByMonth =
+        await this.requestsService.getYearRequestsPendingCountByMonth();
+      const yearRequestsCompletedByMonth =
+        await this.requestsService.getYearRequestsCompletedCountByMonth();
+
+      const requestsStatus =
+        await this.requestsService.getRequestsStatusCount();
       return {
-        clients,
-        carriers,
-        billing,
-        routes,
+        kpis: {
+          activeClients: clients,
+          carriers,
+          activeRoutes: routes,
+          monthlyRevenue: billing,
+        },
+        monthlyRequests: {
+          completed: yearRequestsCompletedByMonth,
+          pending: yearRequestsPendingByMonth,
+        },
+        requestsStatus,
       };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

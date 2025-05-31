@@ -130,6 +130,112 @@ export class RequestsService {
     }
   }
 
+  async getYearRequestsPendingCountByMonth() {
+    try {
+      const currentYear = new Date().getFullYear();
+      const startOfYear = new Date(currentYear, 0, 1);
+      const endOfYear = new Date(currentYear, 11, 31);
+
+      const requests = await this.requestModel.aggregate([
+        {
+          $match: {
+            status: RequestStatus.pending,
+            createdAt: { $gte: startOfYear, $lte: endOfYear },
+          },
+        },
+        {
+          $group: {
+            _id: { $month: '$createdAt' },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { _id: 1 }, // Sort by month
+        },
+      ]);
+
+      // Fill in months with zero counts
+      const monthlyCounts = Array(12).fill(0);
+      requests.forEach((req) => {
+        monthlyCounts[req._id - 1] = req.count;
+      });
+
+      return monthlyCounts;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async getYearRequestsCompletedCountByMonth() {
+    try {
+      const currentYear = new Date().getFullYear();
+      const startOfYear = new Date(currentYear, 0, 1);
+      const endOfYear = new Date(currentYear, 11, 31);
+
+      const requests = await this.requestModel.aggregate([
+        {
+          $match: {
+            status: RequestStatus.completed,
+            createdAt: { $gte: startOfYear, $lte: endOfYear },
+          },
+        },
+        {
+          $group: {
+            _id: { $month: '$createdAt' },
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { _id: 1 }, // Sort by month
+        },
+      ]);
+
+      // Fill in months with zero counts
+      const monthlyCounts = Array(12).fill(0);
+      requests.forEach((req) => {
+        monthlyCounts[req._id - 1] = req.count;
+      });
+
+      return monthlyCounts;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async getRequestsStatusCount() {
+    try {
+      const requests = await this.requestModel.aggregate([
+        {
+          $group: {
+            _id: '$status',
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $project: {
+            status: '$_id',
+            count: 1,
+            _id: 0,
+          },
+        },
+      ]);
+
+      const statusCount = requests.reduce((acc, req) => {
+        acc[req.status] = req.count;
+        return acc;
+      }, {});
+
+      return {
+        pending: statusCount[RequestStatus.pending] || 0,
+        done: statusCount[RequestStatus.done] || 0,
+        completed: statusCount[RequestStatus.completed] || 0,
+        cancelled: statusCount[RequestStatus.cancelled] || 0,
+      };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
   async updateStatus(id: string, status: RequestStatus) {
     try {
       const request = await this.requestModel.findById(id).lean();
