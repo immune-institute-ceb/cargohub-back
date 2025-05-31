@@ -401,7 +401,7 @@ class AuthService {
     token: string,
   ) {
     try {
-      const url = `${envs.frontendUrl}api/v1/auth/reset-password?_t=${token}`;
+      const url = `${envs.frontendUrl}api/v1/auth/set-password?_t=${token}`;
       await this.transporter.sendMail({
         from: envs.emailUser,
         to: email,

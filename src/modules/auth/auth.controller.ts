@@ -133,7 +133,7 @@ export class AuthController {
     return this.authService.login(loginUserDto, req);
   }
 
-  @Post('reset-password')
+  @Post('set-password')
   @ApiResponse({
     status: 200,
     description: 'Password updated',
