@@ -17,6 +17,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiNotFoundResponse,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -93,6 +94,12 @@ export class CarriersController {
 
   @Patch(':carrierId/status')
   @ApiOperation({ summary: 'Update carrier status' })
+  @ApiQuery({
+    name: 'status',
+    required: true,
+    description: 'New status for the carrier',
+    enum: [CarrierStatus.resting, CarrierStatus.available],
+  })
   updateCarrierStatus(
     @Param('carrierId', ParseMongoIdPipe) carrierId: string,
     @Query(
@@ -104,6 +111,6 @@ export class CarriersController {
     )
     status: FinalCarrierStatus,
   ) {
-    return this.carriersService.updateStatus(carrierId, status);
+    return this.carriersService.updateCarrierStatus(carrierId, status);
   }
 }

@@ -214,6 +214,17 @@ export class RoutesService {
     }
   }
 
+  async getInTransitRoutesCount() {
+    try {
+      const inTransitCount = await this.routeModel.countDocuments({
+        status: RouteStatus.inTransit,
+      });
+      return inTransitCount;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
   async deleteRoute(id: string) {
     try {
       const route = await this.routeModel.findByIdAndDelete(id);
