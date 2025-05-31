@@ -100,7 +100,8 @@ export class AuthController {
     description: 'User Registered',
     type: LoginResponseDto,
   })
-  // @Auth(ValidRoles.admin)
+  @ApiBearerAuth()
+  @Auth(ValidRoles.admin)
   @ApiOperation({ summary: 'Register a new user with adminManager role' })
   registerUserAdminManager(
     @Body() registerUserAdminManagerDto: RegisterUserAdminManagerDto,
