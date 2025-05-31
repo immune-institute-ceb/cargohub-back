@@ -88,6 +88,15 @@ export class CarriersService {
     }
   }
 
+  async getCarriersCount() {
+    try {
+      const count = await this.carrierModel.countDocuments();
+      return count;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
   async update(id: string, updateCarrierDto: UpdateCarrierDto) {
     try {
       const { ...update } = updateCarrierDto;
