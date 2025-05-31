@@ -12,6 +12,7 @@ import { ClientsStatus } from '../interfaces/active-clients.interface';
  * @param companyAddress Company address
  * @param status Client status
  * @param userId User id
+ * @param requests Client requests
  * @returns Client entity schema
  * @example
  * {
@@ -21,6 +22,16 @@ import { ClientsStatus } from '../interfaces/active-clients.interface';
  * companyAddress: '123 Main St, Madrid',
  * status: ['active'],
  * userId: '5f4e6d6f4f6d4f6d4f6d4f6d'
+ * requests: [
+ *  {
+ *    _id: '5f4e6d6f4f6d4f6d4f6d4f6d',
+ *   origin: 'Madrid',
+ *  destination: 'Barcelona',
+ *  request_date: '2023-08-15T10:30:00Z',
+ *  delivery_date: '2023-08-20T14:00:00Z',
+ *  status: 'pending',
+ *  prioriy: 'normal',
+ * }
  * }
  */
 @Schema({ timestamps: true })

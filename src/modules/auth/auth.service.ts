@@ -9,6 +9,9 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
+// * Configs
+import { envs } from '@config/envs';
+
 // * External modules
 import { google } from 'googleapis';
 import { Request } from 'express';
@@ -24,12 +27,15 @@ import {
   ContactDto,
   LoginUserDto,
   RecoverPasswordDto,
+  RegisterUserAdminManagerDto,
   RegisterUserDto,
   TwoFactorDto,
   VerifyTwoFactorDto,
 } from './dto';
 
 //* Interfaces
+import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
+import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 import { JwtPayload, JwtPayloadRecoverPassword } from './interfaces';
 
 //* Services
@@ -39,10 +45,6 @@ import { ExceptionsService } from '@common/exceptions/exceptions.service';
 
 //* Entities
 import { User } from '@modules/users/entities/user.entity';
-import { envs } from '@config/envs';
-import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
-import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
-import { RegisterUserAdminManagerDto } from './dto/register-user-adminManager.dto';
 
 @Injectable()
 class AuthService {

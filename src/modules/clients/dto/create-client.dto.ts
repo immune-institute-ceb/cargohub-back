@@ -1,4 +1,6 @@
 // Objective: Define a DTO for creating a client with validation and transformation rules.
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsAlphanumeric, IsString, Matches, MinLength } from 'class-validator';
@@ -12,13 +14,6 @@ import { IsAlphanumeric, IsString, Matches, MinLength } from 'class-validator';
  *   "companyName": "Test Company",
  *   "companyCIF": "B12345678",
  *   "companyAddress": "123 Main St, Madrid",
- *   "userId": {
- *      "_id": "5f4e6d6f4f6d4f6d4f6d4f6d",
- *      "email": "test@gmail.com",
- *      "firstName": "Test",
- *      "lastName": "User",
- *      "phone": "123456789",
- *  }
  * }
  */
 export class CreateClientDto {

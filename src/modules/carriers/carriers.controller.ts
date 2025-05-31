@@ -23,6 +23,9 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 
+// * DTOs
+import { FinalCarrierStatus } from '@modules/carriers/dto/update-status.dto';
+
 //* Pipes
 import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
@@ -34,9 +37,10 @@ import { Auth } from '@modules/auth/decorators/auth.decorator';
 
 //* Services
 import { CarriersService } from './carriers.service';
-import { CarrierStatus } from './interfaces/carrier-status.interface';
-import { FinalCarrierStatus } from '@modules/clients/dto/update-status.dto';
+
+// * Interfaces
 import { ValidRoles } from '@modules/auth/interfaces';
+import { CarrierStatus } from './interfaces/carrier-status.interface';
 
 @ApiTags('Carriers')
 @ApiNotFoundResponse({

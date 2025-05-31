@@ -3,6 +3,7 @@
 //* NestJS modules
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ScheduleModule } from '@nestjs/schedule';
 
 //* Config
 import { envs } from './config/envs';
@@ -19,7 +20,6 @@ import { CarriersModule } from './modules/carriers/carriers.module';
 import { RequestsModule } from '@modules/requests/requests.module';
 import { TrucksModule } from './modules/trucks/trucks.module';
 import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
-import { ScheduleModule } from '@nestjs/schedule';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({

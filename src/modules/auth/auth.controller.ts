@@ -21,6 +21,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 //* DTOs
 import {
@@ -30,6 +31,7 @@ import {
   LoginResponseDto,
   LoginUserDto,
   RecoverPasswordDto,
+  RegisterUserAdminManagerDto,
   RegisterUserDto,
   TwoFactorDto,
   VerifyTwoFactorDto,
@@ -46,9 +48,9 @@ import { User } from '../users/entities/user.entity';
 
 //* Services
 import AuthService from './auth.service';
-import { AuthGuard } from '@nestjs/passport';
+
+//* Interfaces
 import { ValidRoles } from './interfaces';
-import { RegisterUserAdminManagerDto } from './dto/register-user-adminManager.dto';
 
 @ApiTags('Auth')
 @ApiNotFoundResponse({

@@ -19,13 +19,15 @@ import { UpdateCarrierDto } from './dto/update-carrier.dto';
 // * Entities
 import { Carrier } from './entities/carrier.entity';
 
-//* Modules
+//* Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
+import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 import { TrucksService } from '@modules/trucks/trucks.service';
 import { RoutesService } from '@modules/rutas/route.service';
+
+//* Interfaces
 import { TruckStatus } from '@modules/trucks/interfaces/truck-status.interface';
 import { CarrierStatus } from './interfaces/carrier-status.interface';
-import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
 import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 

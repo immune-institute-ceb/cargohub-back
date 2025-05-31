@@ -1,10 +1,15 @@
+// Objective: Implement the service to manage the dashboard functionality in the application.
+
+// * NestJS modules
+import { Injectable } from '@nestjs/common';
+
+// * Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { CarriersService } from '@modules/carriers/carriers.service';
 import { ClientsService } from '@modules/clients/clients.service';
 import { BillingService } from '@modules/facturacion/billing.service';
 import { RequestsService } from '@modules/requests/requests.service';
 import { RoutesService } from '@modules/rutas/route.service';
-import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class DashboardService {

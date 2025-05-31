@@ -1,8 +1,17 @@
+// Objective: Implement the controller for the dashboard module to manage dashboard-related endpoints.
+
+// * NestJS Modules
 import { Controller, Get } from '@nestjs/common';
-import { DashboardService } from './dashboard.service';
-import { Auth } from '@modules/auth/decorators';
-import { ValidRoles } from '@modules/auth/interfaces';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+
+//* Decorators
+import { Auth } from '@modules/auth/decorators';
+
+// * Services
+import { DashboardService } from './dashboard.service';
+
+// * Interfaces
+import { ValidRoles } from '@modules/auth/interfaces';
 import { DashboardResponseDto } from './dto/response.dto';
 
 @Controller('dashboard')
