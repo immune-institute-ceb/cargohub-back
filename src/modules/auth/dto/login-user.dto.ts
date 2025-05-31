@@ -1,4 +1,6 @@
 // Purpose: DTO for login user endpoint.
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEmail,

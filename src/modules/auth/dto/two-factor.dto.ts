@@ -1,3 +1,6 @@
+// Objective: Define a DTO for two-factor authentication verification with validation rules
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, MinLength, MaxLength, IsNotEmpty } from 'class-validator';
 

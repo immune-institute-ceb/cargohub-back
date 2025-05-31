@@ -1,3 +1,6 @@
+// Objective: Dto to create an audit log entry, with validation rules and Swagger documentation
+
+// * NestJS modules
 import {
   IsEnum,
   IsNotEmpty,
@@ -7,17 +10,31 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { LogLevel } from '../interfaces/log-level.interface';
-import { ContextLogs } from '../interfaces/context-log.interface';
 
+// * Interfaces
+import { AuditLogLevel } from '../interfaces/log-level.interface';
+import { AuditLogContext } from '../interfaces/context-log.interface';
+
+/**
+ * Data transfer object to create an audit log entry
+ * @export
+ * @class CreateAuditLogDto
+ * @example
+ * {
+ *  "level": "info",
+ * "context": "AuthService",
+ * "message": "User created successfully",
+ * "meta": { "userId": "abc123", "ip": "::1" }
+ * }
+ */
 export class CreateAuditLogDto {
   @ApiProperty({
     description: 'Log level',
-    enum: LogLevel,
+    enum: AuditLogLevel,
     example: 'info',
   })
-  @IsEnum(LogLevel, {
-    message: `Level must be one of: ${Object.values(LogLevel).join(', ')}`,
+  @IsEnum(AuditLogLevel, {
+    message: `Level must be one of: ${Object.values(AuditLogLevel).join(', ')}`,
     each: true,
   })
   level: string;
@@ -25,12 +42,12 @@ export class CreateAuditLogDto {
   @ApiProperty({
     description: 'Context or source of the log',
     example: 'AuthService',
-    enum: ContextLogs,
+    enum: AuditLogContext,
   })
   @IsString()
   @IsNotEmpty()
-  @IsEnum(ContextLogs, {
-    message: `Context must be one of: ${Object.values(ContextLogs).join(', ')}`,
+  @IsEnum(AuditLogContext, {
+    message: `Context must be one of: ${Object.values(AuditLogContext).join(', ')}`,
     each: true,
   })
   context: string;

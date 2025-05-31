@@ -2,6 +2,7 @@
 
 //* NestJS modules
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -18,13 +19,17 @@ import { UpdateClientDto } from './dto/update-client.dto';
 
 // * Entities
 import { Client } from './entities/client.entity';
+import { Requests } from '@modules/requests/entities/request.entity';
 
 // * Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
-import { Requests } from '@modules/requests/entities/request.entity';
 import { RequestsService } from '@modules/requests/requests.service';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
+
+// * Interfaces
 import { ClientsStatus } from './interfaces/active-clients.interface';
+import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
+import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 
 @Injectable()
 export class ClientsService {
@@ -38,8 +43,6 @@ export class ClientsService {
   ) {}
   async create(createClientDto: CreateClientDto, userId: Types.ObjectId) {
     try {
-      // If userId is provided, set it in the DTO
-
       const clientCreated = await this.clientModel.create({
         ...createClientDto,
         user: userId,
@@ -134,10 +137,21 @@ export class ClientsService {
       const client = await this.clientModel.findById(id);
       if (!client) throw new NotFoundException('Client not found');
       if (client.status === status) {
-        throw new NotFoundException('Client already has this status');
+        throw new BadRequestException('Client already has this status');
       }
       client.status = status;
       const updatedClient = await client.save();
+
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.clientsService,
+        message: `Client status updated to ${status}`,
+        meta: {
+          clientId: id,
+          userId: client.user?._id?.toString(),
+          status: updatedClient.status,
+        },
+      });
 
       return {
         message: 'Client status updated successfully',

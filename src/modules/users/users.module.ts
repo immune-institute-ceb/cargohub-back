@@ -26,6 +26,10 @@ import {
   CarrierSchema,
 } from '@modules/carriers/entities/carrier.entity';
 import { Client, ClientSchema } from '@modules/clients/entities/client.entity';
+import {
+  AuditLog,
+  AuditLogSchema,
+} from '@modules/audit-logs/entities/audit-log.entity';
 
 @Module({
   controllers: [UsersController],
@@ -52,6 +56,10 @@ import { Client, ClientSchema } from '@modules/clients/entities/client.entity';
       {
         name: Client.name,
         schema: ClientSchema,
+      },
+      {
+        name: AuditLog.name,
+        schema: AuditLogSchema,
       },
     ]),
   ],

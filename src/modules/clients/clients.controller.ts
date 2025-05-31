@@ -24,6 +24,8 @@ import { Auth } from '@modules/auth/decorators/auth.decorator';
 
 // * Services
 import { ClientsService } from './clients.service';
+
+//* Interfaces
 import { ValidRoles } from '@modules/auth/interfaces';
 import { ClientsStatus } from './interfaces/active-clients.interface';
 
@@ -75,6 +77,12 @@ export class ClientsController {
     type: Client,
   })
   @ApiOperation({ summary: 'Update client status' })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    schema: {
+      example: { message: 'Client already has this status' },
+    },
+  })
   @ApiQuery({
     name: 'status',
     required: true,

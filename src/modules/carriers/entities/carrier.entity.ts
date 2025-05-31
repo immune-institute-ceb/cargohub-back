@@ -1,7 +1,13 @@
 // Purpose: Define the carrier entity schema and model for the database
+
+// * NestJS modules
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
+
+//* External modules
 import mongoose, { Document, Types } from 'mongoose';
+
+// * Interfaces
 import { CarrierStatus } from '../interfaces/carrier-status.interface';
 
 /**
@@ -9,7 +15,9 @@ import { CarrierStatus } from '../interfaces/carrier-status.interface';
  * @param _id Carrier id
  * @param dni Carrier DNI
  * @param licenseNumber Carrier license number
- * @param userId User id associated with the carrier
+ * @param user User id associated with the carrier
+ * @param status Carrier status
+ * @param truck Truck associated with the carrier
  * @export
  * @class Carrier
  */

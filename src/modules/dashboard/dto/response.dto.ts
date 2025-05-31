@@ -1,5 +1,9 @@
+// Objective: Define a DTO for Dashboard response with monthly request statistics and other metrics.
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 
+// MonthlyRequestsDto class to encapsulate monthly request statistics
 class MonthlyRequestsDto {
   @ApiProperty({
     description: 'Monthly completed requests',
@@ -16,6 +20,21 @@ class MonthlyRequestsDto {
   pending: number[];
 }
 
+/**
+ * Data Transfer Object for Dashboard Response
+ * @export
+ * @class DashboardResponseDto
+ * @description This DTO encapsulates the response structure for the dashboard, including metrics such as active clients, carriers, active routes, monthly requests, and request status.
+ * @example
+ * {
+ *  "activeClients": 1,
+ * "carriers": 5,
+ * "activeRoutes": 10,
+ * "monthlyRequests": {
+ *    "completed": [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+ *   "pending": [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
+ * },
+ */
 export class DashboardResponseDto {
   @ApiProperty({
     description: 'Total number of requests',

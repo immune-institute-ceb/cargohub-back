@@ -1,4 +1,6 @@
 // Objective: DTO to change the user password, with validation rules
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, Matches, MaxLength, MinLength } from 'class-validator';
 

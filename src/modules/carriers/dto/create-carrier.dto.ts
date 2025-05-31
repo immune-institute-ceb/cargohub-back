@@ -1,4 +1,6 @@
 // Purpose: DTO for carrier creation with validation rules
+
+//* NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import { IsAlphanumeric, Matches } from 'class-validator';
 
@@ -10,14 +12,7 @@ import { IsAlphanumeric, Matches } from 'class-validator';
  * {
  * "dni": "12345678A",
  * "licenseNumber": "B-123456",
- * "userId": {
- *  "_id": "5f4e6d6f4f6d4f6d4f6d4f6d",
- * "email": "test@gmail.com",
- * "firstName": "Test",
- * "lastName": "User",
- * "phone": "123456789",
  *  }
- * }
  */
 export class CreateCarrierDto {
   @ApiProperty({

@@ -1,5 +1,4 @@
-// src/common/validators/is-city.validator.ts
-
+//Objective: Create a custom validation decorator to check if a given string is a valid city name from a predefined list of cities, ensuring that the city has a significant population.
 import {
   registerDecorator,
   ValidationOptions,
@@ -7,6 +6,7 @@ import {
   ValidatorConstraintInterface,
   ValidationArguments,
 } from 'class-validator';
+
 import * as cities from 'all-the-cities';
 
 @ValidatorConstraint({ async: false })
@@ -19,7 +19,7 @@ export class IsCityConstraint implements ValidatorConstraintInterface {
     const matches = cities.filter(
       (city) =>
         city.name.toLowerCase().includes(normalized) &&
-        city.population > 100000, // Example threshold for "most populated"
+        city.population > 100000, // Guarantee significant population
     );
 
     return matches.length > 0;

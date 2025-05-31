@@ -1,4 +1,5 @@
-export enum ContextLogs {
+// Description: Audit log context enumeration for categorizing logs in the system
+export enum AuditLogContext {
   authService = 'authService',
   userService = 'userService',
   carriersService = 'carriersService',
