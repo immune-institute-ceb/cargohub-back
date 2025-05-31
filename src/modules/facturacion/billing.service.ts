@@ -28,6 +28,10 @@ import { RequestsService } from '@modules/requests/requests.service';
 import { RequestStatus } from '@modules/requests/interfaces/request-status.interface';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 
+// * Interfaces
+import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
+import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
+
 @Injectable()
 export class BillingService {
   constructor(
@@ -55,6 +59,16 @@ export class BillingService {
       if (!billingCreated) {
         throw new NotFoundException('Billing could not be created');
       }
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.billingService,
+        message: `Billing created with status: ${BillingStatus.pending}`,
+        meta: {
+          billingId: billingCreated._id.toString(),
+          clientId: billingCreated.clientId.toString(),
+          requestId: billingCreated.requestId.toString(),
+        },
+      });
       return billingCreated;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -87,11 +101,31 @@ export class BillingService {
           billing.paidDate = new Date();
           billing.status = status;
           const updatedBilling = await billing.save();
+          await this.auditLogsService.create({
+            level: AuditLogLevel.info,
+            context: AuditLogContext.billingService,
+            message: `Billing marked as paid`,
+            meta: {
+              billingId,
+              requestId: billing.requestId.toString(),
+              clientId: billing.clientId.toString(),
+            },
+          });
           return updatedBilling;
         }
       }
       billing.status = status;
       await billing.save();
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.billingService,
+        message: `Billing status updated to ${status}`,
+        meta: {
+          billingId,
+          clientId: billing.clientId.toString(),
+          requestId: billing.requestId.toString(),
+        },
+      });
       return billing;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -108,6 +142,16 @@ export class BillingService {
         request.status = RequestStatus.inProgress;
         await request.save();
       }
+      await this.auditLogsService.create({
+        level: AuditLogLevel.warn,
+        context: AuditLogContext.billingService,
+        message: `Billing deleted`,
+        meta: {
+          billingId: id,
+          requestId: billing?.requestId?.toString(),
+          clientId: billing?.clientId?.toString(),
+        },
+      });
       return { message: 'Billing deleted' };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -121,6 +165,16 @@ export class BillingService {
       console.log(billing);
       if (billing) {
         await this.billingModel.deleteOne({ requestId });
+        await this.auditLogsService.create({
+          level: AuditLogLevel.warn,
+          context: AuditLogContext.billingService,
+          message: `Billing deleted by request ID`,
+          meta: {
+            billingId: billing._id.toString(),
+            requestId: requestId.toString(),
+            clientId: billing.clientId.toString(),
+          },
+        });
       }
       return { message: 'Billing deleted for request' };
     } catch (error) {

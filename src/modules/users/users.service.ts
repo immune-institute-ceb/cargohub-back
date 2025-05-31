@@ -26,6 +26,10 @@ import { ClientsService } from '@modules/clients/clients.service';
 import { ValidRoles } from '@modules/auth/interfaces';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 
+// * Interfaces
+import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
+import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -95,7 +99,14 @@ export class UsersService {
         );
         createdUser.carrierId = carrier._id;
       }
-
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.userService,
+        message: `User created successfully`,
+        meta: {
+          userId: createdUser._id.toString(),
+        },
+      });
       // 3. Guardar referencias en el usuario
       return createdUser.save();
     } catch (error) {
@@ -148,7 +159,14 @@ export class UsersService {
           );
         }
       }
-
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.userService,
+        message: `User updated successfully`,
+        meta: {
+          userId: userUpdated._id.toString(),
+        },
+      });
       return {
         message: 'User updated',
         userUpdated: await this.findUserById(userUpdated._id.toString()),
@@ -209,6 +227,14 @@ export class UsersService {
         await this.carriersService.remove(user.carrierId._id.toString());
       }
       await this.userModel.findOneAndDelete({ _id: user._id });
+      await this.auditLogsService.create({
+        level: AuditLogLevel.warn,
+        context: AuditLogContext.userService,
+        message: `User deleted successfully`,
+        meta: {
+          userId: user._id.toString(),
+        },
+      });
       return { message: 'User deleted' };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -222,6 +248,14 @@ export class UsersService {
         throw new NotFoundException('User not found');
       }
       await this.deleteUser(user);
+      await this.auditLogsService.create({
+        level: AuditLogLevel.warn,
+        context: AuditLogContext.userService,
+        message: `User deleted by admin`,
+        meta: {
+          userId: user._id.toString(),
+        },
+      });
       return { message: 'User deleted by admin' };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

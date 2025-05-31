@@ -8,6 +8,7 @@ import { PassportModule } from '@nestjs/passport';
 
 //* Services
 import { UsersService } from './users.service';
+import { UserCleanupService } from '@common/cleanBBDD/userCleanUp.service';
 
 //* Controllers
 import { UsersController } from './users.controller';
@@ -20,7 +21,7 @@ import { CommonModule } from '@common/common.module';
 import { ClientsModule } from '@modules/clients/clients.module';
 import { CarriersModule } from '@modules/carriers/carriers.module';
 import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
-import { UserCleanupService } from '@common/cleanBBDD/userCleanUp.service';
+
 import {
   Carrier,
   CarrierSchema,

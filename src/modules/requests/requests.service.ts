@@ -28,6 +28,10 @@ import { RequestStatus } from './interfaces/request-status.interface';
 import { RouteStatus } from '@modules/rutas/interfaces/route-status.interface';
 import { BillingService } from '@modules/facturacion/billing.service';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
+
+//* Interfaces
+import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
+import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 import { ClientsStatus } from '@modules/clients/interfaces/active-clients.interface';
 
 @Injectable()
@@ -95,7 +99,16 @@ export class RequestsService {
       }
       request.routeId = routeCreated._id;
       await request.save();
-
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.requestsService,
+        message: `Request created for client ${client._id.toString()}`,
+        meta: {
+          requestId: request._id.toString(),
+          clientId: client._id.toString(),
+          userId: user._id.toString(),
+        },
+      });
       return request;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -301,6 +314,16 @@ export class RequestsService {
         }
       }
 
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.requestsService,
+        message: `Request status updated to ${status} for request ID ${id}`,
+        meta: {
+          requestId: id,
+          userId: client.user?._id?.toString(),
+          status,
+        },
+      });
       return {
         message: 'Request status updated successfully',
         updatedRequest,
@@ -326,6 +349,14 @@ export class RequestsService {
       if (!requestDeleted) {
         throw new NotFoundException('Request could not be deleted');
       }
+      await this.auditLogsService.create({
+        level: AuditLogLevel.warn,
+        context: AuditLogContext.requestsService,
+        message: `Request deleted successfully`,
+        meta: {
+          requestId: id,
+        },
+      });
       return {
         message: 'Request deleted successfully',
       };
@@ -355,6 +386,14 @@ export class RequestsService {
           }
         }
       }
+      await this.auditLogsService.create({
+        level: AuditLogLevel.warn,
+        context: AuditLogContext.requestsService,
+        message: `All requests for client ${clientId} have been deleted`,
+        meta: {
+          clientId: clientId,
+        },
+      });
       return {
         message: 'All requests for the client have been deleted',
       };
