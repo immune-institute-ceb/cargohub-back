@@ -31,6 +31,8 @@ import { RequestsService } from '@modules/requests/requests.service';
 import { Requests } from '@modules/requests/entities/request.entity';
 import { RequestStatus } from '@modules/requests/interfaces/request-status.interface';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
+import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
+import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
 
 @Injectable()
 export class RoutesService {
@@ -59,6 +61,15 @@ export class RoutesService {
 
       routeCreated.request = request._id;
       await routeCreated.save();
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.routesService,
+        message: `Route created successfully`,
+        meta: {
+          routeId: routeCreated._id.toString(),
+          requestId: routeCreated.request.toString(),
+        },
+      });
       return routeCreated;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -152,7 +163,15 @@ export class RoutesService {
 
       route.status = status;
       await route.save();
-
+      await this.auditLogsService.create({
+        level: AuditLogLevel.warn,
+        context: AuditLogContext.routesService,
+        message: `Route status updated to ${status}`,
+        meta: {
+          routeId: route._id.toString(),
+          requestId: requestId,
+        },
+      });
       return {
         message: `Route status updated to ${status}`,
         route,
@@ -241,8 +260,15 @@ export class RoutesService {
             );
           }
         }
+        await this.auditLogsService.create({
+          level: AuditLogLevel.warn,
+          context: AuditLogContext.routesService,
+          message: `Route deleted successfully`,
+          meta: {
+            routeId: route._id.toString(),
+          },
+        });
       }
-
       return {
         message: 'Route deleted successfully',
         route,
@@ -286,7 +312,15 @@ export class RoutesService {
 
       route.carrier = carrier._id;
       await route.save();
-
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.routesService,
+        message: `Route assigned to carrier`,
+        meta: {
+          routeId: route._id.toString(),
+          carrierId: carrier._id.toString(),
+        },
+      });
       return {
         message: 'Route assigned to carrier',
         route,
@@ -327,7 +361,15 @@ export class RoutesService {
       route.carrier = null;
       route.status = RouteStatus.pending;
       await route.save();
-
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.routesService,
+        message: `Route unassigned from carrier`,
+        meta: {
+          routeId: route._id.toString(),
+          carrierId: carrier._id.toString(),
+        },
+      });
       return {
         message: 'Route unassigned from carrier',
         route,
@@ -350,6 +392,14 @@ export class RoutesService {
             RouteStatus.pending,
           );
         }
+        await this.auditLogsService.create({
+          level: AuditLogLevel.info,
+          context: AuditLogContext.routesService,
+          message: `All routes unassigned from carrier`,
+          meta: {
+            carrierId: carrierId,
+          },
+        });
       }
 
       return {

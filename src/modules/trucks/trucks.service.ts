@@ -1,3 +1,5 @@
+// Objective: Implement the service for managing trucks in the application.
+// * NestJS modules
 import {
   BadRequestException,
   forwardRef,
@@ -5,14 +7,24 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+
+// * DTOs
 import { CreateTruckDto } from './dto/create-truck.dto';
 import { UpdateTruckDto } from './dto/update-truck.dto';
+
+// * External modules
 import { InjectModel } from '@nestjs/mongoose';
 import { Truck } from './entities/truck.entity';
 import { Model } from 'mongoose';
+
+// * Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { CarriersService } from '@modules/carriers/carriers.service';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
+
+// * Interfaces
+import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
+import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 import { TruckStatus } from './interfaces/truck-status.interface';
 
 @Injectable()
@@ -28,6 +40,17 @@ export class TrucksService {
   async create(createTruckDto: CreateTruckDto) {
     try {
       const truckCreated = await this.truckModel.create(createTruckDto);
+      if (!truckCreated) {
+        throw new BadRequestException('Truck could not be created');
+      }
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.trucksService,
+        message: `Truck created successfully`,
+        meta: {
+          truckId: truckCreated._id.toString(),
+        },
+      });
       return {
         message: 'Truck created successfully',
         truck: truckCreated,
@@ -67,6 +90,14 @@ export class TrucksService {
         { new: true },
       );
       if (!truckUpdated) throw new NotFoundException('Truck not found');
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.trucksService,
+        message: `Truck updated successfully`,
+        meta: {
+          truckId: truckUpdated._id.toString(),
+        },
+      });
       return truckUpdated;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
@@ -96,6 +127,16 @@ export class TrucksService {
         throw new NotFoundException('Truck not found after update');
       }
 
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.trucksService,
+        message: `Truck status updated to ${status}`,
+        meta: {
+          truckId: truckUpdated._id.toString(),
+          status,
+        },
+      });
+
       return {
         message: 'Truck status updated successfully',
         truck: truckUpdated,
@@ -110,6 +151,14 @@ export class TrucksService {
       const truckDeleted = await this.truckModel.findByIdAndDelete(id);
       if (!truckDeleted) throw new NotFoundException('Truck not found');
       await this.carriersService.unassignTruckDeleted(id);
+      await this.auditLogsService.create({
+        level: AuditLogLevel.warn,
+        context: AuditLogContext.trucksService,
+        message: `Truck deleted successfully`,
+        meta: {
+          truckId: truckDeleted._id.toString(),
+        },
+      });
       return {
         message: 'Truck deleted successfully',
       };
