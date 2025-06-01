@@ -18,19 +18,23 @@ import { RegisterBillingDto } from './dto/register-billing.dto';
 
 //* Entities
 import { Billing } from './entities/billing.entity';
+import { Requests } from '@modules/requests/entities/request.entity';
 
 //* Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
-import { Requests } from '@modules/requests/entities/request.entity';
-import { BillingStatus } from './interfaces/billing-status.interface';
 import { RoutesService } from '@modules/rutas/route.service';
 import { RequestsService } from '@modules/requests/requests.service';
-import { RequestStatus } from '@modules/requests/interfaces/request-status.interface';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 
 // * Interfaces
+import { BillingStatus } from './interfaces/billing-status.interface';
 import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
 import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
+import {
+  RequestPackageType,
+  RequestPriority,
+  RequestStatus,
+} from '@modules/requests/interfaces';
 
 @Injectable()
 export class BillingService {
@@ -50,14 +54,17 @@ export class BillingService {
       const registerBillingDto: RegisterBillingDto = {
         requestId: request._id,
         clientId: request.clientId,
-        billingAmount: await this.calcAmount(request.routeId.toString()),
+        billingAmount: await this.calcAmount(
+          request.routeId.toString(),
+          request,
+        ),
         issueDate: new Date(),
         dueDate: new Date(new Date().setMonth(new Date().getMonth() + 1)), // Due date is one month from issue date
         status: BillingStatus.pending,
       };
       const billingCreated = await this.billingModel.create(registerBillingDto);
       if (!billingCreated) {
-        throw new NotFoundException('Billing could not be created');
+        throw new BadRequestException('Billing could not be created');
       }
       await this.auditLogsService.create({
         level: AuditLogLevel.info,
@@ -82,14 +89,15 @@ export class BillingService {
       if (billing.status === status) {
         throw new BadRequestException(`Billing already has status: ${status}`);
       }
-      // if (
-      //   billing.status === BillingStatus.paid ||
-      //   billing.status === BillingStatus.cancelled
-      // ) {
-      //   throw new BadRequestException(
-      //     `Billing with status ${billing.status} cannot be updated`,
-      //   );
-      // }
+
+      if (
+        billing.status === BillingStatus.paid ||
+        billing.status === BillingStatus.cancelled
+      ) {
+        throw new BadRequestException(
+          `Billing with status ${billing.status} cannot be updated`,
+        );
+      }
 
       if (status === BillingStatus.paid) {
         const updatedRequest = await this.requestsService.updateStatus(
@@ -114,6 +122,7 @@ export class BillingService {
           return updatedBilling;
         }
       }
+
       billing.status = status;
       await billing.save();
       await this.auditLogsService.create({
@@ -260,12 +269,26 @@ export class BillingService {
     }
   }
 
-  async calcAmount(routeId: string) {
+  async calcAmount(routeId: string, request: Requests) {
     try {
       const route = await this.routesService.findRouteById(routeId);
       if (!route) throw new NotFoundException('Route not found');
       const distance = route.distance;
-      const ratePerKm = 10;
+      let ratePerKm = 0.5;
+      if (request.packageType === RequestPackageType.box) {
+        ratePerKm = 0.3; // Discounted rate for box packages
+      } else if (request.packageType === RequestPackageType.pallet) {
+        ratePerKm = 0.7; // Increased rate for pallet packages
+      }
+      if (
+        request.priority === RequestPriority.high ||
+        request.priority === RequestPriority.urgent
+      ) {
+        ratePerKm *= 1.2; // Increase rate by 20% for high priority
+      }
+      if (request.priority === RequestPriority.low) {
+        ratePerKm *= 0.9; // Decrease rate by 10% for low priority
+      }
       return distance * ratePerKm;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

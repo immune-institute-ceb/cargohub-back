@@ -1,3 +1,6 @@
+// Objective: Define a DTO for creating a Truck with validation and transformation rules.
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
@@ -7,9 +10,24 @@ import {
   Matches,
   Min,
 } from 'class-validator';
+
+// * Interfaces
 import { FuelType } from '../interfaces/fuel-type.interface';
 import { TruckStatus } from '../interfaces/truck-status.interface';
 
+/**
+ * Data transfer object for creating a Truck
+ * @export
+ * @class CreateTruckDto
+ * @example
+ * {
+ *   "licensePlate": "ABC-1234",
+ *  "carModel": "Ford F-150",
+ *  "capacity": 5,
+ * "fuelType": "diesel",
+ * "status": "available"
+ *  }
+ */
 export class CreateTruckDto {
   @ApiProperty({
     description: 'Truck license plate',

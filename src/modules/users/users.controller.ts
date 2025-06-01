@@ -20,31 +20,16 @@ import { Auth, GetUser } from '@modules/auth/decorators';
 
 //* Entities
 import { User } from '@modules/users/entities/user.entity';
-import { UserWithRelations } from './interfaces/user-with-relations';
 
 //* Services
 import { UsersService } from './users.service';
+
+// * Interfaces
 import { ValidRoles } from '@modules/auth/interfaces';
+import { UserWithRelations } from './interfaces/user-with-relations';
 
 @ApiTags('Users')
-@ApiNotFoundResponse({
-  description: 'Not Found',
-  schema: {
-    oneOf: [{ example: { message: 'User not found' } }],
-  },
-})
-@ApiBadRequestResponse({
-  description: 'Bad Request',
-  schema: {
-    oneOf: [
-      { example: { message: 'Passwords do not match' } },
-      { example: { message: 'User already archived' } },
-      { example: { message: 'User not archived' } },
-      { example: { message: 'Error uploading file to IPFS' } },
-      { example: { message: 'No files found' } },
-    ],
-  },
-})
+@ApiNotFoundResponse({ description: 'User not found' })
 @ApiInternalServerErrorResponse({
   description: 'Internal Server Error, check the logs',
 })
@@ -53,7 +38,7 @@ import { ValidRoles } from '@modules/auth/interfaces';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get()
+  @Get('get-user')
   @ApiCreatedResponse({
     description: 'User found',
     type: User,
@@ -83,6 +68,15 @@ export class UsersController {
             message: 'Client data is not allowed for users with carrier role',
           },
         },
+      ],
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+    schema: {
+      oneOf: [
+        { example: { message: 'Client ID not found for user' } },
+        { example: { message: 'Carrier ID not found for user' } },
       ],
     },
   })

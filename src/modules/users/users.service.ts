@@ -19,14 +19,12 @@ import { User } from './entities/user.entity';
 
 //* Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
-
-//* Modules
 import { CarriersService } from '@modules/carriers/carriers.service';
 import { ClientsService } from '@modules/clients/clients.service';
-import { ValidRoles } from '@modules/auth/interfaces';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 
 // * Interfaces
+import { ValidRoles } from '@modules/auth/interfaces';
 import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
 import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 

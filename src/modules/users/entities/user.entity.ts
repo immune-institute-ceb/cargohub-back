@@ -13,13 +13,11 @@ import { ValidRoles } from '@modules/auth/interfaces';
  * @param name User name
  * @param lastName1 User first last name
  * @param lastName2 User second last name
- * @param image User image
  * @param isActive Tells if the user is active
  * @param roles User roles
  * @param permissions User permissions
  * @param createdAt User creation date
  * @param deletedAt User deletion date
- * @param isDeleted Tells if the user is deleted
  * @param twoFactorAuth User two-factor authentication code
  * @param twoFactorQrCode User two-factor authentication QR code
  * @param twoFactorAuthEnabled Tells if the user has two-factor authentication enabled
@@ -95,15 +93,6 @@ export class User extends Document {
   lastName2: string;
 
   @ApiProperty({
-    description: 'User image',
-    example: 'https://www.example.com/image.jpg',
-  })
-  @Prop({
-    index: true,
-  })
-  image: string;
-
-  @ApiProperty({
     description: 'Tells if the user is active',
     example: 'true',
   })
@@ -161,16 +150,6 @@ export class User extends Document {
     index: true,
   })
   deletedAt: Date;
-
-  @ApiProperty({
-    description: 'Tells if the user is deleted',
-    example: 'true',
-  })
-  @Prop({
-    index: true,
-    default: false,
-  })
-  isDeleted: boolean;
 
   @ApiProperty({
     description: 'User twoFactorAuth',

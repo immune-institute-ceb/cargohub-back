@@ -1,20 +1,25 @@
 // Objective: Define the Ruta entity schema and model for the database
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+
+//* External modules
 import mongoose, { Document, Types } from 'mongoose';
+
+// * Interfaces
 import { RouteStatus } from '../interfaces/route-status.interface';
 
 /**
  * Route entity schema
  * @param _id Route id
- * @param type Route type
  * @param origin Route origin
  * @param destination Route destination
- * @param distance Route distance
- * @param estimatedTime Route estimated time
- * @param status Route status
- * @param deletedAt Route deletedAt
- * @param isDeleted Tells if the route is deleted
+ * @param distance Route distance in km
+ * @param estimatedTime Route estimated time in hours
+ * @param status Route status (pending, inTransit, completed, cancelled)
+ * @param carrier Carrier assigned to the route
+ * @param request Request associated with the route
  * @returns Route entity schema
  */
 @Schema({ timestamps: true })

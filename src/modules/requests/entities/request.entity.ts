@@ -1,20 +1,30 @@
 // Objective: Define the Request entity schema and model for the database
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+
+// * External modules
 import { Document, Types } from 'mongoose';
-import { RequestStatus } from '../interfaces/request-status.interface';
-import { RequestPriority } from '../interfaces/request-priority.interface';
+
+// * Interfaces
+import {
+  RequestPackageType,
+  RequestPriority,
+  RequestStatus,
+} from '../interfaces';
 
 /**
  * Request entity schema
  * @param _id Request id
- * @param client_name Client name
+ * @param clientId Client Id associated with the request
  * @param origin Shipment origin
  * @param destination Shipment destination
- * @param request_date Request date
+ * @param request_date Date when the request was made
  * @param delivery_date Estimated delivery date
- * @param status Request status (pending, in progress, delivered)
- * @param priority Request priority (normal, high, urgent)
+ * @param status Current status of the request (pending, in_progress, done, cancelled)
+ * @param priority Priority of the request (low, medium, high)
+ * @param routeId Route Id associated with the request
  * @returns Request entity schema
  */
 @Schema({ timestamps: true })
@@ -57,6 +67,16 @@ export class Requests extends Document {
   destination: string;
 
   @ApiProperty({
+    description: 'Package weight in kg',
+    example: 10,
+  })
+  @Prop({
+    index: true,
+    required: true,
+  })
+  packageWeight: number;
+
+  @ApiProperty({
     description: 'Request date',
     example: '2023-08-15T10:30:00Z',
   })
@@ -87,11 +107,24 @@ export class Requests extends Document {
   status: RequestStatus;
 
   @ApiProperty({
+    description: 'Package type',
+    example: RequestPackageType.box,
+  })
+  @Prop({
+    index: true,
+    required: true,
+    enum: RequestPackageType,
+    default: RequestPackageType.box,
+  })
+  packageType: RequestPackageType;
+
+  @ApiProperty({
     description: 'Request priority',
     example: RequestPriority.medium,
   })
   @Prop({
     index: true,
+    required: true,
     enum: RequestPriority,
     default: RequestPriority.medium,
   })

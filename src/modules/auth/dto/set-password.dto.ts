@@ -1,4 +1,4 @@
-// Objective: DTO to change the user authenticated password, with validation rules
+// Objective: DTO to change the user password, with validation rules
 
 // * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
@@ -7,28 +7,14 @@ import { IsString, Matches, MaxLength, MinLength } from 'class-validator';
 /**
  * Data transfer object to change the user password
  * @export
- * @class ChangePasswordDto
+ * @class SetPasswordDto
  * @example
  * {
- * "oldPassword": "OldPassword123",
  *  "password": "Password123",
  * "passwordConfirmed": "Password123"
  * }
  */
-export class ChangePasswordDto {
-  @ApiProperty({
-    description: 'User old password',
-    example: 'OldPassword123',
-  })
-  @IsString()
-  @MinLength(6)
-  @MaxLength(50)
-  @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message:
-      'The old password must have a Uppercase, lowercase letter and a number',
-  })
-  oldPassword: string;
-
+export class SetPasswordDto {
   @ApiProperty({
     description:
       'User password, must have a Uppercase, lowercase letter and a number',
@@ -41,7 +27,7 @@ export class ChangePasswordDto {
     message:
       'The password must have a Uppercase, lowercase letter and a number',
   })
-  newPassword: string;
+  password: string;
 
   @ApiProperty({
     description:
@@ -55,5 +41,5 @@ export class ChangePasswordDto {
     message:
       'The passwordConfirmed must have a Uppercase, lowercase letter and a number',
   })
-  newPasswordConfirmed: string;
+  passwordConfirmed: string;
 }

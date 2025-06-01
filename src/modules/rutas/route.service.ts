@@ -6,7 +6,6 @@ import {
   forwardRef,
   Inject,
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -21,16 +20,20 @@ import { RegisterRouteDto } from './dto/register-route.dto';
 
 //* Entities
 import { Route } from './entities/route.entity';
+import { User } from '@modules/users/entities/user.entity';
+import { Requests } from '@modules/requests/entities/request.entity';
 
 //* Services
-import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { CarriersService } from '@modules/carriers/carriers.service';
+import { RequestsService } from '@modules/requests/requests.service';
+import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
+import { ExceptionsService } from '@common/exceptions/exceptions.service';
+
+//* Interfaces
+import { ValidRoles } from '@modules/auth/interfaces';
 import { RouteStatus } from './interfaces/route-status.interface';
 import { CarrierStatus } from '@modules/carriers/interfaces/carrier-status.interface';
-import { RequestsService } from '@modules/requests/requests.service';
-import { Requests } from '@modules/requests/entities/request.entity';
 import { RequestStatus } from '@modules/requests/interfaces/request-status.interface';
-import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
 
@@ -50,8 +53,7 @@ export class RoutesService {
   async create(registerRouteDto: RegisterRouteDto, request: Requests) {
     try {
       const routeCreated = await this.routeModel.create(registerRouteDto);
-      if (!routeCreated)
-        throw new InternalServerErrorException('Route creation failed');
+      if (!routeCreated) throw new BadRequestException('Route creation failed');
       const distance = this.calcDistance(routeCreated);
       if (distance !== null && distance !== undefined) {
         routeCreated.distance = distance;
@@ -76,10 +78,20 @@ export class RoutesService {
     }
   }
 
-  async updateRouteStatus(id: string, status: RouteStatus) {
+  async updateRouteStatus(id: string, status: RouteStatus, user?: User) {
     try {
       const route = await this.routeModel.findById(id);
       if (!route) throw new NotFoundException('Route not found');
+      if (!user?.roles.includes(ValidRoles.admin || ValidRoles.adminManager)) {
+        if (route.carrier?._id?.toString() !== user?.carrierId?.toString()) {
+          throw new BadRequestException(
+            'User is not authorized to update this route',
+          );
+        }
+      }
+      if (!route.carrier) {
+        throw new BadRequestException('Route does not have a carrier assigned');
+      }
 
       if (route.status === status) {
         throw new BadRequestException(`Route is already in ${status} status`);
@@ -287,16 +299,16 @@ export class RoutesService {
       if (!carrier) throw new NotFoundException('Carrier not found');
 
       if (!carrier.truck) {
-        throw new NotFoundException('Carrier does not have a truck assigned');
+        throw new BadRequestException('Carrier does not have a truck assigned');
       }
       if (
         carrier.status !== CarrierStatus.resting &&
         carrier.status !== CarrierStatus.available
       ) {
-        throw new NotFoundException('Carrier is not available');
+        throw new BadRequestException('Carrier is not available');
       }
       if (route.carrier?._id.toString() === carrier._id.toString()) {
-        throw new NotFoundException(
+        throw new BadRequestException(
           'Route is already assigned to this carrier',
         );
       }
@@ -336,7 +348,7 @@ export class RoutesService {
       if (!route) throw new NotFoundException('Route not found');
 
       if (!route.carrier) {
-        throw new NotFoundException('Route does not have a carrier assigned');
+        throw new BadRequestException('Route does not have a carrier assigned');
       }
       if (route.status === RouteStatus.inTransit) {
         throw new BadRequestException(
@@ -351,7 +363,7 @@ export class RoutesService {
         carrier.status === CarrierStatus.assigned &&
         route.carrier._id.toString() !== carrier._id.toString()
       ) {
-        throw new NotFoundException('Carrier is not assigned to this route');
+        throw new BadRequestException('Carrier is not assigned to this route');
       }
       await this.carriersService.updateStatus(
         carrier._id.toString(),

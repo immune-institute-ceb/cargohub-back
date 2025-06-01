@@ -15,6 +15,7 @@ import { Client } from '@modules/clients/entities/client.entity';
 import { AuditLog } from '@modules/audit-logs/entities/audit-log.entity';
 
 // * Interfaces
+import { ValidRoles } from '@modules/auth/interfaces';
 import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
 import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 
@@ -41,6 +42,7 @@ export class UserCleanupService {
     // Find unverified users created more than 15 minutes ago
     const unverifiedUsers = await this.userModel.find({
       emailVerified: false,
+      roles: { $in: [ValidRoles.carrier, ValidRoles.client] },
       createdAt: { $lt: expirationDate },
     });
 

@@ -1,8 +1,25 @@
+// Objective: Define the Truck entity schema for MongoDB using Mongoose in a NestJS application.
+
+// * NestJS modules
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
+
+// * External modules
 import { Document, Types } from 'mongoose';
+
+// * Interfaces
 import { TruckStatus } from '../interfaces/truck-status.interface';
 
+/**
+ * Truck entity schema
+ * @param _id Truck id
+ * @param licensePlate Truck license plate
+ * @param carModel Truck model
+ * @param capacity Truck capacity in tons
+ * @param fuelType Fuel type of the truck
+ * @param status Truck status (available, inMaintenance, unavailable)
+ * @returns Truck entity schema
+ */
 @Schema({ timestamps: true })
 export class Truck extends Document {
   @ApiProperty({

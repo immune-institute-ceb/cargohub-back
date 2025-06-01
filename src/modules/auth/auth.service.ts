@@ -23,7 +23,7 @@ import * as requestIp from 'request-ip';
 
 //* DTOs
 import {
-  ChangePasswordDto,
+  SetPasswordDto,
   ContactDto,
   LoginUserDto,
   RecoverPasswordDto,
@@ -31,6 +31,7 @@ import {
   RegisterUserDto,
   TwoFactorDto,
   VerifyTwoFactorDto,
+  ChangePasswordDto,
 } from './dto';
 
 //* Interfaces
@@ -118,7 +119,7 @@ class AuthService {
     }
   }
 
-  private async sendConfirmationEmail(user: User) {
+  async sendConfirmationEmail(user: User) {
     try {
       await this.sendEmail(
         'Welcome to CargoHub',
@@ -146,7 +147,6 @@ class AuthService {
       )) as User;
 
       if (!user) throw new UnauthorizedException(`Not valid credentials`);
-      if (user?.isDeleted) throw new UnauthorizedException('User is archived');
       if (!user?.isActive || !user?.emailVerified)
         throw new UnauthorizedException('User is inactive, talk with an admin');
 
@@ -155,7 +155,10 @@ class AuthService {
 
       if (user.twoFactorAuthEnabled) {
         return {
-          user: user.email,
+          user: {
+            email: user.email,
+            twoFactorAuthEnabled: user.twoFactorAuthEnabled,
+          },
           message: '2FA code is required',
         };
       }
@@ -170,15 +173,23 @@ class AuthService {
           timestamp: new Date().toISOString(),
         },
       });
-      return this.refreshToken(user);
+      return this.loginWithToken(user);
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
   }
 
-  refreshToken(user: User) {
+  loginWithToken(user: User) {
+    const {
+      password,
+      clientId,
+      carrierId,
+      permissions,
+      emailVerified,
+      ...userWithoutPassword
+    } = user.toObject();
     return {
-      user,
+      userWithoutPassword,
       token: this.getJwtToken(
         {
           _id: user._id.toString(),
@@ -189,7 +200,24 @@ class AuthService {
           permissions: user.permissions,
           message: 'login',
         } as JwtPayload,
-        '1d',
+        '2h',
+      ),
+    };
+  }
+
+  refreshToken(user: User) {
+    return {
+      token: this.getJwtToken(
+        {
+          _id: user._id.toString(),
+          name: user.name,
+          phone: user.phone,
+          email: user.email,
+          role: user.roles,
+          permissions: user.permissions,
+          message: 'login',
+        } as JwtPayload,
+        '2h',
       ),
     };
   }
@@ -205,7 +233,7 @@ class AuthService {
     }
   }
 
-  async resetPassword(token: string, changePasswordDto: ChangePasswordDto) {
+  async resetPassword(token: string, setPasswordDto: SetPasswordDto) {
     try {
       const { _id, message } = this.jwtService.verify<{
         _id: string;
@@ -213,14 +241,11 @@ class AuthService {
       }>(token);
       const user = await this.usersService.findUserById(_id);
       if (!user) throw new NotFoundException('User not found');
-      if (changePasswordDto.password !== changePasswordDto.passwordConfirmed)
+      if (setPasswordDto.password !== setPasswordDto.passwordConfirmed)
         throw new BadRequestException('Passwords do not match');
       if (message === 'confirmEmail' && user.emailVerified)
         throw new BadRequestException('Email already confirmed');
-      const passwordHash = bcrypt.hashSync(
-        String(changePasswordDto.password),
-        10,
-      );
+      const passwordHash = bcrypt.hashSync(String(setPasswordDto.password), 10);
 
       const userUpdated = await this.usersService.findAndUpdatePassword(
         _id,
@@ -265,6 +290,33 @@ class AuthService {
     }
   }
 
+  async changePassword(user: User, changePasswordDto: ChangePasswordDto) {
+    try {
+      const { oldPassword, newPassword, newPasswordConfirmed } =
+        changePasswordDto;
+
+      if (newPassword !== newPasswordConfirmed)
+        throw new BadRequestException('Passwords do not match');
+
+      const userWithPassword = await this.usersService.findUserWithPassword(
+        user.email,
+      );
+
+      if (!userWithPassword) throw new NotFoundException('User not found');
+
+      if (!bcrypt.compareSync(oldPassword, userWithPassword.password))
+        throw new UnauthorizedException('Old password is incorrect');
+
+      const passwordHash = bcrypt.hashSync(newPassword, 10);
+      userWithPassword.password = passwordHash;
+      await userWithPassword.save();
+
+      return { message: 'Password changed successfully' };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
   async contact(body: ContactDto) {
     try {
       // * Send email to the admin
@@ -294,6 +346,8 @@ class AuthService {
       );
 
       if (!userTo2fa) throw new NotFoundException('User not found');
+      if (userTo2fa.twoFactorAuth)
+        throw new BadRequestException('2FA already enabled');
 
       const secret = speakeasy.generateSecret({
         name: `CargoHub - ${userTo2fa.email}`,
@@ -354,7 +408,8 @@ class AuthService {
         verifiyTwoFactorDto.email,
       )) as User;
       if (!user) throw new NotFoundException('User not found');
-      if (!user.twoFactorAuth) throw new BadRequestException('2FA not enabled');
+      if (!user.twoFactorAuth || !user.twoFactorAuthEnabled)
+        throw new BadRequestException('2FA not enabled');
 
       const isValid = speakeasy.totp.verify({
         secret: user.twoFactorAuth,
@@ -374,7 +429,7 @@ class AuthService {
           timestamp: new Date().toISOString(),
         },
       });
-      return { message: '2FA code verified', user: this.refreshToken(user) };
+      return { message: '2FA code verified', user: this.loginWithToken(user) };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -415,7 +470,7 @@ class AuthService {
     token: string,
   ) {
     try {
-      const url = `${envs.frontendUrl}api/v1/auth/set-password?_t=${token}`;
+      const url = `${envs.frontendUrl}/set-password?_t=${token}`;
       await this.transporter.sendMail({
         from: envs.emailUser,
         to: email,

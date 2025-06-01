@@ -18,7 +18,7 @@ import { DashboardResponseDto } from './dto/response.dto';
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 
-  @Get('dashboard/summary')
+  @Get('summary')
   @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiBearerAuth()
   @ApiOperation({

@@ -10,17 +10,17 @@ import { envs } from './config/envs';
 import { ConfigModule } from '@nestjs/config';
 
 //* Modules
-import { AuthModule } from './modules/auth/auth.module';
-import { CommonModule } from './common/common.module';
-import { UsersModule } from './modules/users/users.module';
-import { BillingModule } from './modules/facturacion/billing.module';
-import { RoutesModule } from './modules/rutas/route.module';
-import { ClientsModule } from './modules/clients/clients.module';
-import { CarriersModule } from './modules/carriers/carriers.module';
 import { RequestsModule } from '@modules/requests/requests.module';
-import { TrucksModule } from './modules/trucks/trucks.module';
-import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
-import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { CommonModule } from '@common/common.module';
+import { AuthModule } from '@modules/auth/auth.module';
+import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
+import { CarriersModule } from '@modules/carriers/carriers.module';
+import { ClientsModule } from '@modules/clients/clients.module';
+import { DashboardModule } from '@modules/dashboard/dashboard.module';
+import { BillingModule } from '@modules/facturacion/billing.module';
+import { RoutesModule } from '@modules/rutas/route.module';
+import { TrucksModule } from '@modules/trucks/trucks.module';
+import { UsersModule } from '@modules/users/users.module';
 
 @Module({
   imports: [
