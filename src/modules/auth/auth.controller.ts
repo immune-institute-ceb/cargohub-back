@@ -25,7 +25,7 @@ import { AuthGuard } from '@nestjs/passport';
 
 //* DTOs
 import {
-  ChangePasswordDto,
+  SetPasswordDto,
   ContactDto,
   Generate2faCodeResponseDto,
   LoginResponseDto,
@@ -35,6 +35,7 @@ import {
   RegisterUserDto,
   TwoFactorDto,
   VerifyTwoFactorDto,
+  ChangePasswordDto,
 } from './dto';
 
 //* External modules
@@ -81,7 +82,6 @@ import { ValidRoles } from './interfaces';
     oneOf: [
       { example: { message: 'Unauthorized' } },
       { example: { message: 'User is inactive, talk with an admin' } },
-      { example: { message: 'User is archived' } },
       { example: { message: 'Not valid token' } },
     ],
   },
@@ -94,6 +94,15 @@ export class AuthController {
   @ApiCreatedResponse({
     description: 'User created, check your email to confirm your account',
   })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    schema: {
+      oneOf: [
+        { example: { message: 'User already exists in the database' } },
+        { example: { message: 'Duplicate client or carrier data found' } },
+      ],
+    },
+  })
   @ApiOperation({ summary: 'Register a new user' })
   registerUser(@Body() registerUserDto: RegisterUserDto) {
     return this.authService.registerUser(registerUserDto);
@@ -102,6 +111,15 @@ export class AuthController {
   @Post('register/adminManager')
   @ApiCreatedResponse({
     description: 'User created, check your email to confirm your account',
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    schema: {
+      oneOf: [
+        { example: { message: 'User already exists in the database' } },
+        { example: { message: 'Duplicate client or carrier data found' } },
+      ],
+    },
   })
   @ApiBearerAuth()
   @Auth(ValidRoles.admin)
@@ -125,10 +143,8 @@ export class AuthController {
       oneOf: [
         { example: { message: 'Not valid credentials' } },
         { example: { message: 'Not valid credentials' } },
-        { example: { message: 'User is archived' } },
         { example: { message: 'User is inactive, talk with an admin' } },
         { example: { message: '2FA code is required' } },
-        { example: { message: 'Invalid 2FA code' } },
       ],
     },
   })
@@ -166,9 +182,9 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt-recover-password'))
   resetPassword(
     @GetTokenFromHeader() token: string,
-    @Body() changePasswordDto: ChangePasswordDto,
+    @Body() setPasswordDto: SetPasswordDto,
   ) {
-    return this.authService.resetPassword(token, changePasswordDto);
+    return this.authService.resetPassword(token, setPasswordDto);
   }
 
   @Post('recover-password')
@@ -181,11 +197,34 @@ export class AuthController {
     return this.authService.recoverPassword(recoverPasswordDto);
   }
 
+  @Patch('change-password')
+  @ApiResponse({
+    status: 200,
+    description: 'Password changed successfully',
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request - Passwords do not match',
+    schema: {
+      oneOf: [{ example: { message: 'Passwords do not match' } }],
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Old password is incorrect',
+  })
+  @ApiOperation({ summary: 'Change user password' })
+  @ApiBearerAuth()
+  @Auth()
+  changePasswordUser(
+    @GetUser() user,
+    @Body() changePasswordDto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(user as User, changePasswordDto);
+  }
+
   @Get('refresh-token')
   @ApiResponse({
     status: 200,
     description: 'Token refreshed',
-    type: LoginResponseDto,
   })
   @ApiUnauthorizedResponse({
     description: 'Unauthorized - Authentication failure',
@@ -193,7 +232,6 @@ export class AuthController {
       oneOf: [
         { example: { message: 'Not valid token' } },
         { example: { message: 'User is inactive, talk with an admin' } },
-        { example: { message: 'User is archived' } },
       ],
     },
   })
@@ -250,6 +288,16 @@ export class AuthController {
     type: Generate2faCodeResponseDto,
   })
   @ApiOperation({ summary: 'Generate a new 2FA code' })
+  @ApiBadRequestResponse({
+    description: 'Bad Request - 2FA already enabled',
+    schema: {
+      oneOf: [
+        { example: { message: '2FA already enabled' } },
+        { example: { message: 'Failed to generate OTP Auth URL' } },
+        { example: { message: 'Failed to generate QR code' } },
+      ],
+    },
+  })
   @ApiBearerAuth()
   @Auth()
   generate2faCode(@GetUser() user) {
@@ -262,6 +310,16 @@ export class AuthController {
     description: '2FA code activated',
   })
   @ApiOperation({ summary: 'Activate 2FA code' })
+  @ApiBadRequestResponse({
+    description: 'Bad Request - 2FA not enabled',
+    schema: {
+      oneOf: [
+        { example: { message: '2FA not enabled' } },
+        { example: { message: '2FA already enabled' } },
+        { example: { message: 'Invalid 2FA code' } },
+      ],
+    },
+  })
   @ApiBearerAuth()
   @Auth()
   activateTwoFactorCode(@GetUser() user, @Body() token: TwoFactorDto) {
@@ -273,6 +331,15 @@ export class AuthController {
     status: 200,
     description: '2FA code verified',
     type: LoginResponseDto,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request - Invalid 2FA code',
+    schema: {
+      oneOf: [
+        { example: { message: 'Invalid 2FA code' } },
+        { example: { message: '2FA not enabled' } },
+      ],
+    },
   })
   @ApiOperation({ summary: 'Verify 2FA code' })
   verify2faCode(
@@ -287,6 +354,7 @@ export class AuthController {
     status: 200,
     description: '2FA code disabled',
   })
+  @ApiBadRequestResponse({ description: 'Bad Request - 2FA not enabled' })
   @ApiOperation({ summary: 'Disable 2FA code' })
   @ApiBearerAuth()
   @Auth()

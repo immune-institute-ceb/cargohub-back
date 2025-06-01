@@ -1,7 +1,8 @@
 // Objective: RegisterRutaDto class to define the structure of the data to be received in the register endpoint
+
+//* NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, MinLength } from 'class-validator';
-
 import { Transform } from 'class-transformer';
 
 /**
@@ -10,12 +11,8 @@ import { Transform } from 'class-transformer';
  * @class RegisterRouteDto
  * @example
  * {
- *  "type": "National",
  *  "origin": "Madrid",
  *  "destination": "Málaga",
- *  "distance": 523,
- *  "estimatedTime": 5,
- *  "...": "..."
  * }
  */
 export class RegisterRouteDto {

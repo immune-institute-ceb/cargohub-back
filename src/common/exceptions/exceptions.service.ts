@@ -6,6 +6,7 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 
 @Injectable()
@@ -17,7 +18,8 @@ export class ExceptionsService {
     // It shows the error message to the user.
     if (
       error instanceof BadRequestException ||
-      error instanceof NotFoundException
+      error instanceof NotFoundException ||
+      error instanceof UnauthorizedException
     )
       throw error;
 

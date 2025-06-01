@@ -30,16 +30,21 @@ import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
 //* DTOs
 import { CreateRequestDto } from './dto/create-request.dto';
+import { FinalClientStatus } from './dto/update-status.dto';
+
+// * Entities
+import { Requests } from './entities/request.entity';
+import { User } from '@modules/users/entities/user.entity';
 
 // * Decorators
 import { Auth, GetUser } from '@modules/auth/decorators';
 
 //* Services
 import { RequestsService } from './requests.service';
+
+// * Interfaces
 import { ValidRoles } from '@modules/auth/interfaces';
-import { User } from '@modules/users/entities/user.entity';
-import { RequestStatus } from './interfaces/request-status.interface';
-import { FinalClientStatus } from './dto/update-status.dto';
+import { RequestStatus } from './interfaces';
 
 @ApiTags('Requests')
 @ApiNotFoundResponse({ description: 'Request not found' })
@@ -56,6 +61,15 @@ export class RequestsController {
   @ApiCreatedResponse({
     description: 'Request created successfully',
   })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    schema: {
+      oneOf: [
+        { example: { message: 'Request already exists for this client' } },
+        { example: { message: 'Request could not be created' } },
+      ],
+    },
+  })
   create(@Body() createRequestDto: CreateRequestDto, @GetUser() user) {
     return this.requestsService.create(createRequestDto, user as User);
   }
@@ -66,7 +80,10 @@ export class RequestsController {
   @ApiResponse({
     status: 200,
     description: 'Return all requests from the client',
-    type: [Request],
+    type: [Requests],
+  })
+  @ApiNotFoundResponse({
+    description: 'No requests found for this client',
   })
   findAllRequestsByClientId(
     @Param('clientId', ParseMongoIdPipe) clientId: string,
@@ -75,12 +92,12 @@ export class RequestsController {
   }
 
   @Get(':requestId')
-  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiOperation({ summary: 'Get a request by id' })
   @ApiResponse({
     status: 200,
     description: 'Return the request',
-    type: Request,
+    type: Requests,
   })
   findOne(@Param('requestId', ParseMongoIdPipe) id: string) {
     return this.requestsService.findOne(id);
@@ -93,6 +110,41 @@ export class RequestsController {
     status: 200,
     description: 'Request status updated successfully',
   })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    schema: {
+      oneOf: [
+        {
+          example: {
+            message: 'Client is inactive and cannot update request status',
+          },
+        },
+        {
+          example: {
+            message: 'You can only update requests for your own client',
+          },
+        },
+        {
+          example: {
+            message: 'Request can only be cancelled if it is pending',
+          },
+        },
+        { example: { message: 'Request already has this status' } },
+        {
+          example: {
+            message:
+              'Request is already marked as completed and cannot be updated',
+          },
+        },
+        {
+          example: {
+            message:
+              'Route must be done before request can be marked as done or completed',
+          },
+        },
+      ],
+    },
+  })
   @ApiQuery({
     name: 'status',
     required: true,
@@ -100,6 +152,7 @@ export class RequestsController {
     enum: [RequestStatus.done, RequestStatus.cancelled],
   })
   updateStatus(
+    @GetUser() user,
     @Param('requestId', ParseMongoIdPipe) id: string,
     @Query(
       'status',
@@ -110,7 +163,7 @@ export class RequestsController {
     )
     status: FinalClientStatus,
   ) {
-    return this.requestsService.updateStatus(id, status);
+    return this.requestsService.updateStatus(id, status, user as User);
   }
 
   @Delete(':requestId')
@@ -119,6 +172,9 @@ export class RequestsController {
   @ApiResponse({
     status: 200,
     description: 'Request deleted successfully',
+  })
+  @ApiBadRequestResponse({
+    description: 'Request could not be deleted',
   })
   remove(@Param('requestId', ParseMongoIdPipe) id: string) {
     return this.requestsService.remove(id);

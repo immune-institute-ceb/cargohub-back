@@ -1,4 +1,6 @@
 // Objective: RegisterFacturacionDto class definition
+
+//* NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsDate,
@@ -10,8 +12,12 @@ import {
 } from 'class-validator';
 
 import { Type } from 'class-transformer';
-import { BillingStatus } from '../interfaces/billing-status.interface';
+
+//* External modules
 import { Types } from 'mongoose';
+
+// * Interfaces
+import { BillingStatus } from '../interfaces/billing-status.interface';
 
 /**
  * Data transfer object for register facturacion
@@ -19,9 +25,9 @@ import { Types } from 'mongoose';
  * @class RegisterFacturacionDto
  * @example
  * {
- *  "clientName": "Juan Perez",
+ * "clientId": "60d5ec49f1c2b8b1f8c8b8b8",
+ * "requestId": "60d5ec49f1c2b8b1f8c8b8b8",
  *  "billingAmount": 100,
- *  "idServices": ["60d5ec49f1c2b8b1f8c8b8b8"],
  *  "issueDate": "2023-01-01",
  *  "dueDate": "2023-01-31",
  *  "status": "pending"

@@ -18,21 +18,22 @@ import { CreateRequestDto } from './dto/create-request.dto';
 
 //* Entities
 import { Requests } from './entities/request.entity';
+import { User } from '@modules/users/entities/user.entity';
 
 //* Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
-import { User } from '@modules/users/entities/user.entity';
 import { ClientsService } from '@modules/clients/clients.service';
 import { RoutesService } from '@modules/rutas/route.service';
-import { RequestStatus } from './interfaces/request-status.interface';
-import { RouteStatus } from '@modules/rutas/interfaces/route-status.interface';
 import { BillingService } from '@modules/facturacion/billing.service';
 import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 
 //* Interfaces
+import { ValidRoles } from '@modules/auth/interfaces';
+import { RouteStatus } from '@modules/rutas/interfaces/route-status.interface';
 import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
-import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 import { ClientsStatus } from '@modules/clients/interfaces/active-clients.interface';
+import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
+import { RequestStatus } from './interfaces';
 
 @Injectable()
 export class RequestsService {
@@ -62,7 +63,7 @@ export class RequestsService {
         ...createRequestDto,
       });
       if (existingRequest) {
-        throw new NotFoundException('Request already exists for this client');
+        throw new BadRequestException('Request already exists for this client');
       }
       if (client.status === ClientsStatus.inactive) {
         throw new BadRequestException(
@@ -71,10 +72,10 @@ export class RequestsService {
       }
       const request = await this.requestModel.create(createRequestDto);
       if (!request) {
-        throw new NotFoundException('Request could not be created');
+        throw new BadRequestException('Request could not be created');
       } else if (client.requests?.includes(request._id)) {
         await this.requestModel.findByIdAndDelete(request._id);
-        throw new NotFoundException('Request already exists for this client');
+        throw new BadRequestException('Request already exists for this client');
       }
       const { clientWithRequest } =
         await this.clientsService.addRequestToClient(
@@ -95,7 +96,7 @@ export class RequestsService {
         request,
       );
       if (!routeCreated) {
-        throw new NotFoundException('Route could not be created');
+        throw new BadRequestException('Route could not be created');
       }
       request.routeId = routeCreated._id;
       await request.save();
@@ -249,7 +250,7 @@ export class RequestsService {
     }
   }
 
-  async updateStatus(id: string, status: RequestStatus) {
+  async updateStatus(id: string, status: RequestStatus, user?: User) {
     try {
       const request = await this.requestModel.findById(id).lean();
       if (!request) {
@@ -260,6 +261,13 @@ export class RequestsService {
       );
       if (!client) {
         throw new NotFoundException('Client not found for this request');
+      }
+      if (!user?.roles.includes(ValidRoles.admin || ValidRoles.adminManager)) {
+        if (request.clientId.toString() !== user?.clientId?._id?.toString()) {
+          throw new BadRequestException(
+            'You can only update requests for your own client',
+          );
+        }
       }
       if (client.status === ClientsStatus.inactive) {
         throw new BadRequestException(
@@ -310,7 +318,7 @@ export class RequestsService {
         const billing =
           await this.billingService.createBillingFromRequest(updatedRequest);
         if (!billing) {
-          throw new NotFoundException('Billing could not be created');
+          throw new BadRequestException('Billing could not be created');
         }
       }
 
@@ -347,7 +355,7 @@ export class RequestsService {
 
       const requestDeleted = await this.requestModel.findByIdAndDelete(id);
       if (!requestDeleted) {
-        throw new NotFoundException('Request could not be deleted');
+        throw new BadRequestException('Request could not be deleted');
       }
       await this.auditLogsService.create({
         level: AuditLogLevel.warn,
@@ -382,7 +390,7 @@ export class RequestsService {
             request._id,
           );
           if (!requestDeleted) {
-            throw new NotFoundException('Request could not be deleted');
+            throw new BadRequestException('Request could not be deleted');
           }
         }
       }

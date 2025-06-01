@@ -25,8 +25,10 @@ import { Billing } from './entities/billing.entity';
 
 //* Services
 import { BillingService } from './billing.service';
-import { BillingStatus } from './interfaces/billing-status.interface';
+
+// * Interfaces
 import { ValidRoles } from '@modules/auth/interfaces';
+import { BillingStatus } from './interfaces/billing-status.interface';
 
 @ApiTags('Billing')
 @ApiNotFoundResponse({ description: 'Billing not found' })
@@ -37,7 +39,7 @@ import { ValidRoles } from '@modules/auth/interfaces';
 export class BillingController {
   constructor(private readonly billingService: BillingService) {}
 
-  @Delete('delete-billing/:id')
+  @Delete(':id')
   @Auth(ValidRoles.admin)
   @ApiCreatedResponse({ description: 'Billing deleted' })
   @ApiOperation({ summary: 'Delete a billing by Id' })
@@ -115,6 +117,15 @@ export class BillingController {
     status: 200,
     description: 'Billing status updated',
     type: Billing,
+  })
+  @ApiBadRequestResponse({
+    description: 'Bad Request',
+    schema: {
+      oneOf: [
+        { example: { message: 'Billing already has status: :status' } },
+        { example: { message: 'Billing with status X cannot be updated' } },
+      ],
+    },
   })
   @ApiOperation({ summary: 'Update billing status' })
   @ApiQuery({

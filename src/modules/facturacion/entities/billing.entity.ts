@@ -1,18 +1,25 @@
 // Objective: Define the facturacion entity schema and model for the database
+
+// * NestJS modules
 import { ApiProperty } from '@nestjs/swagger';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+
+// * External modules
 import { Document, Types } from 'mongoose';
+
+// * Interfaces
 import { BillingStatus } from '../interfaces/billing-status.interface';
 
 /**
  * Facturacion entity schema
  * @param _id Facturacion id
- * @param clientName Nombre del cliente
- * @param billingAmount Importe de la facturacion
- * @param idServices Array de ids de servicios
- * @param issueDate Fecha de emision de la factura
- * @param dueDate Fecha de vencimiento de la factura
- * @param status Estado de la factura (pendiente, pagada, cancelada)
+ * @param requestId Request Id associated with the billing
+ * @param clientId Client Id associated with the billing
+ * @param billingAmount Amount to be billed
+ * @param issueDate Date when the invoice is issued
+ * @param dueDate Date when the invoice is due
+ * @param paidDate Date when the invoice is paid (optional)
+ * @param status Status of the invoice (pending, paid, canceled)
  * @returns Facturacion entity schema
  */
 @Schema({ timestamps: true })

@@ -33,7 +33,6 @@ export class JwtLoginStrategy extends PassportStrategy(Strategy, 'jwt-login') {
     if (!user.isActive || !user.emailVerified)
       throw new UnauthorizedException('User is inactive, talk with an admin');
 
-    if (user.isDeleted) throw new UnauthorizedException('User is archived');
     return user;
   }
 }

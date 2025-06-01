@@ -2,6 +2,7 @@ export { LoginResponseDto } from './login-response.dto';
 export { RegisterUserDto } from './register-user.dto';
 export { LoginUserDto } from './login-user.dto';
 export { RecoverPasswordDto } from './recover-password.dto';
+export { SetPasswordDto } from './set-password.dto';
 export { ChangePasswordDto } from './change-password.dto';
 export { ContactDto } from './contact.dto';
 export { UpdateUserDto } from './update-user.dto';

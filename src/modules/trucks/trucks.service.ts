@@ -8,14 +8,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+// * External modules
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+
 // * DTOs
 import { CreateTruckDto } from './dto/create-truck.dto';
 import { UpdateTruckDto } from './dto/update-truck.dto';
 
-// * External modules
-import { InjectModel } from '@nestjs/mongoose';
+// * Entities
 import { Truck } from './entities/truck.entity';
-import { Model } from 'mongoose';
 
 // * Services
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
@@ -104,17 +106,33 @@ export class TrucksService {
     }
   }
 
-  async updateTruckStatus(id: string, status: string) {
+  async updateTruckStatus(id: string, status: TruckStatus) {
     try {
       const truck = await this.truckModel.findById(id);
       if (!truck) {
         throw new NotFoundException('Truck not found');
       }
 
-      if (status === 'maintenance' && truck.status !== TruckStatus.available) {
+      if (
+        status === TruckStatus.maintenance &&
+        truck.status !== TruckStatus.available
+      ) {
         throw new BadRequestException(
           'Truck can only enter maintenance from available status',
         );
+      }
+
+      if (
+        status === TruckStatus.available &&
+        truck.status !== TruckStatus.maintenance
+      ) {
+        throw new BadRequestException(
+          'Truck can only return to available status from maintenance',
+        );
+      }
+
+      if (truck.status === status) {
+        throw new BadRequestException(`Truck is already in ${status} status`);
       }
 
       const truckUpdated = await this.truckModel.findByIdAndUpdate(

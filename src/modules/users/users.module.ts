@@ -1,7 +1,7 @@
 // Objective: Implement the module for the user entity.
 
 //* NestJS modules
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PassportModule } from '@nestjs/passport';
@@ -15,13 +15,6 @@ import { UsersController } from './users.controller';
 
 //* Entities
 import { User, UserSchema } from './entities/user.entity';
-
-//* Modules
-import { CommonModule } from '@common/common.module';
-import { ClientsModule } from '@modules/clients/clients.module';
-import { CarriersModule } from '@modules/carriers/carriers.module';
-import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
-
 import {
   Carrier,
   CarrierSchema,
@@ -32,11 +25,20 @@ import {
   AuditLogSchema,
 } from '@modules/audit-logs/entities/audit-log.entity';
 
+//* Modules
+import { CommonModule } from '@common/common.module';
+import { ClientsModule } from '@modules/clients/clients.module';
+import { CarriersModule } from '@modules/carriers/carriers.module';
+import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
+import { SendEmailUserAdminService } from '@common/cleanBBDD/sendEmailUserAdmin.service';
+import { AuthModule } from '@modules/auth/auth.module';
+
 @Module({
   controllers: [UsersController],
-  providers: [UsersService, UserCleanupService],
+  providers: [UsersService, UserCleanupService, SendEmailUserAdminService],
   exports: [UsersService],
   imports: [
+    forwardRef(() => AuthModule),
     CommonModule,
     ConfigModule,
     ClientsModule,

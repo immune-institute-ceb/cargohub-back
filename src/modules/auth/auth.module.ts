@@ -1,6 +1,6 @@
 // Objective: Implement the module to manage the authentication of the application.
 //* NestJS modules
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { envs } from '@config/envs';
 import { PassportModule } from '@nestjs/passport';
@@ -24,7 +24,7 @@ import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
   controllers: [AuthController],
   providers: [AuthService, JwtLoginStrategy, JwtRecoverPasswordStrategy],
   imports: [
-    UsersModule,
+    forwardRef(() => UsersModule),
     CommonModule,
     AuditLogsModule,
     // Passport module to manage authentication
@@ -47,6 +47,7 @@ import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
     JwtRecoverPasswordStrategy,
     PassportModule,
     JwtModule,
+    AuthService,
   ],
 })
 export class AuthModule {}
