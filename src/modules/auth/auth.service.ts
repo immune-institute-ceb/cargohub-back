@@ -249,6 +249,7 @@ class AuthService {
           throw new BadRequestException('Email already verified');
         user.emailVerified = true;
         await user.save();
+        await this.generate2faCode(user);
       }
       const passwordHash = bcrypt.hashSync(String(setPasswordDto.password), 10);
 
@@ -258,6 +259,7 @@ class AuthService {
       );
 
       if (!userUpdated) throw new NotFoundException('User not found');
+
       return { message: 'Password updated' };
     } catch (error) {
       if (error?.name === 'TokenExpiredError') {
