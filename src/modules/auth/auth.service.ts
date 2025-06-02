@@ -183,14 +183,8 @@ class AuthService {
   }
 
   loginWithToken(user: User) {
-    const {
-      password,
-      clientId,
-      carrierId,
-      permissions,
-      emailVerified,
-      ...userWithoutPassword
-    } = user.toObject();
+    const { password, permissions, emailVerified, ...userWithoutPassword } =
+      user.toObject();
     return {
       userWithoutPassword,
       token: this.getJwtToken(
@@ -446,7 +440,7 @@ class AuthService {
     expiresIn: string,
   ) {
     const token = this.jwtService.sign(payload, {
-      expiresIn: expiresIn || '1h',
+      expiresIn: expiresIn || '2h',
     });
     return token;
   }

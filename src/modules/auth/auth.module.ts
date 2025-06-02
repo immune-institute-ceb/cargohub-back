@@ -37,7 +37,7 @@ import { AuditLogsModule } from '@modules/audit-logs/audit-logs.module';
       useFactory: () => ({
         secret: envs.jwtSecret,
         signOptions: {
-          expiresIn: '1h',
+          expiresIn: '2h',
         },
       }),
     }),
