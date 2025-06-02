@@ -28,7 +28,6 @@ export class ExceptionsService {
 
     // Other errors.
     console.log(error);
-    console.log(error.code);
     if (error.code === 11000) {
       throw new BadRequestException('Duplicate key error: ' + error.message);
     }

@@ -104,7 +104,6 @@ export class BillingService {
           billing.requestId.toString(),
           RequestStatus.completed,
         );
-        console.log(updatedRequest);
         if (updatedRequest) {
           billing.paidDate = new Date();
           billing.status = status;
@@ -169,9 +168,7 @@ export class BillingService {
 
   async deleteBillingByRequestId(requestId: Types.ObjectId) {
     try {
-      console.log(requestId);
       const billing = await this.billingModel.findOne({ requestId });
-      console.log(billing);
       if (billing) {
         await this.billingModel.deleteOne({ requestId });
         await this.auditLogsService.create({

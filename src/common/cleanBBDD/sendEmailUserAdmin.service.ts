@@ -43,7 +43,6 @@ export class SendEmailUserAdminService {
       roles: { $in: [ValidRoles.admin, ValidRoles.adminManager] },
       createdAt: { $lt: expirationDate },
     });
-
     for (const user of unverifiedAdmins) {
       try {
         await this.authService.sendConfirmationEmail(user);

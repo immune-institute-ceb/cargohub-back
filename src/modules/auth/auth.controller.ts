@@ -26,7 +26,6 @@ import { AuthGuard } from '@nestjs/passport';
 //* DTOs
 import {
   SetPasswordDto,
-  ContactDto,
   Generate2faCodeResponseDto,
   LoginResponseDto,
   LoginUserDto,
@@ -261,25 +260,6 @@ export class AuthController {
   @Auth()
   verifyTokenUser(@GetTokenFromHeader() token: string) {
     return this.authService.verifyToken(token);
-  }
-
-  @Post('contact')
-  @ApiResponse({
-    status: 200,
-    description: 'Thanks for contacting us, check your email',
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal Server Error, check the logs',
-    schema: {
-      oneOf: [
-        { example: { message: 'Failed to send email' } },
-        { example: { message: 'Failed to send email to admin' } },
-      ],
-    },
-  })
-  @ApiOperation({ summary: 'Contact via email' })
-  contact(@Body() body: ContactDto) {
-    return this.authService.contact(body);
   }
 
   @Post('2fa/generate')

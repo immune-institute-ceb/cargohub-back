@@ -24,7 +24,6 @@ import * as requestIp from 'request-ip';
 //* DTOs
 import {
   SetPasswordDto,
-  ContactDto,
   LoginUserDto,
   RecoverPasswordDto,
   RegisterUserAdminManagerDto,
@@ -37,7 +36,11 @@ import {
 //* Interfaces
 import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
 import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
-import { JwtPayload, JwtPayloadRecoverPassword } from './interfaces';
+import {
+  JwtPayload,
+  JwtPayloadRecoverPassword,
+  ValidRoles,
+} from './interfaces';
 
 //* Services
 import { UsersService } from '@modules/users/users.service';
@@ -224,10 +227,14 @@ class AuthService {
 
   async verifyToken(token: string) {
     try {
-      await this.jwtService.verifyAsync(token, {
+      const { _id } = await this.jwtService.verifyAsync<{
+        _id: string;
+      }>(token, {
         secret: envs.jwtSecret,
       });
-      return { message: 'Token is valid' };
+      const user = await this.usersService.findUserById(_id);
+      if (!user) throw new NotFoundException('User not found');
+      return { message: 'Token is valid', role: user.roles };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -243,8 +250,12 @@ class AuthService {
       if (!user) throw new NotFoundException('User not found');
       if (setPasswordDto.password !== setPasswordDto.passwordConfirmed)
         throw new BadRequestException('Passwords do not match');
-      if (message === 'confirmEmail' && user.emailVerified)
-        throw new BadRequestException('Email already confirmed');
+      if (message === 'confirmEmail') {
+        if (user.emailVerified)
+          throw new BadRequestException('Email already verified');
+        user.emailVerified = true;
+        await user.save();
+      }
       const passwordHash = bcrypt.hashSync(String(setPasswordDto.password), 10);
 
       const userUpdated = await this.usersService.findAndUpdatePassword(
@@ -253,7 +264,13 @@ class AuthService {
       );
 
       if (!userUpdated) throw new NotFoundException('User not found');
-
+      if (
+        message === 'confirmEmail' &&
+        (user.roles.includes(ValidRoles.admin) ||
+          user.roles.includes(ValidRoles.adminManager))
+      ) {
+        return await this.generate2faCode(user);
+      }
       return { message: 'Password updated' };
     } catch (error) {
       if (error?.name === 'TokenExpiredError') {
@@ -312,28 +329,6 @@ class AuthService {
       await userWithPassword.save();
 
       return { message: 'Password changed successfully' };
-    } catch (error) {
-      this.exceptionsService.handleDBExceptions(error);
-    }
-  }
-
-  async contact(body: ContactDto) {
-    try {
-      // * Send email to the admin
-      await this.transporter.sendMail({
-        from: envs.emailUser,
-        to: envs.emailUser,
-        subject: 'Contact',
-        html: `<h1>Contact</h1><p>${body.name}</p><p>${body.email}</p><p>${body.consulta}</p>`,
-      });
-      // * Send email to the user
-      await this.transporter.sendMail({
-        from: envs.emailUser,
-        to: body.email,
-        subject: 'Contact',
-        html: `<h1>Contact</h1><p>Thanks for contacting us, your message has been recieved, we will contact you soon</p>`,
-      });
-      return { message: 'Thanks for contacting us, check your email' };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }

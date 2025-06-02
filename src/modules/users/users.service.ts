@@ -203,7 +203,7 @@ export class UsersService {
     try {
       return await this.userModel.findOneAndUpdate(
         { _id },
-        { password, emailVerified: true },
+        { password },
         { new: true },
       );
     } catch (error) {
