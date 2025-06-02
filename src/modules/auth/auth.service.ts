@@ -264,13 +264,6 @@ class AuthService {
       );
 
       if (!userUpdated) throw new NotFoundException('User not found');
-      if (
-        message === 'confirmEmail' &&
-        (user.roles.includes(ValidRoles.admin) ||
-          user.roles.includes(ValidRoles.adminManager))
-      ) {
-        return await this.generate2faCode(user);
-      }
       return { message: 'Password updated' };
     } catch (error) {
       if (error?.name === 'TokenExpiredError') {
