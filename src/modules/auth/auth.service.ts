@@ -249,7 +249,7 @@ class AuthService {
           throw new BadRequestException('Email already verified');
         user.emailVerified = true;
         await user.save();
-        await this.generate2faCode(user);
+        return await this.generate2faCode(user);
       }
       const passwordHash = bcrypt.hashSync(String(setPasswordDto.password), 10);
 
@@ -260,6 +260,13 @@ class AuthService {
 
       if (!userUpdated) throw new NotFoundException('User not found');
 
+      if (userUpdated.twoFactorAuthEnabled) {
+        userUpdated.twoFactorAuthEnabled = false;
+        return {
+          message: 'Password updated, please verify your 2FA code',
+          qrCode: userUpdated.twoFactorQrCode,
+        };
+      }
       return { message: 'Password updated' };
     } catch (error) {
       if (error?.name === 'TokenExpiredError') {
@@ -353,7 +360,6 @@ class AuthService {
       await user.save();
       return {
         message: '2FA code generated',
-        secret: secret.base32,
         qrCode,
       };
     } catch (error) {
