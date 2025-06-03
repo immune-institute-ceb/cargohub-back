@@ -2,8 +2,10 @@
 
 //* NestJS modules
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 //* Config
 import { envs } from './config/envs';
@@ -23,7 +25,22 @@ import { TrucksModule } from '@modules/trucks/trucks.module';
 import { UsersModule } from '@modules/users/users.module';
 
 @Module({
+  providers: [
+    {
+      provide: APP_GUARD, // Register the ThrottlerGuard globally
+      useClass: ThrottlerGuard,
+    },
+  ],
   imports: [
+    ThrottlerModule.forRoot({
+      // Configure global throttling
+      throttlers: [
+        {
+          ttl: 60000,
+          limit: 10,
+        },
+      ],
+    }),
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
