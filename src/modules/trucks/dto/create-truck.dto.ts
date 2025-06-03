@@ -34,8 +34,9 @@ export class CreateTruckDto {
     example: 'ABC-1234',
   })
   @IsString()
-  @Matches(/^[A-Z]{3}-\d{4}$/, {
-    message: 'licensePlate must be in the format "ABC-1234"',
+  @IsNotEmpty()
+  @Matches(/^[A-Z0-9-]+$/, {
+    message: 'licensePlate must contain only letters, numbers, and hyphens',
   })
   licensePlate: string;
 
