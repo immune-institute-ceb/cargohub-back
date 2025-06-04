@@ -394,6 +394,36 @@ class AuthService {
     }
   }
 
+  async activateEmailTwoFactorCode(token: string, token2fa: TwoFactorDto) {
+    try {
+      const { _id } = this.jwtService.verify<{
+        _id: string;
+      }>(token, {
+        secret: envs.jwtSecret,
+      });
+
+      const user = await this.usersService.findUserById(_id);
+      if (!user || !user.twoFactorAuth)
+        throw new BadRequestException('2FA not enabled');
+
+      if (user.twoFactorAuthEnabled)
+        throw new BadRequestException('2FA already enabled');
+
+      const isValid = speakeasy.totp.verify({
+        secret: user.twoFactorAuth,
+        encoding: 'base32',
+        token: token2fa.token,
+      });
+
+      if (!isValid) throw new BadRequestException('Invalid 2FA code');
+      user.twoFactorAuthEnabled = true;
+      await user.save();
+      return { message: '2FA code activated' };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
   async verify2faCode(verifiyTwoFactorDto: VerifyTwoFactorDto, req: Request) {
     try {
       const user = (await this.usersService.findUserByEmail(

@@ -327,6 +327,31 @@ export class AuthController {
     return this.authService.activateTwoFactorCode(user as User, token);
   }
 
+  @Post('2fa/email/activate')
+  @ApiResponse({
+    status: 200,
+    description: '2FA code activated',
+  })
+  @ApiOperation({ summary: 'Activate 2FA code' })
+  @ApiBadRequestResponse({
+    description: 'Bad Request - 2FA not enabled',
+    schema: {
+      oneOf: [
+        { example: { message: '2FA not enabled' } },
+        { example: { message: '2FA already enabled' } },
+        { example: { message: 'Invalid 2FA code' } },
+      ],
+    },
+  })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt-recover-password'))
+  activateEmailTwoFactorCode(
+    @GetTokenFromHeader() token: string,
+    @Body() token2fa: TwoFactorDto,
+  ) {
+    return this.authService.activateEmailTwoFactorCode(token, token2fa);
+  }
+
   @Post('2fa/verify')
   @ApiResponse({
     status: 200,
