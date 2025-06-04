@@ -241,7 +241,7 @@ export class AuthController {
     return this.authService.refreshToken(user as User);
   }
 
-  @Get('verify-token')
+  @Get('verify-session-token')
   @ApiResponse({
     status: 200,
     description: 'Token is valid',
@@ -255,10 +255,31 @@ export class AuthController {
       ],
     },
   })
-  @ApiOperation({ summary: 'Verify user token' })
+  @ApiOperation({ summary: 'Verify user session token' })
   @ApiBearerAuth()
   @Auth()
-  verifyTokenUser(@GetTokenFromHeader() token: string) {
+  verifyTokenSessionUser(@GetTokenFromHeader() token: string) {
+    return this.authService.verifyToken(token);
+  }
+
+  @Get('verify-email-token')
+  @ApiResponse({
+    status: 200,
+    description: 'Token is valid',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized - Authentication failure',
+    schema: {
+      oneOf: [
+        { example: { message: 'Not valid token' } },
+        { example: { message: 'Unauthorized' } },
+      ],
+    },
+  })
+  @ApiOperation({ summary: 'Verify user email token' })
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt-recover-password'))
+  verifyTokenEmailUser(@GetTokenFromHeader() token: string) {
     return this.authService.verifyToken(token);
   }
 

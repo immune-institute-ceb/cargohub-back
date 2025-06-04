@@ -244,14 +244,16 @@ class AuthService {
       if (!user) throw new NotFoundException('User not found');
       if (setPasswordDto.password !== setPasswordDto.passwordConfirmed)
         throw new BadRequestException('Passwords do not match');
+      const passwordHash = bcrypt.hashSync(String(setPasswordDto.password), 10);
+
       if (message === 'confirmEmail') {
         if (user.emailVerified)
           throw new BadRequestException('Email already verified');
         user.emailVerified = true;
+        user.password = passwordHash;
         await user.save();
         return await this.generate2faCode(user);
       }
-      const passwordHash = bcrypt.hashSync(String(setPasswordDto.password), 10);
 
       const userUpdated = await this.usersService.findAndUpdatePassword(
         _id,
