@@ -2,7 +2,7 @@
 
 //* NestJS modules
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 //* External modules
@@ -18,12 +18,21 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
 
   app.setGlobalPrefix('api/v1');
 
+  const swaggerUrlAllowed = envs.swaggerUrl
+    ? envs.swaggerUrl + envs.port
+    : undefined;
+
+  console.log(swaggerUrlAllowed);
+
   app.enableCors({
     origin: (origin, callback) => {
-      const allowedOrigins = [envs.frontendUrl];
+      const allowedOrigins = [envs.frontendUrl, swaggerUrlAllowed].filter(
+        Boolean,
+      );
       if (!origin || allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
@@ -78,5 +87,6 @@ async function bootstrap() {
   SwaggerModule.setup('api/v1', app, documentFactory);
 
   await app.listen(envs.port ?? 3000);
+  logger.log(`Application is running on: http://localhost:${envs.port}`);
 }
 bootstrap();

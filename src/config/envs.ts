@@ -13,6 +13,7 @@ interface EnvVars {
   EMAIL_REFRESH_TOKEN: string;
   REDIRECT_URI: string;
   FRONTEND_URL: string;
+  SWAGGER_URL?: string; // Optional for Swagger UI
 }
 
 // Envs schema using Joi for validation
@@ -27,6 +28,7 @@ const envsSchema = joi
     EMAIL_REFRESH_TOKEN: joi.string().required(),
     REDIRECT_URI: joi.string().required(),
     FRONTEND_URL: joi.string().required(),
+    SWAGGER_URL: joi.string().optional(), // Optional for Swagger UI
   })
   .unknown(true);
 
@@ -49,4 +51,5 @@ export const envs = {
   emailRefreshToken: envVars.EMAIL_REFRESH_TOKEN,
   redirectUri: envVars.REDIRECT_URI,
   frontendUrl: envVars.FRONTEND_URL,
+  swaggerUrl: envVars.SWAGGER_URL,
 };
