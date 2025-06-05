@@ -20,7 +20,7 @@ describe('DashboardController', () => {
   });
 
   it('returns summary from service', () => {
-    service.getDashboardSummary.mockReturnValue('sum' as any);
+    service.getDashboardSummary.mockReturnValue('sum' as unknown as Awaited<ReturnType<DashboardService['getDashboardSummary']>>);
     expect(controller.getDashboardSummary()).toBe('sum');
   });
 

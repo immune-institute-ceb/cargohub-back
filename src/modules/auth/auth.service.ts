@@ -107,8 +107,9 @@ class AuthService {
     registerUserAdminManagerDto: RegisterUserAdminManagerDto,
   ) {
     try {
-      const { __rolesValidator__, ...rest } =
-        registerUserAdminManagerDto as any;
+      const { __rolesValidator__, ...rest } = registerUserAdminManagerDto as Omit<RegisterUserAdminManagerDto, '__rolesValidator__'> & {
+        __rolesValidator__?: unknown;
+      };
       const user = await this.usersService.create({
         ...rest,
       });

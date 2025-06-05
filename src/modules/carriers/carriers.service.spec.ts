@@ -21,14 +21,17 @@ describe('CarriersService', () => {
       countDocuments: jest.fn(),
       findByIdAndDelete: jest.fn(),
       findById: jest.fn(),
-    } as any;
-    exceptions = { handleDBExceptions: jest.fn() } as any;
-    audits = { create: jest.fn() } as any;
-    users = {} as any;
-    trucks = { updateTruckStatus: jest.fn(), findOne: jest.fn() } as any;
-    routes = { findRoutesByCarrier: jest.fn(), unassignRouteFromCarrierRemoved: jest.fn() } as any;
-    service = new CarriersService(model, exceptions, audits, users, trucks as any);
-    (service as any).routesService = routes;
+    } as jest.Mocked<Model<Carrier>>;
+    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
+    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
+    users = {} as jest.Mocked<UsersService>;
+    trucks = { updateTruckStatus: jest.fn(), findOne: jest.fn() } as jest.Mocked<TrucksService>;
+    routes = {
+      findRoutesByCarrier: jest.fn(),
+      unassignRouteFromCarrierRemoved: jest.fn(),
+    } as { findRoutesByCarrier: jest.Mock; unassignRouteFromCarrierRemoved: jest.Mock };
+    service = new CarriersService(model, exceptions, audits, users, trucks);
+    (service as unknown as { routesService: typeof routes }).routesService = routes;
   });
 
   it('should be defined', () => {
@@ -36,7 +39,7 @@ describe('CarriersService', () => {
   });
 
   it('create delegates to model', async () => {
-    await service.create({} as any, 'u' as any);
+    await service.create({} as Record<string, never>, 'u');
     expect(model.create).toHaveBeenCalled();
   });
 
@@ -46,13 +49,16 @@ describe('CarriersService', () => {
   });
 
   it('remove deletes carrier', async () => {
-    model.findByIdAndDelete.mockResolvedValue({ truck: { _id: 't' } } as any);
+    model.findByIdAndDelete.mockResolvedValue({ truck: { _id: 't' } } as unknown as Carrier);
     await service.remove('1');
     expect(model.findByIdAndDelete).toHaveBeenCalledWith('1');
   });
 
   it('findCarrierWithPopulatedData calls findById', async () => {
-    model.findById.mockReturnValue({ populate: jest.fn().mockReturnThis(), populate: jest.fn().mockResolvedValue('c') } as any);
+    model.findById.mockReturnValue({
+      populate: jest.fn().mockReturnThis(),
+      populate: jest.fn().mockResolvedValue('c'),
+    } as unknown as ReturnType<Model<Carrier>['findById']>);
     await service.findCarrierWithPopulatedData('2');
     expect(model.findById).toHaveBeenCalledWith('2');
   });

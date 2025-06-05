@@ -19,10 +19,10 @@ describe('TrucksService', () => {
       findById: jest.fn(),
       findByIdAndUpdate: jest.fn(),
       findByIdAndDelete: jest.fn(),
-    } as any;
-    exceptions = { handleDBExceptions: jest.fn() } as any;
-    audits = { create: jest.fn() } as any;
-    users = {} as any;
+    } as jest.Mocked<Model<Truck>>;
+    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
+    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
+    users = {} as jest.Mocked<UsersService>;
     service = new TrucksService(model, exceptions, audits, users);
   });
 
@@ -31,24 +31,24 @@ describe('TrucksService', () => {
   });
 
   it('create uses model', async () => {
-    await service.create({} as any);
+    await service.create({} as Record<string, never>);
     expect(model.create).toHaveBeenCalled();
   });
 
   it('findAll uses find', async () => {
-    model.find.mockReturnValue([] as any);
+    model.find.mockReturnValue([] as unknown as ReturnType<Model<Truck>['find']>);
     await service.findAll();
     expect(model.find).toHaveBeenCalled();
   });
 
   it('findOne uses findById', async () => {
-    model.findById.mockReturnValue({} as any);
+    model.findById.mockReturnValue({} as unknown as ReturnType<Model<Truck>['findById']>);
     await service.findOne('1');
     expect(model.findById).toHaveBeenCalledWith('1');
   });
 
   it('remove uses findByIdAndDelete', async () => {
-    model.findByIdAndDelete.mockResolvedValue({} as any);
+    model.findByIdAndDelete.mockResolvedValue({} as unknown as Truck);
     await service.remove('1');
     expect(model.findByIdAndDelete).toHaveBeenCalledWith('1');
   });

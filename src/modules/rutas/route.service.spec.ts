@@ -20,11 +20,11 @@ describe('RoutesService', () => {
       find: jest.fn(),
       findById: jest.fn(),
       updateOne: jest.fn(),
-    } as any;
-    exceptions = { handleDBExceptions: jest.fn() } as any;
-    audits = { create: jest.fn() } as any;
-    carriers = { findOne: jest.fn() } as any;
-    trucks = {} as any;
+    } as jest.Mocked<Model<Route>>;
+    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
+    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
+    carriers = { findOne: jest.fn() } as jest.Mocked<CarriersService>;
+    trucks = {} as jest.Mocked<TrucksService>;
     service = new RoutesService(model, exceptions, audits, carriers, trucks);
   });
 
@@ -33,24 +33,26 @@ describe('RoutesService', () => {
   });
 
   it('create uses model', async () => {
-    await service.create({ origin: 'o', destination: 'd' } as any, {} as any);
+    await service.create({ origin: 'o', destination: 'd' }, {} as unknown as Parameters<RoutesService['create']>[1]);
     expect(model.create).toHaveBeenCalled();
   });
 
   it('findAllRoutes uses model', async () => {
-    model.find.mockReturnValue({ populate: jest.fn().mockReturnValue([]) } as any);
+    model.find.mockReturnValue({
+      populate: jest.fn().mockReturnValue([]),
+    } as unknown as ReturnType<Model<Route>['find']>);
     await service.findAllRoutes();
     expect(model.find).toHaveBeenCalled();
   });
 
   it('findRouteById uses model', async () => {
-    model.findById.mockReturnValue({} as any);
+    model.findById.mockReturnValue({} as unknown as ReturnType<Model<Route>['findById']>);
     await service.findRouteById('1');
     expect(model.findById).toHaveBeenCalledWith('1');
   });
 
   it('assignCarrierToRoute updates route', async () => {
-    model.updateOne.mockResolvedValue({} as any);
+    model.updateOne.mockResolvedValue({} as unknown as ReturnType<Model<Route>['updateOne']>);
     await service.assignCarrierToRoute('r', 'c');
     expect(model.updateOne).toHaveBeenCalled();
   });

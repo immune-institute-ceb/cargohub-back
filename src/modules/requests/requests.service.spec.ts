@@ -22,12 +22,12 @@ describe('RequestsService', () => {
       find: jest.fn(),
       findById: jest.fn(),
       findByIdAndDelete: jest.fn(),
-    } as any;
-    exceptions = { handleDBExceptions: jest.fn() } as any;
-    routes = { create: jest.fn() } as any;
-    clients = { findOne: jest.fn(), addRequestToClient: jest.fn() } as any;
-    billing = { createBillingFromRequest: jest.fn() } as any;
-    audits = { create: jest.fn() } as any;
+    } as jest.Mocked<Model<Requests>>;
+    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
+    routes = { create: jest.fn() } as jest.Mocked<RoutesService>;
+    clients = { findOne: jest.fn(), addRequestToClient: jest.fn() } as jest.Mocked<ClientsService>;
+    billing = { createBillingFromRequest: jest.fn() } as jest.Mocked<BillingService>;
+    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
     service = new RequestsService(model, exceptions, routes, clients, billing, audits);
   });
 
@@ -36,27 +36,27 @@ describe('RequestsService', () => {
   });
 
   it('create uses model', async () => {
-    clients.findOne.mockResolvedValue({ _id: 'c', requests: [] } as any);
-    routes.create.mockResolvedValue({ _id: 'r' } as any);
-    await service.create({ origin: 'o', destination: 'd' } as any, { _id: 'u' } as any);
+    clients.findOne.mockResolvedValue({ _id: 'c', requests: [] } as unknown as Parameters<typeof service.create>[1] & { _id: string });
+    routes.create.mockResolvedValue({ _id: 'r' } as unknown as ReturnType<RoutesService['create']>);
+    await service.create({ origin: 'o', destination: 'd' } as Record<string, string>, { _id: 'u' } as unknown as Parameters<typeof service.create>[1]);
     expect(model.create).toHaveBeenCalled();
   });
 
   it('findAllRequestsByClientId uses find', async () => {
-    model.find.mockReturnValue([] as any);
-    clients.findOne.mockResolvedValue({ _id: 'c' } as any);
+    model.find.mockReturnValue([] as unknown as ReturnType<Model<Requests>['find']>);
+    clients.findOne.mockResolvedValue({ _id: 'c' } as unknown as Parameters<ClientsService['findOne']>[0]);
     await service.findAllRequestsByClientId('c');
     expect(model.find).toHaveBeenCalled();
   });
 
   it('findOne uses findById', async () => {
-    model.findById.mockReturnValue({} as any);
+    model.findById.mockReturnValue({} as unknown as ReturnType<Model<Requests>['findById']>);
     await service.findOne('1');
     expect(model.findById).toHaveBeenCalledWith('1');
   });
 
   it('remove uses findByIdAndDelete', async () => {
-    model.findByIdAndDelete.mockResolvedValue({} as any);
+    model.findByIdAndDelete.mockResolvedValue({} as unknown as Requests);
     await service.remove('1');
     expect(model.findByIdAndDelete).toHaveBeenCalledWith('1');
   });

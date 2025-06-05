@@ -12,8 +12,8 @@ import {
 export class IsRequiredIfRoleConstraint
   implements ValidatorConstraintInterface
 {
-  validate(value: any, args: ValidationArguments) {
-    const object = args.object as any;
+  validate(value: unknown, args: ValidationArguments) {
+    const object = args.object as Record<string, unknown>;
     const requiredRole = args.constraints[0];
     return !(object.roles?.includes(requiredRole) && !value);
   }

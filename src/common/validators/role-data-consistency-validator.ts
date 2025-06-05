@@ -13,8 +13,8 @@ import { ValidRoles } from '@modules/auth/interfaces';
 export class RoleDataConsistencyConstraint
   implements ValidatorConstraintInterface
 {
-  validate(_value: any, args: ValidationArguments): boolean {
-    const object = args.object as any;
+  validate(_value: unknown, args: ValidationArguments): boolean {
+    const object = args.object as Record<string, unknown>;
 
     // Ensure that roles is an array and has a default value if not provided
     const roles: ValidRoles[] = object.roles || [];
@@ -33,7 +33,7 @@ export class RoleDataConsistencyConstraint
   }
 
   defaultMessage(args: ValidationArguments): string {
-    const object = args.object as any;
+    const object = args.object as Record<string, unknown>;
     const roles = object.roles || [];
     // Ensure that roles is an array and has a default value if not provided
     const hasClientData = object.clientData !== undefined;

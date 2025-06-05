@@ -36,7 +36,7 @@ describe('ClientsController', () => {
   });
 
   it('findAll returns service result', () => {
-    service.findAll.mockReturnValue(['c'] as any);
+    service.findAll.mockReturnValue(['c'] as unknown as Awaited<ReturnType<ClientsService['findAll']>>);
     expect(controller.findAll()).toEqual(['c']);
   });
 });

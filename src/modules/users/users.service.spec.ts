@@ -20,11 +20,11 @@ describe('UsersService', () => {
       findOne: jest.fn(),
       findById: jest.fn(),
       findByIdAndDelete: jest.fn(),
-    } as any;
-    exceptions = { handleDBExceptions: jest.fn() } as any;
-    audits = { create: jest.fn() } as any;
-    clients = { findDuplicateClient: jest.fn() } as any;
-    carriers = { finByDni: jest.fn() } as any;
+    } as jest.Mocked<Model<User>>;
+    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
+    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
+    clients = { findDuplicateClient: jest.fn() } as jest.Mocked<ClientsService>;
+    carriers = { finByDni: jest.fn() } as jest.Mocked<CarriersService>;
     service = new UsersService(model, exceptions, audits, clients, carriers);
   });
 
@@ -35,25 +35,25 @@ describe('UsersService', () => {
   it('create uses model', async () => {
     clients.findDuplicateClient.mockResolvedValue(undefined);
     carriers.finByDni.mockResolvedValue(undefined);
-    model.create.mockResolvedValue({} as any);
-    await service.create({ roles: [] } as any);
+    model.create.mockResolvedValue({} as unknown as User);
+    await service.create({ roles: [] } as RegisterUserDto);
     expect(model.create).toHaveBeenCalled();
   });
 
   it('getUser uses findOne', async () => {
-    model.findOne.mockReturnValue({} as any);
-    await service.getUser({} as any);
+    model.findOne.mockReturnValue({} as unknown as ReturnType<Model<User>['findOne']>);
+    await service.getUser({ _id: '1' } as User);
     expect(model.findOne).toHaveBeenCalled();
   });
 
   it('deleteUser uses findByIdAndDelete', async () => {
-    model.findByIdAndDelete.mockResolvedValue({} as any);
-    await service.deleteUser({ _id: '1' } as any);
+    model.findByIdAndDelete.mockResolvedValue({} as unknown as User);
+    await service.deleteUser({ _id: '1', roles: [] } as User);
     expect(model.findByIdAndDelete).toHaveBeenCalled();
   });
 
   it('deleteUserByAdmin uses findByIdAndDelete', async () => {
-    model.findByIdAndDelete.mockResolvedValue({} as any);
+    model.findByIdAndDelete.mockResolvedValue({} as unknown as User);
     await service.deleteUserByAdmin('1');
     expect(model.findByIdAndDelete).toHaveBeenCalledWith('1');
   });

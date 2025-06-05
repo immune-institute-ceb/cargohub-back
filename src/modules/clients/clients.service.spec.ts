@@ -19,10 +19,10 @@ describe('ClientsService', () => {
       findById: jest.fn(),
       findOneAndUpdate: jest.fn(),
       countDocuments: jest.fn(),
-    } as any;
-    exceptions = { handleDBExceptions: jest.fn() } as any;
-    requests = { findOne: jest.fn() } as any;
-    audits = { create: jest.fn() } as any;
+    } as jest.Mocked<Model<Client>>;
+    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
+    requests = { findOne: jest.fn() } as jest.Mocked<RequestsService>;
+    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
     service = new ClientsService(model, exceptions, requests, audits);
   });
 
@@ -31,18 +31,24 @@ describe('ClientsService', () => {
   });
 
   it('create delegates to model', async () => {
-    await service.create({} as any, 'u' as any);
+    await service.create({} as Record<string, never>, 'u');
     expect(model.create).toHaveBeenCalled();
   });
 
   it('findAll uses model', async () => {
-    model.find.mockReturnValue({ populate: jest.fn().mockReturnThis(), populate: jest.fn().mockResolvedValue('x') } as any);
+    model.find.mockReturnValue({
+      populate: jest.fn().mockReturnThis(),
+      populate: jest.fn().mockResolvedValue('x'),
+    } as unknown as ReturnType<Model<Client>['find']>);
     await service.findAll();
     expect(model.find).toHaveBeenCalled();
   });
 
   it('findOne uses model', async () => {
-    model.findById.mockReturnValue({ populate: jest.fn().mockReturnThis(), populate: jest.fn().mockResolvedValue('x') } as any);
+    model.findById.mockReturnValue({
+      populate: jest.fn().mockReturnThis(),
+      populate: jest.fn().mockResolvedValue('x'),
+    } as unknown as ReturnType<Model<Client>['findById']>);
     await service.findOne('1');
     expect(model.findById).toHaveBeenCalledWith('1');
   });
@@ -53,8 +59,8 @@ describe('ClientsService', () => {
   });
 
   it('update uses model', async () => {
-    model.findOneAndUpdate.mockResolvedValue('c' as any);
-    await service.update('1', {} as any);
+    model.findOneAndUpdate.mockResolvedValue('c' as unknown as Client);
+    await service.update('1', {} as Record<string, never>);
     expect(model.findOneAndUpdate).toHaveBeenCalled();
   });
 });

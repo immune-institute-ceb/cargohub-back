@@ -19,11 +19,11 @@ describe('BillingService', () => {
       create: jest.fn(),
       find: jest.fn(),
       findById: jest.fn(),
-    } as any;
-    exceptions = { handleDBExceptions: jest.fn() } as any;
-    routes = {} as any;
-    requests = {} as any;
-    audits = { create: jest.fn() } as any;
+    } as jest.Mocked<Model<Billing>>;
+    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
+    routes = {} as jest.Mocked<RoutesService>;
+    requests = {} as jest.Mocked<RequestsService>;
+    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
     service = new BillingService(model, exceptions, routes, requests, audits);
   });
 
@@ -32,24 +32,28 @@ describe('BillingService', () => {
   });
 
   it('createBillingFromRequest uses model', async () => {
-    await service.createBillingFromRequest({ routeId: new Types.ObjectId(), _id: new Types.ObjectId(), clientId: new Types.ObjectId() } as any);
+    await service.createBillingFromRequest({
+      routeId: new Types.ObjectId(),
+      _id: new Types.ObjectId(),
+      clientId: new Types.ObjectId(),
+    });
     expect(model.create).toHaveBeenCalled();
   });
 
   it('findAllBillings uses find', async () => {
-    model.find.mockReturnValue({} as any);
+    model.find.mockReturnValue({} as unknown as ReturnType<Model<Billing>['find']>);
     await service.findAllBillings();
     expect(model.find).toHaveBeenCalled();
   });
 
   it('findBillingById uses findById', async () => {
-    model.findById.mockReturnValue({} as any);
+    model.findById.mockReturnValue({} as unknown as ReturnType<Model<Billing>['findById']>);
     await service.findBillingById('1');
     expect(model.findById).toHaveBeenCalledWith('1');
   });
 
   it('getMensualBilling aggregates', async () => {
-    model.find.mockReturnValue({} as any);
+    model.find.mockReturnValue({} as unknown as ReturnType<Model<Billing>['find']>);
     await service.getMensualBilling();
     expect(model.find).toHaveBeenCalled();
   });

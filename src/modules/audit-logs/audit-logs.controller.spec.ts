@@ -20,7 +20,7 @@ describe('AuditLogsController', () => {
   });
 
   it('returns service result', () => {
-    service.findAll.mockReturnValue(['a'] as any);
+    service.findAll.mockReturnValue(['a'] as unknown as Awaited<ReturnType<AuditLogsService['findAll']>>);
     expect(controller.findAll()).toEqual(['a']);
   });
 

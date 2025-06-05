@@ -12,13 +12,17 @@ describe('AuthService', () => {
   let audits: jest.Mocked<AuditLogsService>;
 
   beforeEach(() => {
-    jwt = { sign: jest.fn(), verifyAsync: jest.fn(), signAsync: jest.fn() } as any;
+    jwt = {
+      sign: jest.fn(),
+      verifyAsync: jest.fn(),
+      signAsync: jest.fn(),
+    } as jest.Mocked<JwtService>;
     users = {
       findUserWithPassword: jest.fn(),
       findUserById: jest.fn(),
-    } as any;
-    exceptions = { handleDBExceptions: jest.fn() } as any;
-    audits = {} as any;
+    } as jest.Mocked<UsersService>;
+    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
+    audits = {} as jest.Mocked<AuditLogsService>;
     service = new AuthService(jwt, users, exceptions, audits);
   });
 
@@ -39,9 +43,11 @@ describe('AuthService', () => {
       twoFactorAuthEnabled: false,
       isActive: true,
       emailVerified: true,
-    } as any);
+    } as unknown as ReturnType<typeof users.findUserWithPassword> extends Promise<infer U>
+      ? U
+      : never;
     jwt.sign.mockReturnValue('token');
-    await service.login({ email: 'e', password: 'a' } as any, {} as any);
+    await service.login({ email: 'e', password: 'a' } as LoginUserDto, {} as Request);
     expect(users.findUserWithPassword).toHaveBeenCalledWith('e');
   });
 
@@ -54,13 +60,13 @@ describe('AuthService', () => {
       email: 'e',
       roles: [],
       permissions: [],
-    } as any);
+    });
     expect(result).toEqual({ token: 't' });
   });
 
   it('verifyToken checks user existence', async () => {
-    jwt.verifyAsync.mockResolvedValue({ _id: '1' } as any);
-    users.findUserById.mockResolvedValue({ roles: [] } as any);
+    jwt.verifyAsync.mockResolvedValue({ _id: '1' } as { _id: string });
+    users.findUserById.mockResolvedValue({ roles: [] } as unknown as Parameters<typeof service['verifyToken']>[0]);
     await service.verifyToken('tok');
     expect(jwt.verifyAsync).toHaveBeenCalledWith('tok', { secret: expect.any(String) });
     expect(users.findUserById).toHaveBeenCalledWith('1');
@@ -68,7 +74,9 @@ describe('AuthService', () => {
 
   it('getJwtToken delegates to JwtService', () => {
     jwt.sign.mockReturnValue('x');
-    const token = (service as any).getJwtToken({ a: 1 } as any, '1h');
+    const token = (service as unknown as {
+      getJwtToken(payload: Record<string, unknown>, exp: string): string;
+    }).getJwtToken({ a: 1 }, '1h');
     expect(jwt.sign).toHaveBeenCalledWith({ a: 1 }, { expiresIn: '1h' });
     expect(token).toBe('x');
   });
