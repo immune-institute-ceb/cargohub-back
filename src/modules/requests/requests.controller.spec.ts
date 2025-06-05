@@ -17,7 +17,7 @@ describe('RequestsController', () => {
       updateStatus: jest.fn(),
       remove: jest.fn(),
     };
-    controller = new RequestsController(service as RequestsService);
+    controller = new RequestsController(service as unknown as RequestsService);
   });
 
   it('create calls service', () => {

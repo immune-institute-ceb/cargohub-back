@@ -13,7 +13,7 @@ describe('ClientsController', () => {
       findOne: jest.fn(),
       updateStatus: jest.fn(),
     };
-    controller = new ClientsController(service as ClientsService);
+    controller = new ClientsController(service as unknown as ClientsService);
   });
 
   it('findAll calls service', () => {

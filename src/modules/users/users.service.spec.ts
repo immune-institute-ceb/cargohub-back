@@ -5,6 +5,7 @@ import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { ClientsService } from '../clients/clients.service';
 import { CarriersService } from '../carriers/carriers.service';
+import { RegisterUserDto } from '../auth/dto';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -20,11 +21,11 @@ describe('UsersService', () => {
       findOne: jest.fn(),
       findById: jest.fn(),
       findByIdAndDelete: jest.fn(),
-    } as jest.Mocked<Model<User>>;
-    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
-    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
-    clients = { findDuplicateClient: jest.fn() } as jest.Mocked<ClientsService>;
-    carriers = { finByDni: jest.fn() } as jest.Mocked<CarriersService>;
+    } as unknown as jest.Mocked<Model<User>>;
+    exceptions = { handleDBExceptions: jest.fn() } as unknown as jest.Mocked<ExceptionsService>;
+    audits = { create: jest.fn() } as unknown as jest.Mocked<AuditLogsService>;
+    clients = { findDuplicateClient: jest.fn() } as unknown as jest.Mocked<ClientsService>;
+    carriers = { finByDni: jest.fn() } as unknown as jest.Mocked<CarriersService>;
     service = new UsersService(model, exceptions, audits, clients, carriers);
   });
 

@@ -3,7 +3,6 @@ import { Model } from 'mongoose';
 import { Carrier } from './entities/carrier.entity';
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
-import { UsersService } from '../users/users.service';
 import { TrucksService } from '../trucks/trucks.service';
 
 describe('CarriersService', () => {
@@ -11,7 +10,6 @@ describe('CarriersService', () => {
   let model: jest.Mocked<Model<Carrier>>;
   let exceptions: jest.Mocked<ExceptionsService>;
   let audits: jest.Mocked<AuditLogsService>;
-  let users: jest.Mocked<UsersService>;
   let trucks: jest.Mocked<TrucksService>;
   let routes: { findRoutesByCarrier: jest.Mock };
 
@@ -21,16 +19,15 @@ describe('CarriersService', () => {
       countDocuments: jest.fn(),
       findByIdAndDelete: jest.fn(),
       findById: jest.fn(),
-    } as jest.Mocked<Model<Carrier>>;
-    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
-    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
-    users = {} as jest.Mocked<UsersService>;
-    trucks = { updateTruckStatus: jest.fn(), findOne: jest.fn() } as jest.Mocked<TrucksService>;
+    } as unknown as jest.Mocked<Model<Carrier>>;
+    exceptions = { handleDBExceptions: jest.fn() } as unknown as jest.Mocked<ExceptionsService>;
+    audits = { create: jest.fn() } as unknown as jest.Mocked<AuditLogsService>;
+    trucks = { updateTruckStatus: jest.fn(), findOne: jest.fn() } as unknown as jest.Mocked<TrucksService>;
     routes = {
       findRoutesByCarrier: jest.fn(),
       unassignRouteFromCarrierRemoved: jest.fn(),
     } as { findRoutesByCarrier: jest.Mock; unassignRouteFromCarrierRemoved: jest.Mock };
-    service = new CarriersService(model, exceptions, audits, users, trucks);
+    service = new CarriersService(model, exceptions, trucks, routes, audits);
     (service as unknown as { routesService: typeof routes }).routesService = routes;
   });
 
@@ -55,10 +52,9 @@ describe('CarriersService', () => {
   });
 
   it('findCarrierWithPopulatedData calls findById', async () => {
-    model.findById.mockReturnValue({
-      populate: jest.fn().mockReturnThis(),
-      populate: jest.fn().mockResolvedValue('c'),
-    } as unknown as ReturnType<Model<Carrier>['findById']>);
+    const chain = { populate: jest.fn().mockReturnThis() } as Record<string, jest.Mock>;
+    (chain.populate as jest.Mock).mockResolvedValue('c');
+    model.findById.mockReturnValue(chain as unknown as ReturnType<Model<Carrier>['findById']>);
     await service.findCarrierWithPopulatedData('2');
     expect(model.findById).toHaveBeenCalledWith('2');
   });

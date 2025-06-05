@@ -15,7 +15,7 @@ describe('UsersController', () => {
       deleteUser: jest.fn(),
       deleteUserByAdmin: jest.fn(),
     };
-    controller = new UsersController(service as UsersService);
+    controller = new UsersController(service as unknown as UsersService);
   });
 
   it('getUser calls service', () => {

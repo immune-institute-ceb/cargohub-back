@@ -7,7 +7,7 @@ describe('DashboardController', () => {
 
   beforeEach(() => {
     service = { getDashboardSummary: jest.fn() };
-    controller = new DashboardController(service as DashboardService);
+    controller = new DashboardController(service as unknown as DashboardService);
   });
 
   it('getDashboardSummary calls service', () => {

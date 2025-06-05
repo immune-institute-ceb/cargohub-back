@@ -3,6 +3,8 @@ import AuthService from './auth.service';
 import { UsersService } from '../users/users.service';
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
+import { LoginUserDto } from './dto';
+import { Request } from 'express';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -16,13 +18,13 @@ describe('AuthService', () => {
       sign: jest.fn(),
       verifyAsync: jest.fn(),
       signAsync: jest.fn(),
-    } as jest.Mocked<JwtService>;
+    } as unknown as jest.Mocked<JwtService>;
     users = {
       findUserWithPassword: jest.fn(),
       findUserById: jest.fn(),
-    } as jest.Mocked<UsersService>;
-    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
-    audits = {} as jest.Mocked<AuditLogsService>;
+    } as unknown as jest.Mocked<UsersService>;
+    exceptions = { handleDBExceptions: jest.fn() } as unknown as jest.Mocked<ExceptionsService>;
+    audits = {} as unknown as jest.Mocked<AuditLogsService>;
     service = new AuthService(jwt, users, exceptions, audits);
   });
 
@@ -47,7 +49,10 @@ describe('AuthService', () => {
       ? U
       : never;
     jwt.sign.mockReturnValue('token');
-    await service.login({ email: 'e', password: 'a' } as LoginUserDto, {} as Request);
+    await service.login(
+      { email: 'e', password: 'a' } as unknown as Parameters<AuthService['login']>[0],
+      {} as unknown as Parameters<AuthService['login']>[1],
+    );
     expect(users.findUserWithPassword).toHaveBeenCalledWith('e');
   });
 

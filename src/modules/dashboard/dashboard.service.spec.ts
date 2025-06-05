@@ -16,16 +16,16 @@ describe('DashboardService', () => {
   let exceptions: jest.Mocked<ExceptionsService>;
 
   beforeEach(() => {
-    clients = { getActiveClientsCount: jest.fn().mockResolvedValue(5) } as jest.Mocked<ClientsService>;
-    carriers = { getCarriersCount: jest.fn().mockResolvedValue(2) } as jest.Mocked<CarriersService>;
-    billing = { getMensualBilling: jest.fn().mockResolvedValue(100) } as jest.Mocked<BillingService>;
+    clients = { getActiveClientsCount: jest.fn().mockResolvedValue(5) } as unknown as jest.Mocked<ClientsService>;
+    carriers = { getCarriersCount: jest.fn().mockResolvedValue(2) } as unknown as jest.Mocked<CarriersService>;
+    billing = { getMensualBilling: jest.fn().mockResolvedValue(100) } as unknown as jest.Mocked<BillingService>;
     requests = {
       getYearRequestsPendingCountByMonth: jest.fn().mockResolvedValue([0]),
       getYearRequestsCompletedCountByMonth: jest.fn().mockResolvedValue([1]),
       getRequestsStatusCount: jest.fn().mockResolvedValue({ pending: 1 }),
-    } as jest.Mocked<RequestsService>;
-    routes = { getInTransitRoutesCount: jest.fn().mockResolvedValue(3) } as jest.Mocked<RoutesService>;
-    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
+    } as unknown as jest.Mocked<RequestsService>;
+    routes = { getInTransitRoutesCount: jest.fn().mockResolvedValue(3) } as unknown as jest.Mocked<RoutesService>;
+    exceptions = { handleDBExceptions: jest.fn() } as unknown as jest.Mocked<ExceptionsService>;
 
     service = new DashboardService(clients, carriers, billing, requests, routes, exceptions);
   });

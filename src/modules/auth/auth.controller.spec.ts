@@ -18,7 +18,7 @@ describe('AuthController', () => {
       verifyToken: jest.fn(),
     } as unknown as jest.Mocked<Pick<AuthService,
       'registerUser' | 'login' | 'refreshToken' | 'disableTwoFactor' | 'verifyToken'>>;
-    controller = new AuthController(service as AuthService);
+    controller = new AuthController(service as unknown as AuthService);
   });
 
   it('registerUser calls service', () => {

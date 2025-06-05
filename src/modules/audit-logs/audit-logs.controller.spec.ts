@@ -7,7 +7,7 @@ describe('AuditLogsController', () => {
 
   beforeEach(() => {
     service = { findAll: jest.fn() };
-    controller = new AuditLogsController(service as AuditLogsService);
+    controller = new AuditLogsController(service as unknown as AuditLogsService);
   });
 
   it('findAll calls service', () => {

@@ -16,7 +16,7 @@ describe('CarriersController', () => {
       unassignTruck: jest.fn(),
       updateCarrierStatus: jest.fn(),
     };
-    controller = new CarriersController(service as CarriersService);
+    controller = new CarriersController(service as unknown as CarriersService);
   });
 
   it('findAll calls service', () => {

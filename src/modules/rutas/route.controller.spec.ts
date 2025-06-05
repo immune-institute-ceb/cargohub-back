@@ -18,7 +18,7 @@ describe('RoutesController', () => {
       assignCarrierToRoute: jest.fn(),
       unassignRouteFromCarrier: jest.fn(),
     };
-    controller = new RoutesController(service as RoutesService);
+    controller = new RoutesController(service as unknown as RoutesService);
   });
 
   it('updateStatus calls service', () => {

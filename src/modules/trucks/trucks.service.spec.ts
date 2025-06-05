@@ -19,10 +19,10 @@ describe('TrucksService', () => {
       findById: jest.fn(),
       findByIdAndUpdate: jest.fn(),
       findByIdAndDelete: jest.fn(),
-    } as jest.Mocked<Model<Truck>>;
-    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
-    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
-    users = {} as jest.Mocked<UsersService>;
+    } as unknown as jest.Mocked<Model<Truck>>;
+    exceptions = { handleDBExceptions: jest.fn() } as unknown as jest.Mocked<ExceptionsService>;
+    audits = { create: jest.fn() } as unknown as jest.Mocked<AuditLogsService>;
+    users = {} as unknown as jest.Mocked<UsersService>;
     service = new TrucksService(model, exceptions, audits, users);
   });
 

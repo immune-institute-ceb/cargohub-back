@@ -4,7 +4,7 @@ import { Route } from './entities/route.entity';
 import { ExceptionsService } from '@common/exceptions/exceptions.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { CarriersService } from '../carriers/carriers.service';
-import { TrucksService } from '../trucks/trucks.service';
+import { RequestsService } from '../requests/requests.service';
 
 describe('RoutesService', () => {
   let service: RoutesService;
@@ -12,7 +12,7 @@ describe('RoutesService', () => {
   let exceptions: jest.Mocked<ExceptionsService>;
   let audits: jest.Mocked<AuditLogsService>;
   let carriers: jest.Mocked<CarriersService>;
-  let trucks: jest.Mocked<TrucksService>;
+  let requests: jest.Mocked<RequestsService>;
 
   beforeEach(() => {
     model = {
@@ -20,12 +20,12 @@ describe('RoutesService', () => {
       find: jest.fn(),
       findById: jest.fn(),
       updateOne: jest.fn(),
-    } as jest.Mocked<Model<Route>>;
-    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
-    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
-    carriers = { findOne: jest.fn() } as jest.Mocked<CarriersService>;
-    trucks = {} as jest.Mocked<TrucksService>;
-    service = new RoutesService(model, exceptions, audits, carriers, trucks);
+    } as unknown as jest.Mocked<Model<Route>>;
+    exceptions = { handleDBExceptions: jest.fn() } as unknown as jest.Mocked<ExceptionsService>;
+    audits = { create: jest.fn() } as unknown as jest.Mocked<AuditLogsService>;
+    carriers = { findOne: jest.fn() } as unknown as jest.Mocked<CarriersService>;
+    requests = {} as unknown as jest.Mocked<RequestsService>;
+    service = new RoutesService(model, exceptions, carriers, requests, audits);
   });
 
   it('should be defined', () => {

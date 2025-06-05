@@ -19,11 +19,11 @@ describe('BillingService', () => {
       create: jest.fn(),
       find: jest.fn(),
       findById: jest.fn(),
-    } as jest.Mocked<Model<Billing>>;
-    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
-    routes = {} as jest.Mocked<RoutesService>;
-    requests = {} as jest.Mocked<RequestsService>;
-    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
+    } as unknown as jest.Mocked<Model<Billing>>;
+    exceptions = { handleDBExceptions: jest.fn() } as unknown as jest.Mocked<ExceptionsService>;
+    routes = {} as unknown as jest.Mocked<RoutesService>;
+    requests = {} as unknown as jest.Mocked<RequestsService>;
+    audits = { create: jest.fn() } as unknown as jest.Mocked<AuditLogsService>;
     service = new BillingService(model, exceptions, routes, requests, audits);
   });
 
@@ -32,11 +32,12 @@ describe('BillingService', () => {
   });
 
   it('createBillingFromRequest uses model', async () => {
-    await service.createBillingFromRequest({
+    const req = {
       routeId: new Types.ObjectId(),
       _id: new Types.ObjectId(),
       clientId: new Types.ObjectId(),
-    });
+    } as unknown as Parameters<typeof service.createBillingFromRequest>[0];
+    await service.createBillingFromRequest(req);
     expect(model.create).toHaveBeenCalled();
   });
 

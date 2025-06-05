@@ -19,10 +19,10 @@ describe('ClientsService', () => {
       findById: jest.fn(),
       findOneAndUpdate: jest.fn(),
       countDocuments: jest.fn(),
-    } as jest.Mocked<Model<Client>>;
-    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
-    requests = { findOne: jest.fn() } as jest.Mocked<RequestsService>;
-    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
+    } as unknown as jest.Mocked<Model<Client>>;
+    exceptions = { handleDBExceptions: jest.fn() } as unknown as jest.Mocked<ExceptionsService>;
+    requests = { findOne: jest.fn() } as unknown as jest.Mocked<RequestsService>;
+    audits = { create: jest.fn() } as unknown as jest.Mocked<AuditLogsService>;
     service = new ClientsService(model, exceptions, requests, audits);
   });
 
@@ -36,19 +36,17 @@ describe('ClientsService', () => {
   });
 
   it('findAll uses model', async () => {
-    model.find.mockReturnValue({
-      populate: jest.fn().mockReturnThis(),
-      populate: jest.fn().mockResolvedValue('x'),
-    } as unknown as ReturnType<Model<Client>['find']>);
+    const chain = { populate: jest.fn().mockReturnThis() } as Record<string, jest.Mock>;
+    (chain.populate as jest.Mock).mockResolvedValue('x');
+    model.find.mockReturnValue(chain as unknown as ReturnType<Model<Client>['find']>);
     await service.findAll();
     expect(model.find).toHaveBeenCalled();
   });
 
   it('findOne uses model', async () => {
-    model.findById.mockReturnValue({
-      populate: jest.fn().mockReturnThis(),
-      populate: jest.fn().mockResolvedValue('x'),
-    } as unknown as ReturnType<Model<Client>['findById']>);
+    const chain = { populate: jest.fn().mockReturnThis() } as Record<string, jest.Mock>;
+    (chain.populate as jest.Mock).mockResolvedValue('x');
+    model.findById.mockReturnValue(chain as unknown as ReturnType<Model<Client>['findById']>);
     await service.findOne('1');
     expect(model.findById).toHaveBeenCalledWith('1');
   });

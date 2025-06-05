@@ -22,12 +22,12 @@ describe('RequestsService', () => {
       find: jest.fn(),
       findById: jest.fn(),
       findByIdAndDelete: jest.fn(),
-    } as jest.Mocked<Model<Requests>>;
-    exceptions = { handleDBExceptions: jest.fn() } as jest.Mocked<ExceptionsService>;
-    routes = { create: jest.fn() } as jest.Mocked<RoutesService>;
-    clients = { findOne: jest.fn(), addRequestToClient: jest.fn() } as jest.Mocked<ClientsService>;
-    billing = { createBillingFromRequest: jest.fn() } as jest.Mocked<BillingService>;
-    audits = { create: jest.fn() } as jest.Mocked<AuditLogsService>;
+    } as unknown as jest.Mocked<Model<Requests>>;
+    exceptions = { handleDBExceptions: jest.fn() } as unknown as jest.Mocked<ExceptionsService>;
+    routes = { create: jest.fn() } as unknown as jest.Mocked<RoutesService>;
+    clients = { findOne: jest.fn(), addRequestToClient: jest.fn() } as unknown as jest.Mocked<ClientsService>;
+    billing = { createBillingFromRequest: jest.fn() } as unknown as jest.Mocked<BillingService>;
+    audits = { create: jest.fn() } as unknown as jest.Mocked<AuditLogsService>;
     service = new RequestsService(model, exceptions, routes, clients, billing, audits);
   });
 
@@ -38,7 +38,7 @@ describe('RequestsService', () => {
   it('create uses model', async () => {
     clients.findOne.mockResolvedValue({ _id: 'c', requests: [] } as unknown as Parameters<typeof service.create>[1] & { _id: string });
     routes.create.mockResolvedValue({ _id: 'r' } as unknown as ReturnType<RoutesService['create']>);
-    await service.create({ origin: 'o', destination: 'd' } as Record<string, string>, { _id: 'u' } as unknown as Parameters<typeof service.create>[1]);
+    await service.create({ origin: 'o', destination: 'd' } as unknown as Parameters<typeof service.create>[0], { _id: 'u' } as unknown as Parameters<typeof service.create>[1]);
     expect(model.create).toHaveBeenCalled();
   });
 

@@ -16,7 +16,7 @@ describe('TrucksController', () => {
       updateTruckStatus: jest.fn(),
       remove: jest.fn(),
     };
-    controller = new TrucksController(service as TrucksService);
+    controller = new TrucksController(service as unknown as TrucksService);
   });
 
   it('create calls service', () => {
