@@ -44,7 +44,7 @@ import { UsersModule } from '@modules/users/users.module';
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: 'src/config/env/.env',
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
     }),
     MongooseModule.forRoot(envs.mongodbUri, {
       connectionFactory: (connection) => {
@@ -65,4 +65,8 @@ import { UsersModule } from '@modules/users/users.module';
     DashboardModule,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    console.log('MONGODB_URI en AppModule:', envs.mongodbUri);
+  }
+}

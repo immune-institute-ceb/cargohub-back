@@ -22,16 +22,21 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
 
   app.enableCors({
-    origin: (origin, callback) => {
-      const allowedOrigins = [envs.frontendUrl];
-      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: true, // Permite cualquier origen
     credentials: true,
   });
+
+  // app.enableCors({
+  //   origin: (origin, callback) => {
+  //     const allowedOrigins = [envs.frontendUrl];
+  //     if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+  //       callback(null, true);
+  //     } else {
+  //       callback(new Error('Not allowed by CORS'));
+  //     }
+  //   },
+  //   credentials: true,
+  // });
 
   // Usa Helmet para configurar headers de seguridad
   app.use(helmet());
