@@ -259,7 +259,7 @@ export class AuthController {
   @ApiBearerAuth()
   @Auth()
   verifyTokenSessionUser(@GetTokenFromHeader() token: string) {
-    return this.authService.verifyToken(token);
+    return this.authService.verifyToken(token, 'session');
   }
 
   @Get('verify-email-token')
@@ -280,7 +280,7 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt-recover-password'))
   verifyTokenEmailUser(@GetTokenFromHeader() token: string) {
-    return this.authService.verifyToken(token);
+    return this.authService.verifyToken(token, 'email');
   }
 
   @Post('2fa/generate')

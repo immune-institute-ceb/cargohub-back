@@ -26,8 +26,6 @@ async function bootstrap() {
     ? envs.swaggerUrl + envs.port
     : undefined;
 
-  console.log(swaggerUrlAllowed);
-
   app.enableCors({
     origin: (origin, callback) => {
       const allowedOrigins = [envs.frontendUrl, swaggerUrlAllowed].filter(

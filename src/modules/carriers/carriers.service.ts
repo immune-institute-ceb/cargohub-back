@@ -81,7 +81,7 @@ export class CarriersService {
     }
   }
 
-  async finByDni(dni: string) {
+  async findByDni(dni: string) {
     try {
       const carrier = await this.carrierModel
         .findOne({ dni })

@@ -59,14 +59,10 @@ export class UsersService {
         (roles.includes(ValidRoles.carrier) && carrierData)
       ) {
         const existingClient = clientData?.companyCIF
-          ? await this.clientsService.findDuplicateClient(
-              clientData.companyCIF,
-              clientData.companyName,
-              clientData.companyAddress,
-            )
+          ? await this.clientsService.findByCIF(clientData.companyCIF)
           : undefined;
         const existingCarrier = carrierData?.dni
-          ? await this.carriersService.finByDni(carrierData.dni)
+          ? await this.carriersService.findByDni(carrierData.dni)
           : undefined;
 
         if (existingClient || existingCarrier) {
@@ -127,6 +123,27 @@ export class UsersService {
         );
       }
       const { ...update } = updateUserDto;
+      if (user.roles.includes(ValidRoles.client)) {
+        if (!user.clientId) {
+          throw new NotFoundException('Client ID not found for user');
+        }
+        if (update.clientData) {
+          await this.clientsService.update(
+            user.clientId._id.toString(),
+            update.clientData,
+          );
+        }
+      } else if (user.roles.includes(ValidRoles.carrier)) {
+        if (!user.carrierId) {
+          throw new NotFoundException('Carrier ID not found for user');
+        }
+        if (update.carrierData) {
+          await this.carriersService.update(
+            user.carrierId._id.toString(),
+            update.carrierData,
+          );
+        }
+      }
       const userUpdated = await this.userModel
         .findOneAndUpdate({ _id: user._id }, update, {
           new: true,
@@ -136,27 +153,6 @@ export class UsersService {
         .exec();
 
       if (!userUpdated) throw new NotFoundException('User not found');
-      if (userUpdated.roles.includes(ValidRoles.client)) {
-        if (!userUpdated.clientId) {
-          throw new NotFoundException('Client ID not found for user');
-        }
-        if (update.clientData) {
-          await this.clientsService.update(
-            userUpdated.clientId._id.toString(),
-            update.clientData,
-          );
-        }
-      } else if (userUpdated.roles.includes(ValidRoles.carrier)) {
-        if (!userUpdated.carrierId) {
-          throw new NotFoundException('Carrier ID not found for user');
-        }
-        if (update.carrierData) {
-          await this.carriersService.update(
-            userUpdated.carrierId._id.toString(),
-            update.carrierData,
-          );
-        }
-      }
       await this.auditLogsService.create({
         level: AuditLogLevel.info,
         context: AuditLogContext.userService,
@@ -167,7 +163,7 @@ export class UsersService {
       });
       return {
         message: 'User updated',
-        userUpdated: await this.findUserById(userUpdated._id.toString()),
+        userUpdated: userUpdated,
       };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

@@ -95,17 +95,9 @@ export class ClientsService {
     }
   }
 
-  async findDuplicateClient(
-    companyCIF: string,
-    companyName: string,
-    companyAddress: string,
-  ) {
+  async findByCIF(companyCIF: string) {
     try {
-      const client = await this.clientModel.findOne({
-        companyCIF,
-        companyName,
-        companyAddress,
-      });
+      const client = await this.clientModel.findOne({ companyCIF });
       return client;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

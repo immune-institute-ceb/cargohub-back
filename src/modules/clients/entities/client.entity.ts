@@ -58,6 +58,7 @@ export class Client extends Document {
   })
   @Prop({
     index: true,
+    unique: true,
   })
   companyCIF: string;
 
