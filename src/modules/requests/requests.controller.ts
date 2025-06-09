@@ -74,6 +74,21 @@ export class RequestsController {
     return this.requestsService.create(createRequestDto, user as User);
   }
 
+  @Get()
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
+  @ApiOperation({ summary: 'Get all requests' })
+  @ApiResponse({
+    status: 200,
+    description: 'Return all requests',
+    type: [Requests],
+  })
+  @ApiNotFoundResponse({
+    description: 'No requests found',
+  })
+  findAllRequests() {
+    return this.requestsService.findAllRequests();
+  }
+
   @Get('clientRequest/:clientId')
   @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
   @ApiOperation({ summary: 'Get all requests by Client Id (not userId)' })

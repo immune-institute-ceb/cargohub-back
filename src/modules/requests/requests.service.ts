@@ -134,6 +134,18 @@ export class RequestsService {
     }
   }
 
+  async findAllRequests() {
+    try {
+      const requests = await this.requestModel.find().populate('clientId');
+      if (!requests || requests.length === 0) {
+        throw new NotFoundException('No requests found');
+      }
+      return requests;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
   async findOne(id: string) {
     try {
       const request = await this.requestModel.findById(id);
