@@ -10,15 +10,15 @@ import { IsString, Matches, MaxLength, MinLength } from 'class-validator';
  * @class SetPasswordDto
  * @example
  * {
- *  "password": "Password123",
- * "passwordConfirmed": "Password123"
+ *  "password": "Password123?",
+ * "passwordConfirmed": "Password123?"
  * }
  */
 export class SetPasswordDto {
   @ApiProperty({
     description:
-      'User password, must have a Uppercase, lowercase letter and a number',
-    example: 'Password123',
+      'User password, must have at least one uppercase letter, one lowercase letter, one number, and one special character.',
+    example: 'Password123?',
   })
   @IsString()
   @MinLength(6)
@@ -31,8 +31,8 @@ export class SetPasswordDto {
 
   @ApiProperty({
     description:
-      'User confirm password, must have a Uppercase, lowercase letter and a number',
-    example: 'Password123',
+      'User confirm password, must have at least one uppercase letter, one lowercase letter, one number, and one special character.',
+    example: 'Password123?',
   })
   @IsString()
   @MinLength(6)

@@ -11,8 +11,8 @@ import { IsString, Matches, MaxLength, MinLength } from 'class-validator';
  * @example
  * {
  * "oldPassword": "OldPassword123",
- *  "password": "Password123",
- * "passwordConfirmed": "Password123"
+ *  "password": "Password123?",
+ * "passwordConfirmed": "Password123?"
  * }
  */
 export class ChangePasswordDto {
@@ -27,8 +27,8 @@ export class ChangePasswordDto {
 
   @ApiProperty({
     description:
-      'User password, must have a Uppercase, lowercase letter and a number',
-    example: 'Password123',
+      'User password, must have at least one uppercase letter, one lowercase letter, one number, and one special character.',
+    example: 'Password123?',
   })
   @IsString()
   @MinLength(6)
@@ -41,8 +41,8 @@ export class ChangePasswordDto {
 
   @ApiProperty({
     description:
-      'User confirm password, must have a Uppercase, lowercase letter and a number',
-    example: 'Password123',
+      'User confirm password, must have at least one uppercase letter, one lowercase letter, one number, and one special character.',
+    example: 'Password123?',
   })
   @IsString()
   @MinLength(6)

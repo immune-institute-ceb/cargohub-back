@@ -56,7 +56,7 @@ export class User extends Document {
 
   @ApiProperty({
     description: 'User password',
-    example: 'Password123',
+    example: 'Password123?',
   })
   @Prop({
     index: true,
