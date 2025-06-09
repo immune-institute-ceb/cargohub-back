@@ -109,30 +109,31 @@ export class TrucksService {
   async updateTruckStatus(id: string, status: TruckStatus, from: string) {
     try {
       const truck = await this.truckModel.findById(id);
-      if (!truck) {
-        throw new NotFoundException('Truck not found');
-      }
-      if (from !== 'CarriersService') {
-        if (
-          status === TruckStatus.maintenance &&
-          truck.status !== TruckStatus.available
-        ) {
-          throw new BadRequestException(
-            'Truck can only enter maintenance from available status',
-          );
-        }
+      if (truck) {
+        if (from !== 'CarriersService') {
+          if (
+            status === TruckStatus.maintenance &&
+            truck.status !== TruckStatus.available
+          ) {
+            throw new BadRequestException(
+              'Truck can only enter maintenance from available status',
+            );
+          }
 
-        if (
-          status === TruckStatus.available &&
-          truck.status !== TruckStatus.maintenance
-        ) {
-          throw new BadRequestException(
-            'Truck can only return to available status from maintenance',
-          );
-        }
+          if (
+            status === TruckStatus.available &&
+            truck.status !== TruckStatus.maintenance
+          ) {
+            throw new BadRequestException(
+              'Truck can only return to available status from maintenance',
+            );
+          }
 
-        if (truck.status === status) {
-          throw new BadRequestException(`Truck is already in ${status} status`);
+          if (truck.status === status) {
+            throw new BadRequestException(
+              `Truck is already in ${status} status`,
+            );
+          }
         }
       }
 
