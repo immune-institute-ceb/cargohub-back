@@ -139,7 +139,7 @@ export class TrucksController {
     )
     status: FinalTruckStatus,
   ) {
-    return this.trucksService.updateTruckStatus(id, status);
+    return this.trucksService.updateTruckStatus(id, status, 'TrucksController');
   }
 
   @Delete(':id')

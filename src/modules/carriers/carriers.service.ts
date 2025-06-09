@@ -157,7 +157,11 @@ export class CarriersService {
 
       const newTruckStatus = statusMap[status];
       if (newTruckStatus) {
-        await this.trucksService.updateTruckStatus(truckId, newTruckStatus);
+        await this.trucksService.updateTruckStatus(
+          truckId,
+          newTruckStatus,
+          'CarriersService',
+        );
       }
       await this.auditLogsService.create({
         level: AuditLogLevel.info,
@@ -214,6 +218,7 @@ export class CarriersService {
         await this.trucksService.updateTruckStatus(
           carrierDeleted.truck._id.toString(),
           TruckStatus.available,
+          'CarriersService',
         );
       }
       await this.routesService.unassignRouteFromCarrierRemoved(id);
@@ -251,9 +256,14 @@ export class CarriersService {
         await this.trucksService.updateTruckStatus(
           carrier.truck._id.toString(),
           TruckStatus.available,
+          'CarriersService',
         );
       }
-      await this.trucksService.updateTruckStatus(truckId, TruckStatus.assigned);
+      await this.trucksService.updateTruckStatus(
+        truckId,
+        TruckStatus.assigned,
+        'CarriersService',
+      );
 
       carrier.truck = truckExists._id;
       await carrier.save();
@@ -282,6 +292,7 @@ export class CarriersService {
       await this.trucksService.updateTruckStatus(
         carrier.truck._id.toString(),
         TruckStatus.available,
+        'CarriersService',
       );
 
       carrier.truck = null;
