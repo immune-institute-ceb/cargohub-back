@@ -221,13 +221,16 @@ class AuthService {
 
   async verifyToken(token: string) {
     try {
-      const { _id } = await this.jwtService.verifyAsync<{
+      const { _id, message } = await this.jwtService.verifyAsync<{
         _id: string;
+        message: string;
       }>(token, {
         secret: envs.jwtSecret,
       });
       const user = await this.usersService.findUserById(_id);
       if (!user) throw new NotFoundException('User not found');
+      if (message === 'confirmEmail' && user.emailVerified)
+        throw new BadRequestException('Email already verified');
       return { message: 'Token is valid', role: user.roles };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

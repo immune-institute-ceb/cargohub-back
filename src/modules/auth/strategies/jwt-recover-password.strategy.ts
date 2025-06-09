@@ -11,15 +11,12 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 //* Interfaces
 import { JwtPayload } from '../interfaces';
 
-//* Services
-import { UsersService } from '@modules/users/users.service';
-
 @Injectable()
 export class JwtRecoverPasswordStrategy extends PassportStrategy(
   Strategy,
   'jwt-recover-password',
 ) {
-  constructor(private readonly usersService: UsersService) {
+  constructor() {
     super({
       secretOrKey: envs.jwtSecret,
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -27,17 +24,11 @@ export class JwtRecoverPasswordStrategy extends PassportStrategy(
     });
   }
 
-  async validate(req: Request, payload: JwtPayload) {
+  validate(req: Request, payload: JwtPayload) {
     const { _id, message } = payload;
-
-    const user = await this.usersService.findUserById(_id);
-    if (!user) throw new UnauthorizedException('Not valid recovery token');
-
     if (message !== 'recoverPassword' && message !== 'confirmEmail')
       throw new UnauthorizedException('Not valid recovery token');
 
-    if (message === 'confirmEmail' && user.emailVerified)
-      throw new UnauthorizedException('Email already verified');
     return {
       _id,
       message,
