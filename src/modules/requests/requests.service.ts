@@ -148,7 +148,7 @@ export class RequestsService {
     try {
       const currentYear = new Date().getFullYear();
       const startOfYear = new Date(currentYear, 0, 1);
-      const endOfYear = new Date(currentYear, 11, 31);
+      const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59, 999);
 
       const requests = await this.requestModel.aggregate([
         {
@@ -164,17 +164,17 @@ export class RequestsService {
           },
         },
         {
-          $sort: { _id: 1 }, // Sort by month
+          $sort: { _id: 1 },
         },
       ]);
 
-      // Fill in months with zero counts
       const monthlyCounts = Array(12).fill(0);
       requests.forEach((req) => {
         monthlyCounts[req._id - 1] = req.count;
       });
 
-      return monthlyCounts;
+      const allZero = monthlyCounts.every((count) => count === 0);
+      return allZero ? [] : monthlyCounts;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
@@ -184,7 +184,7 @@ export class RequestsService {
     try {
       const currentYear = new Date().getFullYear();
       const startOfYear = new Date(currentYear, 0, 1);
-      const endOfYear = new Date(currentYear, 11, 31);
+      const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59, 999);
 
       const requests = await this.requestModel.aggregate([
         {
@@ -209,8 +209,8 @@ export class RequestsService {
       requests.forEach((req) => {
         monthlyCounts[req._id - 1] = req.count;
       });
-
-      return monthlyCounts;
+      const allZero = monthlyCounts.every((count) => count === 0);
+      return allZero ? [] : monthlyCounts;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }
