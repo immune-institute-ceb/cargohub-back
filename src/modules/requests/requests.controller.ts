@@ -56,7 +56,7 @@ export class RequestsController {
   constructor(private readonly requestsService: RequestsService) {}
 
   @Post()
-  @Auth(ValidRoles.admin, ValidRoles.client)
+  @Auth(ValidRoles.client)
   @ApiOperation({ summary: 'Create a new request' })
   @ApiCreatedResponse({
     description: 'Request created successfully',
