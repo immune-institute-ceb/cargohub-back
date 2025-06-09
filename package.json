@@ -17,7 +17,12 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "test:e2e:auth": "npm test -- test/e2e/auth-e2e.spec.ts",
+    "test:e2e:clients": "npm test -- test/e2e/clients-e2e.spec.ts",
+    "test:e2e:audit": "npm test -- test/e2e/auditlogs-e2e.spec.ts",
+    "test:e2e:all": "npm run test:e2e:auth && npm run test:e2e:clients && npm run test:e2e:audit && npm run test:e2e:dashboard && npm run test:e2e:requests && npm run test:e2e:trucks && npm run test:e2e:requests && npm run test:e2e:carriers && npm run test:e2e:routes && npm run test:e2e:billing && npm run test:e2e:users",
+    "test:e2e:ordered": "cross-env NODE_ENV=test jest --config ./jest-e2e.config.ts --runInBand test/e2e/auth-e2e.spec.ts test/e2e/clients-e2e.spec.ts test/e2e/auditlogs-e2e.spec.ts test/e2e/dashboard-e2e.spec.ts test/e2e/requests-e2e.spec.ts test/e2e/trucks-e2e.spec.ts test/e2e/requests-e2e.spec.ts test/e2e/carriers-e2e.spec.ts test/e2e/billing-e2e.spec.ts test/e2e/users-e2e.spec.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

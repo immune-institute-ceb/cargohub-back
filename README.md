@@ -35,10 +35,6 @@ Cargohub is a RESTful API built with [NestJS](https://nestjs.com/) and MongoDB, 
    npm run start:dev
    ```
 
-   
-# Para ejecutar los tests se debe ejecutar:
-``` npm test -- test/e2e/auth-e2e.spec.ts ```
-
 5. **Access the API:**
    - API base URL: `http://localhost:3000/api`
    - Swagger docs: `http://localhost:3000/api/v1`
@@ -235,6 +231,16 @@ Cargohub follows a modular architecture using NestJS, with each domain (users, c
 - The carrier is notified and manages the assigned route.
 - All actions are logged for auditing.
 - Billing is generated for the completed shipment.
+
+## 🧪 Testing
+
+Para ejecutar los tests se debe ejecutar el siguiente comando y usar en .env el MONGODB_URI de cargohub_test:
+   ```npm run test:e2e:ordered ```
+
+Y para los tests unitarios, pueden ejecutarse individualmente mediante:
+``` npm test -- test/login-user.dto.spec.ts ```
+``` npm test -- test/register-user.dto.spec.ts ```
+``` npm test -- test/set-password.dto.spec.ts ```
 
 ## 📄 License
 
