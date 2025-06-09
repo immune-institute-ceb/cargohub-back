@@ -136,7 +136,7 @@ export class CarriersController {
   }
 
   @Patch(':carrierId/status')
-  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.carrier)
+  @Auth(ValidRoles.admin, ValidRoles.carrier)
   @ApiOperation({ summary: 'Update carrier status' })
   @ApiResponse({
     status: 200,
