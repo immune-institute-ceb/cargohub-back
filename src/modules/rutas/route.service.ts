@@ -439,12 +439,12 @@ export class RoutesService {
       const originCity = cities.filter(
         (city) =>
           city.name.toLowerCase() === route.origin.toLowerCase() &&
-          city.population > 500000,
+          city.population > 100000,
       );
       const destinationCity = cities.filter(
         (city) =>
           city.name.toLowerCase() === route.destination.toLowerCase() &&
-          city.population > 500000,
+          city.population > 100000,
       );
       if (!originCity.length || !destinationCity.length) {
         throw new NotFoundException('Origin or destination city not found');
