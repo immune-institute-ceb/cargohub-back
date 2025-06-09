@@ -23,9 +23,9 @@ export class SetPasswordDto {
   @IsString()
   @MinLength(6)
   @MaxLength(50)
-  @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/, {
     message:
-      'The password must have a Uppercase, lowercase letter and a number',
+      'The password must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
   })
   password: string;
 
@@ -37,9 +37,9 @@ export class SetPasswordDto {
   @IsString()
   @MinLength(6)
   @MaxLength(50)
-  @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/, {
     message:
-      'The passwordConfirmed must have a Uppercase, lowercase letter and a number',
+      'The passwordConfirmed must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
   })
   passwordConfirmed: string;
 }

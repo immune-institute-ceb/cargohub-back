@@ -3,16 +3,19 @@
 //* Nest Modules
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
+import { envs } from '@config/envs';
 
 //* External Modules
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 //* Entities
-import { UsersService } from '@modules/users/users.service';
 import { User } from '@modules/users/entities/user.entity';
-import { JwtPayload } from '../interfaces';
-import { envs } from '@config/envs';
 
+//* Interfaces
+import { JwtPayload } from '../interfaces';
+
+//* Services
+import { UsersService } from '@modules/users/users.service';
 @Injectable()
 export class JwtLoginStrategy extends PassportStrategy(Strategy, 'jwt-login') {
   constructor(private readonly usersService: UsersService) {

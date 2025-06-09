@@ -2,13 +2,19 @@
 
 //* NestJS modules
 import { Controller, Get } from '@nestjs/common';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiProperty } from '@nestjs/swagger';
+
+// * Decorators
+import { Auth } from '@modules/auth/decorators';
 
 // * Services
 import { AuditLogsService } from './audit-logs.service';
 
 // * Entities
 import { AuditLog } from './entities/audit-log.entity';
+
+// * Interfaces
+import { ValidRoles } from '@modules/auth/interfaces';
 
 @Controller('audit-logs')
 export class AuditLogsController {
@@ -18,6 +24,8 @@ export class AuditLogsController {
     description: 'Get all audit logs',
     type: [AuditLog],
   })
+  @ApiBearerAuth()
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   findAll() {
     return this.auditLogsService.findAll();
   }

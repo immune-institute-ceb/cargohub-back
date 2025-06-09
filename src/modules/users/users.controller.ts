@@ -49,6 +49,23 @@ export class UsersController {
     return this.usersService.getUser(user);
   }
 
+  @Get('get-admin-user')
+  @ApiCreatedResponse({
+    description: 'Users found',
+    type: [User],
+  })
+  @ApiNotFoundResponse({
+    description: 'No admin users found',
+    schema: {
+      example: { message: 'No admin users found' },
+    },
+  })
+  @ApiOperation({ summary: 'Get admin users' })
+  @Auth(ValidRoles.admin)
+  getAdminUser() {
+    return this.usersService.getAdminUsers();
+  }
+
   @Patch('update-user')
   @ApiCreatedResponse({
     description: 'User updated',

@@ -269,4 +269,20 @@ export class UsersService {
     if (!foundUser) throw new NotFoundException('User not found');
     return foundUser;
   }
+
+  async getAdminUsers() {
+    try {
+      const users = await this.userModel
+        .find({ roles: ValidRoles.admin })
+        .populate('clientId')
+        .populate('carrierId')
+        .exec();
+      if (!users || users.length === 0) {
+        throw new NotFoundException('No admin users found');
+      }
+      return users;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
 }

@@ -23,9 +23,9 @@ export class ChangePasswordDto {
   @IsString()
   @MinLength(6)
   @MaxLength(50)
-  @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/, {
     message:
-      'The old password must have a Uppercase, lowercase letter and a number',
+      'The oldPassword must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
   })
   oldPassword: string;
 
@@ -37,9 +37,9 @@ export class ChangePasswordDto {
   @IsString()
   @MinLength(6)
   @MaxLength(50)
-  @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/, {
     message:
-      'The password must have a Uppercase, lowercase letter and a number',
+      'The newPassword must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
   })
   newPassword: string;
 
@@ -51,9 +51,9 @@ export class ChangePasswordDto {
   @IsString()
   @MinLength(6)
   @MaxLength(50)
-  @Matches(/(?:(?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/, {
     message:
-      'The passwordConfirmed must have a Uppercase, lowercase letter and a number',
+      'The newPassword must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
   })
   newPasswordConfirmed: string;
 }
