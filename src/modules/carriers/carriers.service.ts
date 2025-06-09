@@ -89,7 +89,6 @@ export class CarriersService {
         })
         .populate('user', 'name lastName1 lastName2 phone email')
         .populate('truck', 'licensePlate carModel capacity status fuelType');
-      if (!carrier) throw new NotFoundException('Carrier not found');
       return carrier;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
