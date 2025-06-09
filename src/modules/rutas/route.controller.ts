@@ -120,7 +120,7 @@ export class RoutesController {
     description: 'No routes found for this carrier',
   })
   findRoutesByCarrier(@Param('carrierId', ParseMongoIdPipe) carrierId: string) {
-    return this.routesService.findRoutesByCarrier(carrierId);
+    return this.routesService.findRoutesByCarrierId(carrierId);
   }
 
   @Post('assign-carrier/:routeId/:carrierId')

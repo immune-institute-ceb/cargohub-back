@@ -235,6 +235,16 @@ export class RoutesService {
     try {
       const routes = await this.routeModel.find({ carrier: carrierId });
 
+      return routes;
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
+  async findRoutesByCarrierId(carrierId: string) {
+    try {
+      const routes = await this.routeModel.find({ carrier: carrierId });
+
       if (!routes || routes.length === 0) {
         throw new NotFoundException('No routes found for this carrier');
       }
