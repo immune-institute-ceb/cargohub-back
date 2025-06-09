@@ -62,7 +62,10 @@ export class UsersService {
           ? await this.clientsService.findByCIF(clientData.companyCIF)
           : undefined;
         const existingCarrier = carrierData?.dni
-          ? await this.carriersService.findByDni(carrierData.dni)
+          ? await this.carriersService.findByDniOrLicense(
+              carrierData.dni,
+              carrierData.licenseNumber,
+            )
           : undefined;
 
         if (existingClient || existingCarrier) {

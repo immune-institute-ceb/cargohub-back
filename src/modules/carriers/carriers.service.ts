@@ -81,12 +81,15 @@ export class CarriersService {
     }
   }
 
-  async findByDni(dni: string) {
+  async findByDniOrLicense(dni: string, licenseNumber: string) {
     try {
       const carrier = await this.carrierModel
-        .findOne({ dni })
+        .findOne({
+          $or: [{ dni }, { licenseNumber }],
+        })
         .populate('user', 'name lastName1 lastName2 phone email')
         .populate('truck', 'licensePlate carModel capacity status fuelType');
+      if (!carrier) throw new NotFoundException('Carrier not found');
       return carrier;
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

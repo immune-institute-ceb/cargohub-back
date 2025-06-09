@@ -35,8 +35,9 @@ export class CreateTruckDto {
   })
   @IsString()
   @IsNotEmpty()
-  @Matches(/^[A-Z0-9-]+$/, {
-    message: 'licensePlate must contain only letters, numbers, and hyphens',
+  @Matches(/^(?=(?:[^ ]* ){0,3}[^ ]*$)[A-Z0-9 ]+$/, {
+    message:
+      'licensePlate must contain only uppercase letters, numbers, and up to 3 spaces',
   })
   licensePlate: string;
 
