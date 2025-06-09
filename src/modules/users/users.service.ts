@@ -276,7 +276,7 @@ export class UsersService {
   async getAdminUsers() {
     try {
       const users = await this.userModel
-        .find({ roles: ValidRoles.admin })
+        .find({ roles: ValidRoles.adminManager })
         .populate('clientId')
         .populate('carrierId')
         .exec();
