@@ -89,7 +89,7 @@ export class ClientsController {
     description: 'New status for the client',
     enum: ClientsStatus,
   })
-  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
+  @Auth(ValidRoles.admin, ValidRoles.client)
   updateStatus(
     @Param('id', ParseMongoIdPipe) id: string,
     @Query('status') status: ClientsStatus,
