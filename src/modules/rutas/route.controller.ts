@@ -124,7 +124,7 @@ export class RoutesController {
   }
 
   @Post('assign-carrier/:routeId/:carrierId')
-  @Auth(ValidRoles.carrier, ValidRoles.admin)
+  @Auth(ValidRoles.admin)
   @ApiCreatedResponse({
     description: 'Route assigned to carrier',
     type: Route,
@@ -152,7 +152,7 @@ export class RoutesController {
   }
 
   @Post('unassign-carrier/:routeId')
-  @Auth(ValidRoles.carrier, ValidRoles.admin)
+  @Auth(ValidRoles.admin)
   @ApiCreatedResponse({
     description: 'Route unassigned from carrier',
     type: Route,

@@ -84,7 +84,7 @@ export class CarriersController {
   }
 
   @Get('carrierRoutes/:carrierId')
-  @Auth(ValidRoles.admin, ValidRoles.adminManager)
+  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.carrier)
   @ApiOperation({ summary: 'Get routes assigned to a carrier' })
   getCarrierRoutes(@Param('carrierId', ParseMongoIdPipe) carrierId: string) {
     return this.carriersService.getCarrierRoutes(carrierId);

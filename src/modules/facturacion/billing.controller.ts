@@ -48,7 +48,7 @@ export class BillingController {
   }
 
   @Get()
-  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
     description: 'All billings',
@@ -60,7 +60,7 @@ export class BillingController {
   }
 
   @Get(':id')
-  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
     description: 'Billing found',
@@ -72,7 +72,7 @@ export class BillingController {
   }
 
   @Get('status/:status')
-  @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.client)
+  @Auth(ValidRoles.admin, ValidRoles.adminManager)
   @ApiResponse({
     status: 200,
     description: 'Billings by status',

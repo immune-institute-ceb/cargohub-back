@@ -44,7 +44,7 @@ export class UsersController {
     type: User,
   })
   @ApiOperation({ summary: 'Get user information by Token' })
-  @Auth(ValidRoles.admin)
+  @Auth()
   getUser(@GetUser() user: UserWithRelations) {
     return this.usersService.getUser(user);
   }

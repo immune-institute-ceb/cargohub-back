@@ -59,105 +59,108 @@ To enable email features, set up Gmail OAuth credentials:
 
 ### Authentication
 
-| Method | Route                         | Description              |
-| ------ | ----------------------------- | ------------------------ |
-| GET    | `/auth/refresh-token`         | Refresh JWT token        |
-| GET    | `/auth/verify-session-token`  | Verify session JWT token |
-| GET    | `/auth/verify-email-token`    | Verify email JWT token   |
-| POST   | `/auth/login`                 | User login               |
-| POST   | `/auth/register`              | User registration        |
-| POST   | `/auth/register/adminManager` | Register admin/manager   |
-| POST   | `/auth/set-password`          | Set user password        |
-| POST   | `/auth/change-password`       | Change password          |
-| POST   | `/auth/recover-password`      | Recover password         |
-| POST   | `/auth/2fa/verify`            | Verify 2FA code          |
-| POST   | `/auth/2fa/activate`          | Activate 2FA             |
-| POST   | `/auth/2fa/generate`          | Generate 2FA secret      |
-| PATCH  | `/auth/2fa/disable`           | Disable 2FA              |
+| Method | Route                         | Description                 | Roles Allowed       |
+| ------ | ----------------------------- | --------------------------- | ------------------- |
+| POST   | `/auth/register`              | User registration           | Public              |
+| POST   | `/auth/register/adminManager` | Register admin/manager      | Admin               |
+| POST   | `/auth/login`                 | User login                  | Public              |
+| POST   | `/auth/set-password`          | Set user password           | Public (with token) |
+| POST   | `/auth/recover-password`      | Recover password            | Public              |
+| POST   | `/auth/change-password`       | Change password             | Authenticated Users |
+| GET    | `/auth/refresh-token`         | Refresh JWT token           | Authenticated Users |
+| GET    | `/auth/verify-session-token`  | Verify session JWT token    | Authenticated Users |
+| GET    | `/auth/verify-email-token`    | Verify email JWT token      | Public (with token) |
+| POST   | `/auth/2fa/generate`          | Generate 2FA secret         | Authenticated Users |
+| POST   | `/auth/2fa/activate`          | Activate 2FA                | Authenticated Users |
+| POST   | `/auth/2fa/email/activate`    | Activate 2FA by email token | Public (with token) |
+| POST   | `/auth/2fa/verify`            | Verify 2FA code             | Authenticated Users |
+| PATCH  | `/auth/2fa/disable`           | Disable 2FA                 | Authenticated Users |
 
 ### Dashboard
 
-| Method | Route                | Description       |
-| ------ | -------------------- | ----------------- |
-| GET    | `/dashboard/summary` | Dashboard summary |
+| Method | Route                | Description       | Roles Allowed       |
+| ------ | -------------------- | ----------------- | ------------------- |
+| GET    | `/dashboard/summary` | Dashboard summary | Admin, AdminManager |
 
 ### Users
 
-| Method | Route                          | Description       |
-| ------ | ------------------------------ | ----------------- |
-| GET    | `/users/get-users`             | List users        |
-| PATCH  | `/users/update-user`           | Update user       |
-| DELETE | `/users/delete-user`           | Delete user       |
-| DELETE | `/users/delete-user/admin/:id` | Admin delete user |
+| Method | Route                          | Description                       | Roles Allowed       |
+| ------ | ------------------------------ | --------------------------------- | ------------------- |
+| GET    | `/users/get-user`              | Get user information by Token     | Authenticated Users |
+| GET    | `/users/get-admin-users`       | List users with adminManager role | Admin               |
+| PATCH  | `/users/update-user`           | Update user                       | Authenticated Users |
+| DELETE | `/users/delete-user`           | Delete user                       | Authenticated Users |
+| DELETE | `/users/delete-user/admin/:id` | Admin delete user                 | Admin               |
 
 ### Clients
 
-| Method | Route                 | Description          |
-| ------ | --------------------- | -------------------- |
-| GET    | `/clients`            | List clients         |
-| GET    | `/clients/:id`        | Get client by ID     |
-| PATCH  | `/clients/:id/status` | Update client status |
+| Method | Route                 | Description          | Roles Allowed                     |
+| ------ | --------------------- | -------------------- | --------------------------------- |
+| GET    | `/clients`            | List clients         | Admin, AdminManager               |
+| GET    | `/clients/:id`        | Get client by ID     | Admin, AdminManager, Client (own) |
+| PATCH  | `/clients/:id/status` | Update client status | Admin, AdminManager               |
 
 ### Requests
 
-| Method | Route                               | Description           |
-| ------ | ----------------------------------- | --------------------- |
-| GET    | `/requests/clientRequest/:clientId` | Get client requests   |
-| GET    | `/requests/:requestId`              | Get request by ID     |
-| PATCH  | `/requests/status/:requestId`       | Update request status |
-| POST   | `/requests`                         | Create request        |
-| DELETE | `/requests/:requestId`              | Delete request        |
+| Method | Route                               | Description           | Roles Allowed                     |
+| ------ | ----------------------------------- | --------------------- | --------------------------------- |
+| POST   | `/requests`                         | Create request        | Client                            |
+| GET    | `/requests`                         | Get all requests      | Admin, AdminManager               |
+| GET    | `/requests/clientRequest/:clientId` | Get client requests   | Client (own), Admin, AdminManager |
+| GET    | `/requests/:requestId`              | Get request by ID     | Admin, AdminManager               |
+| DELETE | `/requests/:requestId`              | Delete request        | Client (own), Admin               |
+| PATCH  | `/requests/status/:requestId`       | Update request status | Admin, Client (own)               |
 
 ### Routes
 
-| Method | Route                                          | Description                 |
-| ------ | ---------------------------------------------- | --------------------------- |
-| GET    | `/routes`                                      | List routes                 |
-| GET    | `/routes/:id`                                  | Get route by ID             |
-| GET    | `/routes/status/:status`                       | List routes by status       |
-| GET    | `/routes/carrier/:carrierId`                   | List routes by carrier      |
-| POST   | `/routes/assign-carrier/{routeId}/{carrierId}` | Assign carrier to route     |
-| POST   | `/routes/unassign-carrier/{routeId}`           | Unassign carrier from route |
-| PATCH  | `/routes/status/:id`                           | Update route status         |
+| Method | Route                                          | Description                 | Roles Allowed                      |
+| ------ | ---------------------------------------------- | --------------------------- | ---------------------------------- |
+| PATCH  | `/routes/status/:id`                           | Update route status         | Admin, Carrier (assigned)          |
+| GET    | `/routes`                                      | List routes                 | Admin, AdminManager                |
+| GET    | `/routes/:id`                                  | Get route by ID             | Admin, AdminManager                |
+| GET    | `/routes/status/:status`                       | List routes by status       | Admin, AdminManager                |
+| GET    | `/routes/carrier/:carrierId`                   | List routes by carrier      | Carrier (own), Admin, AdminManager |
+| POST   | `/routes/assign-carrier/{routeId}/{carrierId}` | Assign carrier to route     | Admin                              |
+| POST   | `/routes/unassign-carrier/{routeId}`           | Unassign carrier from route | Admin                              |
 
 ### Carriers
 
-| Method | Route                                        | Description                 |
-| ------ | -------------------------------------------- | --------------------------- |
-| GET    | `/carriers`                                  | List carriers               |
-| GET    | `/carriers/:id`                              | Get carrier by ID           |
-| POST   | `/carriers/carrierRoutes/:carrierId`         | Get carrier's routes        |
-| POST   | `/carriers/:carrierid/assign-truck/:truckId` | Assign truck to carrier     |
-| POST   | `/carriers/:carrierid/unassign-truck`        | Unassign truck from carrier |
-| PATCH  | `/carriers/:carrierId/status`                | Update carrier status       |
+| Method | Route                                        | Description                 | Roles Allowed                      |
+| ------ | -------------------------------------------- | --------------------------- | ---------------------------------- |
+| GET    | `/carriers`                                  | List carriers               | Admin, AdminManager                |
+| GET    | `/carriers/:id`                              | Get carrier by ID           | Admin, AdminManager                |
+| GET    | `/carriers/carrierRoutes/:carrierId`         | Get carrier's routes        | Carrier (own), Admin, AdminManager |
+| POST   | `/carriers/:carrierid/assign-truck/:truckId` | Assign truck to carrier     | Admin                              |
+| POST   | `/carriers/:carrierid/unassign-truck`        | Unassign truck from carrier | Admin                              |
+| PATCH  | `/carriers/:carrierId/status`                | Update carrier status       | Admin, Carrier (assigned)          |
 
 ### Trucks
 
-| Method | Route                | Description         |
-| ------ | -------------------- | ------------------- |
-| GET    | `/trucks`            | List trucks         |
-| GET    | `/trucks/:id`        | Get truck by ID     |
-| PATCH  | `/trucks/:id`        | Update truck        |
-| PATCH  | `/trucks/status/:id` | Update truck status |
-| POST   | `/trucks`            | Create truck        |
-| DELETE | `/trucks/:id`        | Delete truck        |
+| Method | Route                | Description         | Roles Allowed       |
+| ------ | -------------------- | ------------------- | ------------------- |
+| POST   | `/trucks`            | Create truck        | Admin               |
+| GET    | `/trucks`            | List trucks         | Admin, AdminManager |
+| GET    | `/trucks/:id`        | Get truck by ID     | Admin, AdminManager |
+| PATCH  | `/trucks/:id`        | Update truck        | Admin               |
+| DELETE | `/trucks/:id`        | Delete truck        | Admin               |
+| PATCH  | `/trucks/status/:id` | Update truck status | Admin               |
 
 ### Billing
 
-| Method | Route                        | Description       |
-| ------ | ---------------------------- | ----------------- |
-| GET    | `/billings`                  | List billings     |
-| GET    | `/billings/:id`              | Get billing by ID |
-| GET    | `/billings/status/:status`   | List by status    |
-| GET    | `/billings/client/:clientId` | List by client    |
-| PATCH  | `/billings/status/:id`       | Update billing    |
-| DELETE | `/billings/:id`              | Delete billing    |
+| Method | Route                        | Description       | Roles Allowed                     |
+| ------ | ---------------------------- | ----------------- | --------------------------------- |
+| DELETE | `/billings/:id`              | Delete billing    | Admin                             |
+| GET    | `/billings/:id`              | Get billing by ID | Admin, AdminManager               |
+| GET    | `/billings`                  | List billings     | Admin, AdminManager               |
+| GET    | `/billings/status/:status`   | List by status    | Admin, AdminManager               |
+| GET    | `/billings/client/:clientId` | List by client    | Admin, AdminManager, Client (own) |
+| PATCH  | `/billings/status/:id`       | Update billing    | Admin                             |
 
 ### Audit Logs
 
-| Method | Route         | Description     |
-| ------ | ------------- | --------------- |
-| GET    | `/audit-logs` | List audit logs |
+| Method | Route         | Description     | Roles Allowed       |
+| ------ | ------------- | --------------- | ------------------- |
+| GET    | `/audit-logs` | List audit logs | Admin, AdminManager |
 
 ## 📂 Project Structure
 
