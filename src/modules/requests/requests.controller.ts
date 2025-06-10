@@ -102,8 +102,12 @@ export class RequestsController {
   })
   findAllRequestsByClientId(
     @Param('clientId', ParseMongoIdPipe) clientId: string,
+    @GetUser() user: any,
   ) {
-    return this.requestsService.findAllRequestsByClientId(clientId);
+    return this.requestsService.findAllRequestsByClientId(
+      clientId,
+      user as User,
+    );
   }
 
   @Get(':requestId')

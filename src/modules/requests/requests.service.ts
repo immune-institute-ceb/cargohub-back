@@ -116,11 +116,18 @@ export class RequestsService {
     }
   }
 
-  async findAllRequestsByClientId(clientId: string) {
+  async findAllRequestsByClientId(clientId: string, user: User) {
     try {
       const client = await this.clientsService.findOne(clientId);
       if (!client) {
         throw new NotFoundException('Client not found');
+      }
+      if (!user?.roles.includes(ValidRoles.admin || ValidRoles.adminManager)) {
+        if (client.user?._id?.toString() !== user?._id?.toString()) {
+          throw new BadRequestException(
+            'You can only view requests for your own client',
+          );
+        }
       }
       const requests = await this.requestModel.find({
         clientId: client._id,
