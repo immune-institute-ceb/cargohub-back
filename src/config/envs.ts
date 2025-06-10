@@ -14,6 +14,7 @@ interface EnvVars {
   REDIRECT_URI: string;
   FRONTEND_URL: string;
   SWAGGER_URL?: string; // Optional for Swagger UI
+  BACKEND_URL?: string; // Optional for backend URL
 }
 
 // Envs schema using Joi for validation
@@ -29,6 +30,7 @@ const envsSchema = joi
     REDIRECT_URI: joi.string().required(),
     FRONTEND_URL: joi.string().required(),
     SWAGGER_URL: joi.string().optional(), // Optional for Swagger UI
+    BACKEND_URL: joi.string().optional(), // Optional for backend URL
   })
   .unknown(true);
 
@@ -52,4 +54,5 @@ export const envs = {
   redirectUri: envVars.REDIRECT_URI,
   frontendUrl: envVars.FRONTEND_URL,
   swaggerUrl: envVars.SWAGGER_URL,
+  backendUrl: envVars.BACKEND_URL,
 };
