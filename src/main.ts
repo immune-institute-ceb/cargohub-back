@@ -28,9 +28,11 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      const allowedOrigins = [envs.frontendUrl, swaggerUrlAllowed].filter(
-        Boolean,
-      );
+      const allowedOrigins = [
+        envs.frontendUrl,
+        swaggerUrlAllowed,
+        envs.backendUrl,
+      ].filter(Boolean);
       if (!origin || allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
