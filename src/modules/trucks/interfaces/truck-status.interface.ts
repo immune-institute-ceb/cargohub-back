@@ -1,7 +1,7 @@
 // Description: Enum for truck statuses
 export enum TruckStatus {
   available = 'available',
-  onRoute = 'on route',
+  onRoute = 'onRoute',
   assigned = 'assigned',
   maintenance = 'maintenance',
 }
