@@ -83,7 +83,10 @@ export class RoutesService {
       const route = await this.routeModel.findById(id);
       if (!route) throw new NotFoundException('Route not found');
       if (!user?.roles.includes(ValidRoles.admin || ValidRoles.adminManager)) {
-        if (route.carrier?._id?.toString() !== user?.carrierId?.toString()) {
+        const userCarrierId =
+          user?.carrierId?._id?.toString() ?? user?.carrierId?.toString();
+
+        if (route.carrier?._id?.toString() !== userCarrierId) {
           throw new BadRequestException(
             'User is not authorized to update this route',
           );
@@ -417,18 +420,56 @@ export class RoutesService {
     }
   }
 
-  async unassignRouteFromCarrierRemoved(carrierId: string) {
+  async updateRouteStatusByCarrierRemoved(
+    routeId: string,
+    status: RouteStatus,
+    user: User,
+  ) {
     try {
-      const routes = await this.routeModel.find({ carrier: carrierId });
+      const route = await this.routeModel.findById(routeId);
+      if (!route) throw new NotFoundException('Route not found');
+      if (!route.request || !route.request._id) {
+        throw new NotFoundException('Request not found for this route');
+      }
+      await this.requestsService.updateStatusByCarrierRemoved(
+        route.request._id.toString(),
+        RequestStatus.pending,
+      );
+      route.status = status;
+      await route.save();
+      await this.auditLogsService.create({
+        level: AuditLogLevel.info,
+        context: AuditLogContext.routesService,
+        message: `Route status updated to ${status} due to carrier removal`,
+        meta: {
+          routeId: route._id.toString(),
+          userId: user._id.toString(),
+        },
+      });
+      return {
+        message: `Route status updated to ${status}`,
+        route,
+      };
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
 
+  async unassignRouteFromCarrierRemoved(carrierId: string, user: User) {
+    try {
+      const routes = await this.routeModel.find({
+        carrier: carrierId,
+        status: { $ne: RouteStatus.done },
+      });
       if (routes) {
         for (const route of routes) {
-          route.carrier = null;
-          await route.save();
-          await this.updateRouteStatus(
+          await this.updateRouteStatusByCarrierRemoved(
             route._id.toString(),
             RouteStatus.pending,
+            user,
           );
+          route.carrier = null;
+          await route.save();
         }
         await this.auditLogsService.create({
           level: AuditLogLevel.info,

@@ -31,7 +31,7 @@ import { FinalTruckStatus } from './dto/update-status.dto';
 import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
 //* Decorators
-import { Auth } from '@modules/auth/decorators';
+import { Auth, GetUser } from '@modules/auth/decorators';
 
 // * Entities
 import { Truck } from './entities/truck.entity';
@@ -42,6 +42,7 @@ import { TrucksService } from './trucks.service';
 // * Interfaces
 import { TruckStatus } from './interfaces/truck-status.interface';
 import { ValidRoles } from '@modules/auth/interfaces';
+import { User } from '@modules/users/entities/user.entity';
 
 @Controller('trucks')
 @ApiNotFoundResponse({ description: 'Truck not found' })
@@ -149,7 +150,7 @@ export class TrucksController {
     description: 'Truck deleted successfully',
     type: Truck,
   })
-  remove(@Param('id', ParseMongoIdPipe) id: string) {
-    return this.trucksService.remove(id);
+  remove(@Param('id', ParseMongoIdPipe) id: string, @GetUser() user: any) {
+    return this.trucksService.remove(id, user as User);
   }
 }

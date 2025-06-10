@@ -221,7 +221,7 @@ export class UsersService {
         if (!user.carrierId) {
           throw new NotFoundException('Carrier ID not found for user');
         }
-        await this.carriersService.remove(user.carrierId._id.toString());
+        await this.carriersService.remove(user.carrierId._id.toString(), user);
       }
       await this.userModel.findOneAndDelete({ _id: user._id });
       await this.auditLogsService.create({

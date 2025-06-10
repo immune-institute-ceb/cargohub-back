@@ -211,7 +211,7 @@ export class CarriersService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string, user: User) {
     try {
       const carrierDeleted = await this.carrierModel.findByIdAndDelete(id);
 
@@ -223,7 +223,7 @@ export class CarriersService {
           'CarriersService',
         );
       }
-      await this.routesService.unassignRouteFromCarrierRemoved(id);
+      await this.routesService.unassignRouteFromCarrierRemoved(id, user);
       return {
         message: 'Carrier deleted',
         carrierDeleted,
@@ -314,7 +314,7 @@ export class CarriersService {
     }
   }
 
-  async unassignTruckDeleted(truckId: string) {
+  async unassignTruckDeleted(truckId: string, user: User) {
     try {
       const carrier = await this.carrierModel
         .findOne({ truck: truckId })
@@ -323,6 +323,11 @@ export class CarriersService {
       if (!carrier) return;
 
       carrier.truck = null;
+      carrier.status = CarrierStatus.available;
+      await this.routesService.unassignRouteFromCarrierRemoved(
+        carrier._id.toString(),
+        user,
+      );
       await carrier.save();
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);

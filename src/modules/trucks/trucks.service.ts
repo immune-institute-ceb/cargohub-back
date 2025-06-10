@@ -28,6 +28,7 @@ import { AuditLogsService } from '@modules/audit-logs/audit-logs.service';
 import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
 import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
 import { TruckStatus } from './interfaces/truck-status.interface';
+import { User } from '@modules/users/entities/user.entity';
 
 @Injectable()
 export class TrucksService {
@@ -164,11 +165,11 @@ export class TrucksService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: string, user: User) {
     try {
       const truckDeleted = await this.truckModel.findByIdAndDelete(id);
       if (!truckDeleted) throw new NotFoundException('Truck not found');
-      await this.carriersService.unassignTruckDeleted(id);
+      await this.carriersService.unassignTruckDeleted(id, user);
       await this.auditLogsService.create({
         level: AuditLogLevel.warn,
         context: AuditLogContext.trucksService,

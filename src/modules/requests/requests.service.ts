@@ -360,6 +360,21 @@ export class RequestsService {
     }
   }
 
+  async updateStatusByCarrierRemoved(id: string, status: RequestStatus) {
+    try {
+      const request = await this.requestModel.findById(id).lean();
+      if (request) {
+        await this.requestModel.findByIdAndUpdate(
+          id,
+          { status },
+          { new: true }, // returns updated document
+        );
+      }
+    } catch (error) {
+      this.exceptionsService.handleDBExceptions(error);
+    }
+  }
+
   async remove(id: string) {
     try {
       const result = await this.requestModel.findById(id);
