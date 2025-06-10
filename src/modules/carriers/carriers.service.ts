@@ -150,7 +150,7 @@ export class CarriersService {
 
       const statusMap: Record<CarrierStatus, TruckStatus> = {
         [CarrierStatus.assigned]: TruckStatus.onRoute,
-        [CarrierStatus.available]: TruckStatus.available,
+        [CarrierStatus.available]: TruckStatus.assigned,
         [CarrierStatus.onRoute]: TruckStatus.onRoute,
         [CarrierStatus.resting]: TruckStatus.available,
       };

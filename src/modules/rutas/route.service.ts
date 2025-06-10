@@ -291,7 +291,7 @@ export class RoutesService {
           : undefined;
         if (carrierId) {
           const carrier = await this.carriersService.findOne(carrierId);
-          if (carrier) {
+          if (carrier && route.status !== RouteStatus.done) {
             await this.carriersService.updateStatus(
               carrier._id.toString(),
               CarrierStatus.available,
