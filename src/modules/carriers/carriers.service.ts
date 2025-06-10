@@ -30,6 +30,8 @@ import { TruckStatus } from '@modules/trucks/interfaces/truck-status.interface';
 import { CarrierStatus } from './interfaces/carrier-status.interface';
 import { AuditLogLevel } from '@modules/audit-logs/interfaces/log-level.interface';
 import { AuditLogContext } from '@modules/audit-logs/interfaces/context-log.interface';
+import { User } from '@modules/users/entities/user.entity';
+import { ValidRoles } from '@modules/auth/interfaces';
 
 @Injectable()
 export class CarriersService {
@@ -327,11 +329,15 @@ export class CarriersService {
     }
   }
 
-  async getCarrierRoutes(carrierId: string) {
+  async getCarrierRoutes(carrierId: string, user: User) {
     try {
       const carrier = await this.findCarrierWithPopulatedData(carrierId);
       if (!carrier) throw new NotFoundException('Carrier not found');
-
+      if (!user?.roles.includes(ValidRoles.admin || ValidRoles.adminManager)) {
+        if (carrier.user?._id?.toString() !== user._id.toString()) {
+          throw new BadRequestException('You can only access your own routes');
+        }
+      }
       const routes = await this.routesService.findRoutesByCarrier(carrierId);
       if (!routes || routes.length === 0) {
         throw new NotFoundException('No routes found for this carrier');

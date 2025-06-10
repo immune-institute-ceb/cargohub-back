@@ -41,6 +41,8 @@ import { CarriersService } from './carriers.service';
 // * Interfaces
 import { ValidRoles } from '@modules/auth/interfaces';
 import { CarrierStatus } from './interfaces/carrier-status.interface';
+import { GetUser } from '@modules/auth/decorators';
+import { User } from '@modules/users/entities/user.entity';
 
 @ApiTags('Carriers')
 @ApiNotFoundResponse({
@@ -86,8 +88,17 @@ export class CarriersController {
   @Get('carrierRoutes/:carrierId')
   @Auth(ValidRoles.admin, ValidRoles.adminManager, ValidRoles.carrier)
   @ApiOperation({ summary: 'Get routes assigned to a carrier' })
-  getCarrierRoutes(@Param('carrierId', ParseMongoIdPipe) carrierId: string) {
-    return this.carriersService.getCarrierRoutes(carrierId);
+  @ApiNotFoundResponse({
+    description: 'No routes found for this carrier',
+  })
+  @ApiBadRequestResponse({
+    description: 'You can only access your own routes',
+  })
+  getCarrierRoutes(
+    @Param('carrierId', ParseMongoIdPipe) carrierId: string,
+    @GetUser() user: any,
+  ) {
+    return this.carriersService.getCarrierRoutes(carrierId, user as User);
   }
 
   @Post(':carrierId/assign-truck/:truckId')

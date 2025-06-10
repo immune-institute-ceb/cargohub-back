@@ -100,6 +100,9 @@ export class RequestsController {
   @ApiNotFoundResponse({
     description: 'No requests found for this client',
   })
+  @ApiBadRequestResponse({
+    description: 'You can only view requests for your own client',
+  })
   findAllRequestsByClientId(
     @Param('clientId', ParseMongoIdPipe) clientId: string,
     @GetUser() user: any,
