@@ -143,24 +143,22 @@ export class TrucksService {
         { new: true },
       );
 
-      if (!truckUpdated) {
-        throw new NotFoundException('Truck not found after update');
+      if (truckUpdated) {
+        await this.auditLogsService.create({
+          level: AuditLogLevel.info,
+          context: AuditLogContext.trucksService,
+          message: `Truck status updated to ${status}`,
+          meta: {
+            truckId: truckUpdated._id.toString(),
+            status,
+          },
+        });
+
+        return {
+          message: 'Truck status updated successfully',
+          truck: truckUpdated,
+        };
       }
-
-      await this.auditLogsService.create({
-        level: AuditLogLevel.info,
-        context: AuditLogContext.trucksService,
-        message: `Truck status updated to ${status}`,
-        meta: {
-          truckId: truckUpdated._id.toString(),
-          status,
-        },
-      });
-
-      return {
-        message: 'Truck status updated successfully',
-        truck: truckUpdated,
-      };
     } catch (error) {
       this.exceptionsService.handleDBExceptions(error);
     }

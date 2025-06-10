@@ -80,7 +80,7 @@ export class CreateTruckDto {
   @IsNotEmpty()
   @IsEnum(TruckStatus, {
     each: true,
-    message: `status must be one of the following: available, in_use, maintenance`,
+    message: `status must be one of the following: ${Object.values(TruckStatus).join(', ')}`,
   })
   status: TruckStatus;
 }

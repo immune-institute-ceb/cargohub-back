@@ -252,7 +252,7 @@ class AuthService {
       if (message === 'confirmEmail') {
         if (user.emailVerified)
           throw new BadRequestException('Email already verified');
-        user.emailVerified = true;
+
         user.password = passwordHash;
         await user.save();
         return await this.generate2faCode(user);
@@ -419,6 +419,7 @@ class AuthService {
       });
 
       if (!isValid) throw new BadRequestException('Invalid 2FA code');
+      user.emailVerified = true;
       user.twoFactorAuthEnabled = true;
       await user.save();
       return { message: '2FA code activated' };
