@@ -31,7 +31,7 @@ import { TruckStatus } from '../interfaces/truck-status.interface';
 export class CreateTruckDto {
   @ApiProperty({
     description: 'Truck license plate',
-    example: 'ABC-1234',
+    example: '1234 ABC',
   })
   @IsString()
   @IsNotEmpty()

@@ -18,6 +18,7 @@ import { RegisterBillingDto } from './dto/register-billing.dto';
 
 //* Entities
 import { Billing } from './entities/billing.entity';
+import { User } from '@modules/users/entities/user.entity';
 import { Requests } from '@modules/requests/entities/request.entity';
 
 //* Services
@@ -82,7 +83,11 @@ export class BillingService {
     }
   }
 
-  async updateBillingStatus(billingId: string, status: BillingStatus) {
+  async updateBillingStatus(
+    billingId: string,
+    status: BillingStatus,
+    user?: User,
+  ) {
     try {
       const billing = await this.billingModel.findById(billingId);
       if (!billing) throw new NotFoundException('Billing not found');
@@ -103,6 +108,7 @@ export class BillingService {
         const updatedRequest = await this.requestsService.updateStatus(
           billing.requestId.toString(),
           RequestStatus.completed,
+          user,
         );
         if (updatedRequest) {
           billing.paidDate = new Date();

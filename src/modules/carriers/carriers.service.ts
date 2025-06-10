@@ -289,6 +289,11 @@ export class CarriersService {
       if (carrier.status === CarrierStatus.onRoute) {
         throw new BadRequestException('Carrier is currently on a route');
       }
+      if (carrier.status === CarrierStatus.assigned) {
+        throw new BadRequestException(
+          'Carrier is currently assigned to a route, please unassign first',
+        );
+      }
       await this.trucksService.updateTruckStatus(
         carrier.truck._id.toString(),
         TruckStatus.available,

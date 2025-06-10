@@ -139,6 +139,10 @@ export class RoutesService {
           await this.requestsService.updateStatus(
             requestId,
             RequestStatus.issued,
+            user?.roles.includes(ValidRoles.admin) ||
+              user?.roles.includes(ValidRoles.adminManager)
+              ? user
+              : undefined,
           );
           break;
 
@@ -146,6 +150,10 @@ export class RoutesService {
           await this.requestsService.updateStatus(
             requestId,
             RequestStatus.inProgress,
+            user?.roles.includes(ValidRoles.admin) ||
+              user?.roles.includes(ValidRoles.adminManager)
+              ? user
+              : undefined,
           );
 
           if (!route.carrier?._id) {
@@ -162,6 +170,14 @@ export class RoutesService {
           await this.requestsService.updateStatus(
             requestId,
             RequestStatus.pending,
+            user?.roles.includes(ValidRoles.admin) ||
+              user?.roles.includes(ValidRoles.adminManager)
+              ? user
+              : undefined,
+          );
+          await this.carriersService.updateStatus(
+            route.carrier._id.toString(),
+            CarrierStatus.assigned,
           );
           break;
         case RouteStatus.done:

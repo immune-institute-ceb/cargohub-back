@@ -19,9 +19,11 @@ import { ParseMongoIdPipe } from '@common/pipes/parse-mongo-id.pipe';
 
 //* Decorators
 import { Auth } from '@modules/auth/decorators/auth.decorator';
+import { GetUser } from '@modules/auth/decorators';
 
 //* Entities
 import { Billing } from './entities/billing.entity';
+import { User } from '@modules/users/entities/user.entity';
 
 //* Services
 import { BillingService } from './billing.service';
@@ -137,7 +139,8 @@ export class BillingController {
   async updateStatus(
     @Param('id', ParseMongoIdPipe) id: string,
     @Query('status') status: BillingStatus,
+    @GetUser() user: any,
   ) {
-    return this.billingService.updateBillingStatus(id, status);
+    return this.billingService.updateBillingStatus(id, status, user as User);
   }
 }

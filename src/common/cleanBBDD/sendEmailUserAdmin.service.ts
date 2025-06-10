@@ -32,9 +32,9 @@ export class SendEmailUserAdminService {
     private readonly authService: AuthService,
   ) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron(CronExpression.EVERY_MINUTE)
   async handleCron() {
-    const expirationMinutes = 15;
+    const expirationMinutes = 1;
     const expirationDate = new Date(Date.now() - expirationMinutes * 60 * 1000);
 
     // Find unverified admin users created more than 15 minute ago
