@@ -271,6 +271,9 @@ export class RequestsService {
 
   async updateStatus(id: string, status: RequestStatus, user?: User) {
     try {
+      if (!status) {
+        throw new BadRequestException('Status is required in query');
+      }
       const request = await this.requestModel.findById(id).lean();
       if (!request) {
         throw new NotFoundException('Request not found');

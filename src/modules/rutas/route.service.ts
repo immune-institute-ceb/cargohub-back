@@ -80,6 +80,9 @@ export class RoutesService {
 
   async updateRouteStatus(id: string, status: RouteStatus, user?: User) {
     try {
+      if (!status) {
+        throw new BadRequestException('Status is required in query');
+      }
       const route = await this.routeModel.findById(id);
       if (!route) throw new NotFoundException('Route not found');
       if (!user?.roles.includes(ValidRoles.admin || ValidRoles.adminManager)) {

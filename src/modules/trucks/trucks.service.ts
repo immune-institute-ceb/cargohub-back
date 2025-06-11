@@ -109,6 +109,9 @@ export class TrucksService {
 
   async updateTruckStatus(id: string, status: TruckStatus, from: string) {
     try {
+      if (!status) {
+        throw new BadRequestException('Status is required in query');
+      }
       const truck = await this.truckModel.findById(id);
       if (truck) {
         if (from !== 'CarriersService') {

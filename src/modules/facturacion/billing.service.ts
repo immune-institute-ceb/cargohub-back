@@ -89,6 +89,9 @@ export class BillingService {
     user?: User,
   ) {
     try {
+      if (!status) {
+        throw new BadRequestException('Status is required in query');
+      }
       const billing = await this.billingModel.findById(billingId);
       if (!billing) throw new NotFoundException('Billing not found');
       if (billing.status === status) {

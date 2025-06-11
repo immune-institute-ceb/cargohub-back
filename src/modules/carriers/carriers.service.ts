@@ -183,6 +183,9 @@ export class CarriersService {
 
   async updateCarrierStatus(carrierId: string, status: CarrierStatus) {
     try {
+      if (!status) {
+        throw new BadRequestException('Status is required in query');
+      }
       const carrier = await this.carrierModel.findById(carrierId);
       if (!carrier) throw new NotFoundException('Carrier not found');
       if (carrier.status === status) {

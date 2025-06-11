@@ -126,6 +126,9 @@ export class ClientsService {
 
   async updateStatus(id: string, status: ClientsStatus) {
     try {
+      if (!status) {
+        throw new BadRequestException('Status is required in query');
+      }
       const client = await this.clientModel.findById(id);
       if (!client) throw new NotFoundException('Client not found');
       if (client.status === status) {
