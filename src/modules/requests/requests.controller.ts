@@ -180,7 +180,8 @@ export class RequestsController {
       'status',
       new ParseEnumPipe([RequestStatus.done, RequestStatus.cancelled], {
         errorHttpStatusCode: 400,
-        exceptionFactory: () => new BadRequestException('Status must be done'),
+        exceptionFactory: () =>
+          new BadRequestException('Status must be done or cancelled'),
       }),
     )
     status: FinalClientStatus,
