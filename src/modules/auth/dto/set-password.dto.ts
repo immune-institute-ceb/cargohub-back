@@ -37,6 +37,5 @@ export class SetPasswordDto {
   @IsString()
   @MinLength(6)
   @MaxLength(50)
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/)
   passwordConfirmed: string;
 }

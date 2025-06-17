@@ -47,6 +47,5 @@ export class ChangePasswordDto {
   @IsString()
   @MinLength(6)
   @MaxLength(50)
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/)
   newPasswordConfirmed: string;
 }
