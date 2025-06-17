@@ -32,7 +32,7 @@ export class LoginUserDto {
 
   @ApiProperty({
     description:
-      'User Password: must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
+      'User Password: must include at least one uppercase letter, one lowercase letter, one number, and one special character (_ not included).',
     example: 'Password123?',
   })
   @IsString()
@@ -40,7 +40,7 @@ export class LoginUserDto {
   @MaxLength(50)
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/, {
     message:
-      'The password must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
+      'The password must include at least one uppercase letter, one lowercase letter, one number, and one special character (_ not included).',
   })
   password: string;
 }

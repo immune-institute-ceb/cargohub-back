@@ -17,7 +17,7 @@ import { IsString, Matches, MaxLength, MinLength } from 'class-validator';
 export class SetPasswordDto {
   @ApiProperty({
     description:
-      'User password, must have at least one uppercase letter, one lowercase letter, one number, and one special character.',
+      'User password, must have at least one uppercase letter, one lowercase letter, one number, and one special character (_ not included).',
     example: 'Password123?',
   })
   @IsString()
@@ -25,13 +25,13 @@ export class SetPasswordDto {
   @MaxLength(50)
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/, {
     message:
-      'The password must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
+      'The password must include at least one uppercase letter, one lowercase letter, one number, and one special character (_ not included).',
   })
   password: string;
 
   @ApiProperty({
     description:
-      'User confirm password, must have at least one uppercase letter, one lowercase letter, one number, and one special character.',
+      'User confirm password, must have at least one uppercase letter, one lowercase letter, one number, and one special character (_ not included).',
     example: 'Password123?',
   })
   @IsString()
@@ -39,7 +39,7 @@ export class SetPasswordDto {
   @MaxLength(50)
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/, {
     message:
-      'The passwordConfirmed must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
+      'The passwordConfirmed must include at least one uppercase letter, one lowercase letter, one number, and one special character (_ not included).',
   })
   passwordConfirmed: string;
 }

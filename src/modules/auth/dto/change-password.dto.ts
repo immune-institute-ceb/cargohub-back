@@ -27,7 +27,7 @@ export class ChangePasswordDto {
 
   @ApiProperty({
     description:
-      'User password, must have at least one uppercase letter, one lowercase letter, one number, and one special character.',
+      'User password, must have at least one uppercase letter, one lowercase letter, one number, and one special character (_ not included).',
     example: 'Password123?',
   })
   @IsString()
@@ -35,13 +35,13 @@ export class ChangePasswordDto {
   @MaxLength(50)
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/, {
     message:
-      'The newPassword must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
+      'The newPassword must include at least one uppercase letter, one lowercase letter, one number, and one special character (_ not included).',
   })
   newPassword: string;
 
   @ApiProperty({
     description:
-      'User confirm password, must have at least one uppercase letter, one lowercase letter, one number, and one special character.',
+      'User confirm password, must have at least one uppercase letter, one lowercase letter, one number, and one special character (_ not included).',
     example: 'Password123?',
   })
   @IsString()
@@ -49,7 +49,7 @@ export class ChangePasswordDto {
   @MaxLength(50)
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).+$/, {
     message:
-      'The newPassword must include at least one uppercase letter, one lowercase letter, one number, and one special character.',
+      'The newPassword must include at least one uppercase letter, one lowercase letter, one number, and one special character (_ not included).',
   })
   newPasswordConfirmed: string;
 }
